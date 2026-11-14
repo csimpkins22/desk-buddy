@@ -38,6 +38,8 @@ goes its own way after a minute and shows he's not connected. Session state is k
 ~/.desk-buddy/state.json across restarts.
 
 Extras for debugging:  GET /status   POST /cmd  (body: a raw command such as "s done")
+                       GET /play     POST /play (body: an animation's name, or a clip's: a file in
+                       ~/.desk-buddy/clips made by tools/export_frames.py --clip, sent to him over Wi-Fi)
                        GET /sound    POST /sound (body: on | off | toggle | play <moment>)
                        (play tap_<gag>_<mood> plays a gag's sound, e.g. play tap_shock_idle)
 Install as a login item with tools/install_bridge.sh.
@@ -109,6 +111,7 @@ AFPLAY_LAG = 0.05                       # afplay takes a moment to start making 
 HEARTBEAT_EVERY = 15
 NET_PORT = 4210                                    # the board's command port on Wi-Fi (tools/wifi_setup.py)
 STATE_FILE = os.path.join(HOME, "state.json")     # sessions etc. survive a bridge restart
+CLIPS_DIR = os.path.join(HOME, "clips")           # extra animations sent to him over Wi-Fi when asked for (<name>.clip)
 # Slack, polled with your user token (see class SlackWatch). config.json: "slack_token" (xoxp-..., never
 # logged), "slack_vips" (names as Slack shows them), optional "slack_vip_minutes" (how long a letter lasts).
 SLACK_EVERY = 20                        # seconds between polls
@@ -124,6 +127,10 @@ _h.setFormatter(logging.Formatter("%(asctime)s %(message)s"))
 log.addHandler(_h)
 if sys.stderr.isatty():          # under launchd stderr is bridge.out, which only needs crashes
     log.addHandler(logging.StreamHandler())
+
+
+def clip_names():
+    return sorted(f[:-5] for f in (os.listdir(CLIPS_DIR) if os.path.isdir(CLIPS_DIR) else []) if re.fullmatch(r"[a-z0-9_]{1,40}\.clip", f))
 
 
 def read_config():
@@ -229,7 +236,7 @@ class Device:
                     # board rebooted, or it had given up on us (no heartbeat) and gone its own way
                     if "lump ready" in text or text == "resync":
                         self._call(self.on_ready)
-                    elif (text == "tap" or text.startswith("gag ")) and self.on_line:
+                    elif (text == "tap" or text.startswith(("gag ", "clip gone "))) and self.on_line:
                         self._call(self.on_line, text)
                     elif text == "err pairing":
                         log.info("the board refused our pairing token: run tools/wifi_setup.py again")
@@ -641,6 +648,7 @@ class Buddy:
         self.saved = None                         # last state.json we wrote
         self.letters = {}                         # Slack: VIP DMs you haven't read, channel -> {"from", "ts", "since"}
         self.last_plane = 0.0
+        self.clips_sent = {}                      # clip name -> file time of the copy the board has
         self.load_state()
         self.dev = dev or Device(self.resend, self.board_line)
         if start:
@@ -843,6 +851,8 @@ class Buddy:
             self.tapped()
         elif text.startswith("gag "):
             self.gag_sound(text[4:].strip())
+        elif text.startswith("clip gone "):          # he made room for a newer clip: send this one again when it's next asked for
+            self.clips_sent.pop(text[10:].strip(), None)
 
     def gag_sound(self, event):
         """A gag just started on the board: its sound, unless it's night and you've not been around
@@ -1041,6 +1051,7 @@ class Buddy:
 
     def resend(self):
         self.sent_mood = self.sent_overlay = self.sent_colour = self.sent_prep = None
+        self.clips_sent = {}                            # he may have restarted, and clips don't survive that
         self.last_beat = 0.0                            # and tell him the time straight away
         if time.time() - self.woke_at > 60:            # board plugged in or restarted
             self.woke_at = time.time()
@@ -1081,12 +1092,42 @@ class Buddy:
 
     def play(self, name):
         """An animation asked for from the computer: None if there's no such animation,
-        otherwise whether the board got it."""
-        ev = ANIMATIONS.get(name.strip().lower())
+        otherwise whether the board got it. A clip is sent to him first if he doesn't have it."""
+        name = name.strip().lower()
+        ev = ANIMATIONS.get(name)
         if ev is None:
-            return None
-        log.info("play: %s", name.strip().lower())
+            if name not in clip_names():
+                return None
+            if not self.send_clip(name):
+                return False
+            ev = name
+        log.info("play: %s", name)
         return self.event(ev)
+
+    def send_clip(self, name):
+        """Give the board a clip over Wi-Fi (it keeps clips in RAM, so again after it restarts or the file changes)."""
+        path = os.path.join(CLIPS_DIR, name + ".clip")
+        stamp = os.path.getmtime(path)
+        if self.clips_sent.get(name) == stamp:
+            return True
+        cfg = read_config()
+        try:
+            import socket, urllib.request
+            ip = socket.getaddrinfo(cfg.get("lump_host") or "lump.local", 80, socket.AF_INET, socket.SOCK_STREAM)[0][4][0]
+            with open(path, "rb") as f:
+                data = f.read()
+            req = urllib.request.Request(f"http://{ip}/clip", data=data, method="POST", headers={
+                "X-Lump-Token": cfg.get("lump_token", ""), "X-Lump-Size": str(len(data)), "X-Lump-Name": name,
+                "Content-Type": "application/octet-stream"})
+            t0 = time.time()
+            urllib.request.urlopen(req, timeout=20).read()
+        except Exception as e:
+            detail = e.read().decode(errors="replace").strip() if hasattr(e, "read") else str(e)
+            log.info("clip %s not sent: %s", name, detail)
+            return False
+        self.clips_sent[name] = stamp
+        log.info("clip %s sent: %d bytes in %.1f s", name, len(data), time.time() - t0)
+        return True
 
     def _tick(self):
         # Nothing in here may kill this loop: it drives the board, the heartbeat and saving. (If it
@@ -1467,7 +1508,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         elif self.path == "/play":                # an animation by name (GET /play lists them)
             ok = buddy.play(body.decode())
             if ok is None: self._reply(404, b"no such animation (GET /play lists them)")
-            else: self._reply(200 if ok else 503, b"ok" if ok else b"board not connected")
+            else: self._reply(200 if ok else 503, b"ok" if ok else b"couldn't reach the board (see bridge.log)")
         elif self.path == "/sound":               # on | off | toggle | play <moment>
             cmd = body.decode().strip().split()
             if cmd and cmd[0] in ("on", "off", "toggle"):
@@ -1487,7 +1528,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         elif self.path == "/sound":
             self._reply(200, json.dumps(buddy.sounds.settings(), indent=2).encode(), "application/json")
         elif self.path == "/play":
-            self._reply(200, json.dumps(list(ANIMATIONS)).encode(), "application/json")
+            self._reply(200, json.dumps(list(ANIMATIONS) + clip_names()).encode(), "application/json")
         else:
             self._reply(404)
 

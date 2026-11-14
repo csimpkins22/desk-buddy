@@ -45,8 +45,8 @@ cd desk-buddy
 tools/flash.sh
 ```
 
-This builds the firmware and writes it plus Lump's drawings (~11 MB; the drawings take about
-5 minutes). It uses a paced esptool upload because macOS drops bytes from big bursts to
+This builds the firmware and writes it plus Lump's drawings (about 1.6 MB). It uses a paced
+esptool upload because macOS drops bytes from big bursts to
 this board's USB-serial chip, so plain `pio run -t upload` fails.
 
 **2. Install the bridge.** A small Python service that listens to Claude and drives Lump, plus
@@ -128,12 +128,40 @@ python3 tools/export_frames.py 8767
 ```
 
 Open <http://localhost:8767/lump.html#gags> in a browser. The page reloads when you save, and the
-"Tap gags" gallery lets you pause and step through frames. When you're happy, run the `EXPORT_JS`
-snippet from `tools/export_frames.py` in the page's console. It bakes every frame into
-`firmware/data/lump.bin`, then `python3 tools/ota.py --art` (Wi-Fi) or `tools/flash.sh` (cable) puts it on the board.
+"Tap gags" gallery lets you pause and step through frames. When you're happy, bake it (needs Google
+Chrome and the Xcode command line tools):
 
-Two tips: keep repeating effects on a 12-tick beat, so frames are shared between moods and the file
-stays small (it has a 12 MB budget). Keep faces simple: dot eyes, small mouths, and let props sell the gag.
+```bash
+python3 tools/export_frames.py --bake
+```
+
+That writes `firmware/data/lump.bin`, then `python3 tools/ota.py --art` (Wi-Fi) or `tools/flash.sh`
+(cable) puts it on the board. Each frame is stored as the drawing instructions that made it, about a
+kilobyte, and the board redraws it. The bake checks every frame against the browser's picture and
+stores the few it can't match as pixels instead, so anything the canvas can draw still works.
+
+Two tips: keep repeating effects on a 12-tick beat, so frames are shared between moods. Keep faces
+simple: dot eyes, small mouths, and let props sell the gag.
+
+### Clips: new animations without flashing
+
+A clip is one animation in its own small file. The bridge sends it to him over Wi-Fi the first time
+you play it, and he keeps it in memory until he restarts (up to 32 at once; the one played longest
+ago makes way for a new one). Each clip is a script in `design/clips/` that adds its own drawings
+and its sequence, using the page's helpers; `coffee.js` is a short one to copy.
+
+```bash
+python3 tools/export_frames.py --clip coffee --sheet coffee.png   # its drawings side by side, to look at
+python3 tools/export_frames.py --clip all                         # bake every clip into ~/.desk-buddy/clips
+curl -X POST --data coffee 127.0.0.1:47823/play
+python3 tools/showreel.py                                         # everything he can do, back to back
+```
+
+Keep props to cream, greys, yellows, reds, browns, greens and blues: the board takes pinks and
+purples for his body colour and recolours them. `--define file.json` makes a clip from his existing
+drawings with no script: `{"encore": {"home": "idle", "seq": [["S1", 4], ["HL1", 5], ...]}}`.
+Clips need him on Wi-Fi. If one won't send and `~/.desk-buddy/bridge.log` says "No route to host",
+allow the bridge's Python under System Settings > Privacy & Security > Local Network.
 
 ## How it fits together
 
@@ -147,19 +175,22 @@ calendar / Slack ──┘   one mood for all sessions                   plays b
 | Path | What's there |
 |---|---|
 | `firmware/src/main.cpp` | The frame player: moods, transitions, taps, offline mode, Wi-Fi, OTA. The serial protocol is documented at the top. |
+| `firmware/src/vec.h` | The small renderer that draws his frames from instructions |
 | `firmware/data/lump.bin` | Lump's baked frames (written to their own flash partition) |
 | `design/lump.html` | Lump himself: every drawing and animation |
 | `tools/buddy_bridge.py` | The bridge: Claude hooks, app state, usage, calendar, Slack, sounds → one mood |
 | `tools/appwatch/` | Swift helper that reads Chat/Cowork state from the Claude app's accessibility tree |
 | `tools/lumpbar/` | Lump on your Mac: frame baker (`bake.py`) and the notch/menu bar app (`main.swift`) |
 | `tools/flash.sh`, `tools/ota.py`, `tools/wifi_setup.py` | Getting firmware and drawings onto the board |
+| `design/clips/` | Extra animations, each a small script, baked into clips he gets over Wi-Fi |
+| `tools/showreel.py` | Plays everything he can do, one after another |
 | `enclosure/` | OpenSCAD source for the adjustable monitor mount, with [ready-to-print STLs](enclosure/print/) |
 | `tests/` | Bridge tests (no board needed): `~/.desk-buddy/venv/bin/python -m unittest discover -s tests` |
 
 The bridge's debug endpoints help when you're poking at him: `curl 127.0.0.1:47823/status`, or
 `curl -X POST --data "e tap" 127.0.0.1:47823/cmd` to send a raw command. To play an animation on
 demand (from a hotkey, a menu bar app or Shortcuts), `curl -X POST --data disco 127.0.0.1:47823/play`;
-`curl 127.0.0.1:47823/play` lists the names.
+`curl 127.0.0.1:47823/play` lists the names, clips included.
 
 ## License
 

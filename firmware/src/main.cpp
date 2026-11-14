@@ -1,5 +1,6 @@
 // Desk Buddy — Lump frame player.
 // Plays the hand-drawn frames baked from design/lump.html (tools/export_frames.py -> data/lump.bin).
+// Most frames are stored as drawing instructions and drawn here by vec.h; a few are stored as pixels.
 // The frames live in their own flash partition ("lump"), not in the program, so the art and the
 // program can each be updated over Wi-Fi on their own (tools/ota.py; see "Updates" below).
 // The previous Vec firmware lives in archive/vec_main.cpp.
@@ -48,6 +49,11 @@
 //   POST /update/app                 new firmware.bin (application/octet-stream, X-Lump-MD5 checked),
 //                                    written to the other program slot, then restart into it
 //   POST /update/art                 new lump.bin (X-Lump-Sha256 checked) into the art partition, then restart
+//   POST /clip                       an extra animation: a small file in lump.bin's layout holding only events
+//                                    (X-Lump-Name names it, X-Lump-Size is its length). It is kept in RAM until
+//                                    he restarts and plays like any other event ("e <name>"). No restart.
+//                                    When there's no room for another he drops the one played longest ago and
+//                                    prints "clip gone <name>", so the bridge knows to send it again.
 // While an update streams in he shows a progress bar instead of animating. If the art is missing or
 // bad he says so on screen but keeps Wi-Fi and updates working, so it can be fixed without a cable.
 // On its own the device also: fidgets every minute or so while asleep, escalates "alert" to
@@ -65,7 +71,10 @@
 #include <Update.h>
 #include <esp_partition.h>
 #include <esp_ota_ops.h>
+#include <esp_heap_caps.h>
 #include "mbedtls/sha256.h"
+#define VEC_SWAPPED                    // the sprite buffer holds byte-swapped RGB565
+#include "vec.h"
 
 constexpr int PIN_SCLK = 40, PIN_MOSI = 41, PIN_DC = 38, PIN_CS = 39, PIN_RST = 42, PIN_BL = 20;
 constexpr bool PRISM_MIRROR = true;  // rotations 4–7 are mirrored for the prism
@@ -94,8 +103,9 @@ class LGFX : public lgfx::LGFX_Device {
 };
 static LGFX tft;
 static LGFX_Sprite fb(&tft);
+static vec::Canvas cv;                 // draws instruction frames straight into fb
 
-// ---------- animation data: the "lump" flash partition, memory-mapped ----------
+// ---------- animation data: the "lump" flash partition, memory-mapped, plus any clips sent over Wi-Fi ----------
 static const esp_partition_t* artPart = nullptr;
 static const uint8_t* art = nullptr;            // mapped start of the partition
 static size_t artSize = 0;                      // mapped length (the whole partition)
@@ -109,63 +119,79 @@ static bool mapArt() {
   return true;
 }
 
-constexpr int MAX_MOODS = 12, MAX_SEQ = 250;
+constexpr int MAX_MOODS = 12, MAX_SEQ = 250, MAX_SRC = 33;     // source 0 is the flash art, the rest are clips
 enum Kind : uint8_t { LOOP = 0, TRANS = 1, EVENT = 2 };
+struct Src {                                    // where a sequence's frames live
+  const uint8_t* offsets = nullptr; const uint8_t* data = nullptr; const uint8_t* end = nullptr;
+  uint8_t* own = nullptr; String name;           // a clip's RAM buffer and name
+  uint32_t used = 0;                             // when it was last played (or arrived)
+};
 struct Anim {
   uint16_t nFrames = 0; uint8_t fps = 24, nMoods = 0, nSeqs = 0;
   uint8_t base[MAX_MOODS]; String moodName[MAX_MOODS];
-  uint8_t kind[MAX_SEQ], from[MAX_SEQ], to[MAX_SEQ]; uint16_t len[MAX_SEQ]; const uint8_t* seq[MAX_SEQ]; String name[MAX_SEQ];
+  uint8_t kind[MAX_SEQ], from[MAX_SEQ], to[MAX_SEQ], src[MAX_SEQ]; uint16_t len[MAX_SEQ]; const uint8_t* seq[MAX_SEQ]; String name[MAX_SEQ];
   int8_t loopOf[MAX_MOODS], transOf[MAX_MOODS][MAX_MOODS];
-  const uint8_t* offsets; const uint8_t* data;
+  Src srcs[MAX_SRC];
   bool ok = false;
 } A;
 
 static inline uint16_t rd16(const uint8_t* p) { return p[0] | (p[1] << 8); }
 static inline uint32_t rd32(const uint8_t* p) { return p[0] | (p[1] << 8) | (p[2] << 16) | (uint32_t(p[3]) << 24); }
 static String rdStr(const uint8_t*& p) { int n = *p++; String s; s.reserve(n); for (int i = 0; i < n; i++) s += char(p[i]); p += n; return s; }
+static int moodIndex(const String& n);
 
-// Every read is bounds-checked against the partition: half-written or garbage art must fail
-// cleanly (and leave Wi-Fi updates working), never crash.
-static bool parseAnim() {
-  if (!art || artSize < 16) return false;
-  const uint8_t* p = art; const uint8_t* end = art + artSize;
+// Reads the flash art (si 0), or a clip into source si: its events join the list after the ones
+// already there, with its moods matched to ours by name. Every read is bounds-checked: half-written
+// or garbage data must fail cleanly (and leave Wi-Fi updates working), never crash.
+static bool parseArt(const uint8_t* buf, size_t size, int si) {
+  if (!buf || size < 16) return false;
+  const uint8_t* p = buf; const uint8_t* end = buf + size;
   auto room = [&](size_t n) { return size_t(end - p) >= n; };
+  bool clip = si > 0;
   if (memcmp(p, "LUMP", 4) != 0) return false;
   p += 4;
-  if (rd16(p) != 3) return false; p += 2;
-  A.nFrames = rd16(p); p += 2;
-  A.nMoods = *p++; A.fps = *p++;
-  if (A.nMoods > MAX_MOODS) return false;
-  for (int m = 0; m < A.nMoods; m++) {
+  uint16_t version = rd16(p); p += 2;            // 3: every frame is pixels. 4: a frame may be instructions
+  if (version != 3 && version != 4) return false;
+  uint16_t nFrames = rd16(p); p += 2;
+  uint8_t nMoods = *p++, fps = *p++, moodOf[MAX_MOODS];
+  if (nMoods > MAX_MOODS) return false;
+  for (int m = 0; m < nMoods; m++) {
     if (!room(2) || !room(2 + p[1])) return false;
-    A.base[m] = *p++; A.moodName[m] = rdStr(p); A.loopOf[m] = -1;
-    if (A.base[m] >= A.nMoods) return false;
+    uint8_t base = *p++; String name = rdStr(p);
+    if (clip) { int k = moodIndex(name); if (k < 0) return false; moodOf[m] = k; continue; }
+    A.base[m] = base; A.moodName[m] = name; A.loopOf[m] = -1; moodOf[m] = m;
+    if (base >= nMoods) return false;
   }
-  memset(A.transOf, -1, sizeof(A.transOf));
+  if (!clip) { A.nMoods = nMoods; A.fps = fps; A.nFrames = nFrames; A.nSeqs = 0; memset(A.transOf, -1, sizeof(A.transOf)); }
   if (!room(1)) return false;
-  A.nSeqs = *p++;
-  if (A.nSeqs > MAX_SEQ) return false;
-  for (int i = 0; i < A.nSeqs; i++) {
+  int n = *p++, first = A.nSeqs;
+  if (first + n > MAX_SEQ) return false;
+  for (int i = first; i < first + n; i++) {
     if (!room(4) || !room(4 + p[3] + 2)) return false;
-    A.kind[i] = p[0]; A.from[i] = p[1]; A.to[i] = p[2]; p += 3;
-    if (A.from[i] >= A.nMoods || A.to[i] >= A.nMoods) return false;
+    if (p[1] >= nMoods || p[2] >= nMoods || (clip && p[0] != EVENT)) return false;
+    A.kind[i] = p[0]; A.from[i] = moodOf[p[1]]; A.to[i] = moodOf[p[2]]; A.src[i] = si; p += 3;
     A.name[i] = rdStr(p);
     A.len[i] = rd16(p); p += 2;
     if (!A.len[i] || !room(size_t(A.len[i]) * 2)) return false;
     A.seq[i] = p; p += A.len[i] * 2;
-    for (int k = 0; k < A.len[i]; k++) if (rd16(A.seq[i] + 2 * k) >= A.nFrames) return false;
+    for (int k = 0; k < A.len[i]; k++) if (rd16(A.seq[i] + 2 * k) >= nFrames) return false;
     if (A.kind[i] == LOOP) A.loopOf[A.from[i]] = i;
     else if (A.kind[i] == TRANS) A.transOf[A.from[i]][A.to[i]] = i;
   }
-  for (int m = 0; m < A.nMoods; m++) if (A.loopOf[m] < 0) return false;
-  if (!room(size_t(A.nFrames) * 4)) return false;
-  A.offsets = p; p += A.nFrames * 4;
-  A.data = p;
-  for (int f = 0; f < A.nFrames; f++) if (rd32(A.offsets + 4 * f) >= size_t(end - A.data)) return false;
-  return A.ok = true;
+  if (!clip) for (int m = 0; m < nMoods; m++) if (A.loopOf[m] < 0) return false;
+  if (!room(size_t(nFrames) * 4)) return false;
+  Src& S = A.srcs[si];
+  S.offsets = p; p += nFrames * 4; S.data = p; S.end = end;
+  size_t have = end - S.data;
+  for (int f = 0; f < nFrames; f++) {
+    uint32_t o = rd32(S.offsets + 4 * f); size_t at = o & 0x7FFFFFFF;
+    if (at >= have || ((o >> 31) && (at + 2 > have || at + 2 + rd16(S.data + at) > have))) return false;
+  }
+  A.nSeqs = first + n;
+  return true;
 }
 static int moodIndex(const String& n) { for (int m = 0; m < A.nMoods; m++) if (A.moodName[m] == n) return m; return -1; }
-static int eventIndex(const String& n) { for (int i = 0; i < A.nSeqs; i++) if (A.kind[i] == EVENT && A.name[i] == n) return i; return -1; }
+static int eventIndex(const String& n) { for (int i = A.nSeqs - 1; i >= 0; i--) if (A.kind[i] == EVENT && A.name[i] == n) return i; return -1; }   // newest first
 
 // ---------- body colour ----------
 // Frames are exported with his body in pure magenta (FF00FF), the only colour besides the cream
@@ -186,14 +212,27 @@ static uint16_t recolor(uint16_t stored) {               // stored = byte-swappe
   return sw16(lgfx::color565(nr, ng, nb));
 }
 
-// RLE runs of [count][rgb565 big-endian]. The sprite buffer wants byte-swapped RGB565,
-// which is big-endian byte order, so each run's two bytes go in as stored (then recoloured).
-static void decodeFrame(uint16_t idx) {
-  const uint8_t* p = A.data + rd32(A.offsets + 4 * idx);
+// The same swap for an instruction frame, done once per shape colour instead of once per pixel.
+static void recolour8(uint8_t* c) {
+  int r = c[0], g = c[1], b = c[2];
+  if (r < 8 && g < 8 && b < 8) return;
+  float beta = g / 241.f, alpha = r / 255.f - beta;
+  if (alpha <= 0.02f || b < alpha * 255 + beta * 220 - 48) return;
+  c[0] = min(255, int(alpha * tintR + beta * 255)); c[1] = min(255, int(alpha * tintG + beta * 241)); c[2] = min(255, int(alpha * tintB + beta * 220));
+}
+
+// A frame is either drawing instructions (vec.h draws them), or pixels: RLE runs of
+// [count][rgb565 big-endian]. The sprite buffer wants byte-swapped RGB565, which is big-endian byte
+// order, so each run's two bytes go in as stored (then recoloured).
+static void drawFrame(uint8_t src, uint16_t idx) {
+  const Src& S = A.srcs[src];
+  uint32_t o = rd32(S.offsets + 4 * idx);
+  const uint8_t* p = S.data + (o & 0x7FFFFFFF);
+  if (o >> 31) { cv.play(p + 2, rd16(p)); return; }
   uint16_t* out = (uint16_t*)fb.getBuffer();
   int i = 0;
   uint16_t lastIn = 0xFFFF, lastOut = 0;
-  while (i < 240 * 240) {
+  while (i < 240 * 240 && p + 3 <= S.end) {
     int n = p[0]; uint16_t v = p[1] | (p[2] << 8); p += 3;
     if (v != lastIn) { lastIn = v; lastOut = recolor(v); }
     v = lastOut;
@@ -212,7 +251,7 @@ static int lastFrame = -1;
 static float fps = 0;
 
 static void say(const char* fmt, ...);   // below, with the link code
-static void startSeq(int s) { curSeq = s; seqStart = millis(); lastFrame = -1; }
+static void startSeq(int s) { curSeq = s; seqStart = millis(); lastFrame = -1; A.srcs[A.src[s]].used = seqStart; }
 static int nextHop(int a, int b) {
   if (A.transOf[a][b] >= 0) return A.transOf[a][b];
   if (A.base[a] != a) return A.transOf[a][A.base[a]];
@@ -459,10 +498,12 @@ static void drawOverlay(uint32_t now) {
 }
 
 // ---------- serial ----------
+static float slowestDraw = 0;         // the longest any frame took to draw since the last report, in ms
 static void reply() {
-  say("ok mode=%s target=%s playing=%s(%s) fps=%.1f frames=%u seqs=%u",
+  say("ok mode=%s target=%s playing=%s(%s) fps=%.1f frames=%u seqs=%u draw_ms=%.0f",
     demo ? "demo" : offline ? "offline" : "direct", A.moodName[target].c_str(), A.name[curSeq].c_str(),
-    A.kind[curSeq] == LOOP ? "loop" : A.kind[curSeq] == TRANS ? "transition" : "event", fps, A.nFrames, A.nSeqs);
+    A.kind[curSeq] == LOOP ? "loop" : A.kind[curSeq] == TRANS ? "transition" : "event", fps, A.nFrames, A.nSeqs, slowestDraw);
+  slowestDraw = 0;
 }
 static void setWifi(String a);
 static void wifiReport();
@@ -676,12 +717,81 @@ static void onUpdateDone() {
     if (upErr != "pairing token needed") restartAt = millis() + 500;   // the screen was taken over: start clean
   }
 }
+static bool clipBusy(int si) { return A.src[curSeq] == si || (pendingEvent >= 0 && A.src[pendingEvent] == si); }
+// Forget a clip: its sequences close up in the list and its memory is freed.
+static void dropClip(int si) {
+  int w = 0;
+  for (int s = 0; s < A.nSeqs; s++) {
+    if (A.src[s] == si) continue;
+    if (w != s) {
+      A.kind[w] = A.kind[s]; A.from[w] = A.from[s]; A.to[w] = A.to[s]; A.src[w] = A.src[s]; A.len[w] = A.len[s]; A.seq[w] = A.seq[s]; A.name[w] = A.name[s];
+      if (curSeq == s) curSeq = w;
+      if (pendingEvent == s) pendingEvent = w;
+    }
+    w++;
+  }
+  A.nSeqs = w; free(A.srcs[si].own); A.srcs[si] = Src();
+}
+// Make room by dropping the clip played longest ago; false if there's none he can drop.
+static bool dropOldestClip() {
+  int old = -1;
+  for (int i = 1; i < MAX_SRC; i++) if (A.srcs[i].own && !clipBusy(i) && (old < 0 || int32_t(A.srcs[i].used - A.srcs[old].used) < 0)) old = i;
+  if (old < 0) return false;
+  say("clip gone %s", A.srcs[old].name.c_str());
+  dropClip(old);
+  return true;
+}
+// A clip arrives whole in buf (which we own from here on success). One with a name he already has
+// replaces the older one.
+static String addClip(uint8_t* buf, size_t size, String name) {
+  name.toLowerCase();
+  if (!name.length()) return "a clip needs a name (X-Lump-Name)";
+  for (int i = 1; i < MAX_SRC; i++) if (A.srcs[i].own && A.srcs[i].name == name) {
+    if (clipBusy(i)) return "that clip is playing, try again";
+    dropClip(i);
+  }
+  for (;;) {
+    int si = -1;
+    for (int i = 1; i < MAX_SRC && si < 0; i++) if (!A.srcs[i].own) si = i;
+    if (si > 0 && parseArt(buf, size, si)) {
+      A.srcs[si].own = buf; A.srcs[si].name = name; A.srcs[si].used = millis();
+      Serial.printf("clip %s: %u bytes\n", name.c_str(), (unsigned)size);
+      return "";
+    }
+    if (si > 0) A.srcs[si] = Src();
+    if (!dropOldestClip()) return "not a clip he can read";       // with nothing left to drop, the clip itself is the problem
+  }
+}
+static uint8_t* clipBuf = nullptr; static size_t clipSize = 0; static String clipErr;
+static void clipFail(const char* e) { clipErr = e; free(clipBuf); clipBuf = nullptr; }
+static void onClipData() {
+  HTTPRaw& r = web.raw();
+  if (r.status == RAW_START) {
+    clipFail(""); clipSize = web.header("X-Lump-Size").toInt();
+    if (!webAuthed()) return clipFail("pairing token needed");
+    if (!A.ok) return clipFail("he has no drawings to add it to");
+    if (!clipSize || clipSize > 2 * 1024 * 1024) return clipFail("missing X-Lump-Size, or over 2 MB");
+    clipBuf = (uint8_t*)heap_caps_malloc(clipSize, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    if (!clipBuf) clipFail("out of memory");
+  } else if (r.status == RAW_WRITE && clipBuf) {
+    size_t at = r.totalSize - r.currentSize;
+    if (at + r.currentSize > clipSize) return clipFail("more data than X-Lump-Size");
+    memcpy(clipBuf + at, r.buf, r.currentSize);
+  } else if (r.status == RAW_END && clipBuf) { if (r.totalSize != clipSize) clipFail("size mismatch"); }
+  else if (r.status == RAW_ABORTED) clipFail("upload cut short");
+}
+static void onClipDone() {
+  if (clipBuf) { clipErr = addClip(clipBuf, clipSize, web.header("X-Lump-Name")); if (clipErr.length()) free(clipBuf); clipBuf = nullptr; }
+  if (clipErr.length()) web.send(clipErr == "pairing token needed" ? 401 : 400, "text/plain", "err " + clipErr + "\n");
+  else web.send(200, "text/plain", "ok\n");
+}
 static void webBegin() {
-  static const char* keep[] = {"X-Lump-Token", "X-Lump-Size", "X-Lump-MD5", "X-Lump-Sha256"};
-  web.collectHeaders(keep, 4);
+  static const char* keep[] = {"X-Lump-Token", "X-Lump-Size", "X-Lump-MD5", "X-Lump-Sha256", "X-Lump-Name"};
+  web.collectHeaders(keep, 5);
   web.on("/info", HTTP_GET, onInfo);
   web.on("/update/app", HTTP_POST, onUpdateDone, onAppData);
   web.on("/update/art", HTTP_POST, onUpdateDone, onArtData);
+  web.on("/clip", HTTP_POST, onClipDone, onClipData);
   web.begin();
 }
 
@@ -691,7 +801,10 @@ void setup() {
   tft.init(); tft.setRotation(PRISM_MIRROR ? 4 : 0); tft.fillScreen(TFT_BLACK);
   fb.setColorDepth(16); fb.setPsram(false);
   if (!fb.createSprite(240, 240)) { fb.setPsram(true); fb.createSprite(240, 240); }
-  if (!mapArt() || !parseAnim()) {
+  cv.fb = (uint16_t*)fb.getBuffer(); cv.recolour = recolour8;
+  cv.acc = (float*)heap_caps_calloc(vec::STRIDE * (vec::H + 1), sizeof(float), MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+  for (auto& m : cv.clips) m = (uint8_t*)heap_caps_malloc(vec::W * vec::H, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+  if (!cv.acc || !mapArt() || !parseArt(art, artSize, 0)) {
     A.ok = false;
     Serial.println("err lump art missing or bad (send it: tools/ota.py --art)");
     tft.setTextColor(lgfx::color565(255, 241, 220)); tft.setTextDatum(middle_center);
@@ -699,6 +812,7 @@ void setup() {
     wifiBegin();                                   // still reachable, so the art can be sent
     return;
   }
+  A.ok = true;
   Serial.printf("desk-buddy lump ready: %u moods, %u sequences, %u frames\n", A.nMoods, A.nSeqs, A.nFrames);
   randomSeed(esp_random());
   if (imuInit()) { xTaskCreatePinnedToCore(imuTask, "imu", 4096, nullptr, 2, nullptr, 0); Serial.println("imu ready"); }
@@ -739,12 +853,15 @@ void loop() {
   static uint32_t lastOverlayTick = 0;
   uint32_t overlayTick = now / 100;              // corner extras animate at ~10 fps
   bool ov = overlayVisible();
-  if (idx != lastFrame || (ov && overlayTick != lastOverlayTick)) {
+  int frame = (A.src[curSeq] << 16) | idx;
+  if (frame != lastFrame || (ov && overlayTick != lastOverlayTick)) {
     lastOverlayTick = overlayTick;
-    decodeFrame(idx);
+    uint32_t began = micros();
+    drawFrame(A.src[curSeq], idx);
+    slowestDraw = max(slowestDraw, (micros() - began) / 1000.f);
     if (ov) drawOverlay(now);
     fb.pushSprite(0, 0);
-    lastFrame = idx;
+    lastFrame = frame;
     static uint32_t t0 = now; static int n = 0;
     if (++n, now - t0 >= 2000) { fps = n * 1000.f / (now - t0); n = 0; t0 = now; }
   }

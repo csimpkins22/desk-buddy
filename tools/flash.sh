@@ -3,8 +3,7 @@
 # Day to day, use tools/ota.py instead: it updates him over Wi-Fi, sending only what changed.
 # This is for the first install of a new partition layout, or recovery when Wi-Fi updates can't reach him.
 # Writes the bootloader, partition table, program (slot app0, made the boot slot) and, unless ART=0,
-# his drawings (firmware/data/lump.bin) into the "lump" partition. At this cable's pace the drawings
-# take about 5 minutes; ART=0 skips them.
+# his drawings (firmware/data/lump.bin) into the "lump" partition; ART=0 skips them.
 # Needs: PlatformIO, and a Python venv with esptool (set VENV, default tools/.venv).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
