@@ -9,7 +9,7 @@ you what your Claude sessions are up to, so you can look away from the screen wh
   (a permission prompt, a question, a plan to approve), and **celebrating** when it's done.
 - Corner counters show how many sessions are working, waiting on you, or finished and unread.
 - His colour warms from tangerine to red as you get close to your Claude usage limits.
-- **Tap the glass** and he plays one of a dozen gags: electric shock, ring of fire, wolf howl,
+- **Tap the glass** and he plays one of eleven gags: electric shock, ring of fire, wolf howl,
   banana peel, cartoon bomb and more.
 - Optional extras: turns blue before calendar meetings, holds up a letter when a Slack VIP
   messages you, a tiny ocarina voice and sound effects for the gags, sleeps at night, and runs over Wi-Fi with over-the-air updates.
@@ -165,7 +165,7 @@ The bridge also plays clips by itself when the moment fits:
 | A session finishes | a celebration, at most every 10 minutes |
 | A session has needed you for a minute | a "waiting" clip, every 3 minutes until you answer |
 | Certain hours, once a day, if you're around | `coffee`, `lunch`, `afternoon_slump`, `clock_out` and friends |
-| A meeting is 10 minutes away, or has just ended | a meeting clip, then `meeting_over` |
+| A meeting is 10 minutes away | a meeting clip |
 | A Slack DM or mention | sometimes a pigeon or a mailbox instead of the paper plane |
 | Your usage limit is nearly spent | `rate_limited` |
 | Nothing is happening | one of the idle clips, in place of a fidget sound |

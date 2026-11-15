@@ -20,10 +20,10 @@ picture (raw RGBA) and the canvas calls that drew it. Identical frames are store
 is kept as drawing instructions (about a kilobyte, drawn on the board by firmware/src/vec.h) when
 that renderer reproduces the browser's picture closely enough, and as pixels otherwise.
 
-lump.bin layout (little-endian), version 4:
-  "LUMP" u16 version=4  u16 nFrames  u8 nMoods  u8 fps
+lump.bin layout (little-endian), version 5:
+  "LUMP" u16 version=5  u16 nFrames  u8 nMoods  u8 fps
   per mood:      u8 base mood index, u8 nameLen, name
-  u8 nSeqs
+  u16 nSeqs (at most 750 in lump.bin: the board keeps room for that many)
   per sequence:  u8 kind (0 loop, 1 transition, 2 event), u8 from, u8 to,
                  u8 nameLen, name, u16 length, u16 frame index per tick
   u32 offset[nFrames]  (from start of frame data; top bit set = an instruction frame)
@@ -40,6 +40,7 @@ OUT = os.path.join(ROOT, "firmware", "data", "lump.bin")
 CLIPS = os.path.expanduser("~/.desk-buddy/clips")
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 PIXELS = 240 * 240 * 4
+MAX_SEQS = 750                    # sequences the board has room for in lump.bin (MAX_SEQ in firmware/src/main.cpp)
 MAX_MEAN, MAX_FAR = 2.0, 300      # an instruction frame may differ from the browser's by this much: mean % of full
                                   # scale, and pixels more than a quarter of full scale apart (thin edge fringes)
 
@@ -211,6 +212,7 @@ def pstr(s):
 
 def build():
     moods = [m["name"] for m in meta["moments"]]
+    if len(meta["seqs"]) > MAX_SEQS: sys.exit(f"{len(meta['seqs'])} sequences is more than the board's {MAX_SEQS}")
     uniq, pics, calls, body, shows = {}, [], [], bytearray(), {}
     for s in meta["seqs"]:
         ticks = sorted(t for (k, t) in where if k == s["key"])
@@ -234,10 +236,10 @@ def build():
             why["pixels: didn't match closely enough"] += 1; blobs.append((0, rle(pics[i]))); continue
         worst = (max(worst[0], mean), max(worst[1], far))
         why["instructions"] += 1; blobs.append((1, struct.pack("<H", len(v)) + v))
-    out = bytearray(b"LUMP") + struct.pack("<HHBB", 4, len(blobs), len(moods), 24)
+    out = bytearray(b"LUMP") + struct.pack("<HHBB", 5, len(blobs), len(moods), 24)
     for m in meta["moments"]:
         out += bytes([m["base"]]) + pstr(m["name"])
-    out += bytes([len(meta["seqs"])]) + body
+    out += struct.pack("<H", len(meta["seqs"])) + body
     off = 0
     for kind, blob in blobs:
         out += struct.pack("<I", off | (kind << 31)); off += len(blob)

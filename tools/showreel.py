@@ -21,8 +21,9 @@ def sequences(path):
     d = open(path, "rb").read()
     n_moods, fps = d[8], d[9]; p = 10
     for _ in range(n_moods): p += 2 + d[p + 1]
-    out = []; p += 1
-    for _ in range(d[p - 1]):
+    wide = 2 if d[4] >= 5 else 1                     # version 5 on: a two-byte count
+    out = []; count = int.from_bytes(d[p:p + wide], "little"); p += wide
+    for _ in range(count):
         kind, n = d[p], d[p + 3]; name = d[p + 4:p + 4 + n].decode(); p += 4 + n
         ticks, = struct.unpack_from("<H", d, p); p += 2 + 2 * ticks
         out.append((kind, name, ticks / fps))

@@ -546,29 +546,6 @@ def g_wolf(tr):
     tr.add(95, heh(1.26), .45, "heh")
 
 
-def g_glass(tr):
-    for k in range(4):
-        tr.add(k * 1.5, pat(330 + 30 * k), .45, "patter" if k == 0 else None)
-    tr.add(0, whoosh(.25, 600, 2400, 1.2), .3)
-    tr.add(6, add(lvl(thud(240, 120, .2, .9), .9), lvl(splat(), .8)), .9, "SPLAT")
-    tr.add(9, filt(oc(.45, [(0, 1.12), (1, 1.0)], breath=.3), "lp", 700), .5, "mmph")
-    tr.add(20, squeak(.52, 1150, 720), .7, "squeeeak")
-    tr.add(32, bloop(.12, 300, 900), .6, "bloop")
-    tr.add(38, heh(1.68), .5, "hehe")
-    # scrubbing the smudge in little circles with a cloth, frames 46-89: one circle every 6 frames,
-    # working down the glass. A soft swish that follows the circles, and a polish-squeak on each one.
-    d, lap = 44 / FPS, 6 / FPS
-    swirl = lambda t: math.sin(TAU * t / lap)
-    rub = shape(filt(noise(d), "bp", lambda t: 1900 + 700 * swirl(t), 1.4), lambda t: (.35 + .65 * swirl(t) ** 2) * fade(d, .03, .08)(t))
-    tr.add(46, rub, .35, "scrub scrub")
-    for k, tick in enumerate(range(46, 90, 6)):
-        f = 1750 - 45 * k                                          # a touch lower as he works down
-        tr.add(tick + 1, squeak(.1, f, f * (1.12 if k % 2 else .88), 46), .38)
-    tr.add(90, ping(2900, .5, .12), .4, "glint")
-    tr.add(94, add(lvl(ping(3500, .7, .2), 1), at(lvl(ping(4400, .6, .15), .8), .09)), .5, "ting-ting!")
-    tr.add(96, add(lvl(oc(.08, 1.5, atk=.01), .8), at(lvl(oc(.16, [(0, 1.68), (1, 1.78)], atk=.01), .9), .12)), .45, "proud")
-
-
 def g_banana(tr):
     tr.add(0, whistle(.5, 1500, 520, air=.3), .4, "peel falls")
     tr.add(12, splat(.08), .5, "flop")
@@ -779,7 +756,7 @@ def g_startle(tr):
     tr.add(196, oc(.4, [(0, 1.0), (1, .94)], atk=.1, breath=.25), .3, "mm (asleep)")
 
 
-GAGS = {"shock": g_shock, "moto": g_moto, "wolf": g_wolf, "glass": g_glass, "banana": g_banana, "balloon": g_balloon,
+GAGS = {"shock": g_shock, "moto": g_moto, "wolf": g_wolf, "banana": g_banana, "balloon": g_balloon,
         "sneeze": g_sneeze, "accordion": g_accordion, "anvil": g_anvil, "disco": g_disco, "moon": g_moon, "bomb": g_bomb,
         "prep": g_prep, "prep_alarm": g_prep_alarm, "startle": g_startle}
 

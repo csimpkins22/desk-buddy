@@ -73,7 +73,7 @@ TAP_SNOOZE = 120                        # tapping "needs you" holds off the nagg
 # mapped to the board's event. "tap" is a random gag picked by the board, as when you tap the glass
 # (at night the startle, before a meeting the prep), but without a tap's meaning: nothing is snoozed
 # or silenced. A named gag plays in whatever mood he's in.
-GAGS = ("shock", "moto", "wolf", "accordion", "anvil", "disco", "glass", "banana", "balloon", "sneeze", "moon", "bomb")
+GAGS = ("shock", "moto", "wolf", "accordion", "anvil", "disco", "banana", "balloon", "sneeze", "moon", "bomb")
 ANIMATIONS = {"tap": "tap", **{g: f"tap_{g}" for g in GAGS}, "startle": "tap_startle_night", "prep": "tap_prep",
               **{e: e for e in ("fidget_toss", "fidget_twitch", "fidget_bubble", "oops", "hello")}}
 # Usage gauge: his colour warms from Tangerine to red as the busier of your 5-hour / weekly
@@ -705,7 +705,7 @@ class Buddy:
         self.clips_sent = {}                      # clip name -> file time of the copy the board has
         self.last_clip, self.clip_kind, self.recent_clips = 0.0, {}, []    # clips played unprompted: when, by kind, which
         self.clip_days = {}                       # time-of-day clip -> the day it last played
-        self.meeting_clipped = set()              # meeting starts and ends he's already done a clip for
+        self.meeting_clipped = set()              # meeting starts he's already done a clip for
         self.taps_loaded = 0.0
         self.next_idle = time.time() + random.uniform(*IDLE_EVERY)
         self.load_state()
@@ -1203,7 +1203,7 @@ class Buddy:
         return name
 
     def clip_tick(self, now):
-        """Clips that come from time passing: you've kept him waiting, the time of day, a meeting coming or over."""
+        """Clips that come from time passing: you've kept him waiting, the time of day, a meeting coming."""
         with self.lock:
             waiting = any(s["state"] == "alert" and now - s["t"] >= 60 and self._effective(s, now) == "alert" for s in self.sessions.values())
             around = now - self.last_active < 30 * 60
@@ -1211,11 +1211,9 @@ class Buddy:
             self.auto_clip("waiting", CLIP_SETS["waiting"])
             return
         for m in self.meetings():
-            start, end = m.get("start"), m.get("end")
+            start = m.get("start")
             if start and 0 < start - now < MEETING_LEAD and start not in self.meeting_clipped:
                 if self.auto_clip("meeting", CLIP_SETS["meeting"]): self.meeting_clipped.add(start)
-            elif end and 0 <= now - end < 180 and end not in self.meeting_clipped:
-                if self.auto_clip("meeting", ["meeting_over"]): self.meeting_clipped.add(end)
         if around:
             lt = time.localtime(now); hour, today = lt.tm_hour + lt.tm_min / 60, time.strftime("%Y-%m-%d", lt)
             for name, h0, h1 in CLIP_HOURS:

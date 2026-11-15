@@ -13,7 +13,7 @@
 //   s demo            showcase every mood and event on a loop
 //   e <event>         play an event: fidget_toss fidget_twitch fidget_bubble oops hello tap
 //                     ("tap" plays a random gag for the current mood: electric shock, ring of fire,
-//                      wolf howl, accordion, anvil, disco, face on the glass, banana peel, balloon pop,
+//                      wolf howl, accordion, anvil, disco, banana peel, balloon pop,
 //                      sneeze, mooning, cartoon bomb; at night the late-night startle; during a meeting
 //                      countdown or alarm, meeting prep)
 //   p <0|1>           meeting countdown running (the bridge sends it): taps play meeting prep
@@ -121,7 +121,8 @@ static bool mapArt() {
   return true;
 }
 
-constexpr int MAX_MOODS = 12, MAX_SEQ = 250, MAX_SRC = 33;     // source 0 is the flash art, the rest are clips
+constexpr int MAX_MOODS = 12, MAX_SRC = 33;                    // source 0 is the flash art, the rest are clips
+constexpr int MAX_SEQ = 750 + MAX_SRC - 1;                     // 750 sequences in the art, and one for each clip
 enum Kind : uint8_t { LOOP = 0, TRANS = 1, EVENT = 2 };
 struct Src {                                    // where a sequence's frames live
   const uint8_t* offsets = nullptr; const uint8_t* data = nullptr; const uint8_t* end = nullptr;
@@ -130,10 +131,10 @@ struct Src {                                    // where a sequence's frames liv
   bool tap = false;                              // a tap reaction: kept, and in the running when the glass is tapped
 };
 struct Anim {
-  uint16_t nFrames = 0; uint8_t fps = 24, nMoods = 0, nSeqs = 0;
+  uint16_t nFrames = 0, nSeqs = 0; uint8_t fps = 24, nMoods = 0;
   uint8_t base[MAX_MOODS]; String moodName[MAX_MOODS];
   uint8_t kind[MAX_SEQ], from[MAX_SEQ], to[MAX_SEQ], src[MAX_SEQ]; uint16_t len[MAX_SEQ]; const uint8_t* seq[MAX_SEQ]; String name[MAX_SEQ];
-  int8_t loopOf[MAX_MOODS], transOf[MAX_MOODS][MAX_MOODS];
+  int16_t loopOf[MAX_MOODS], transOf[MAX_MOODS][MAX_MOODS];
   Src srcs[MAX_SRC];
   bool ok = false;
 } A;
@@ -153,8 +154,8 @@ static bool parseArt(const uint8_t* buf, size_t size, int si) {
   bool clip = si > 0;
   if (memcmp(p, "LUMP", 4) != 0) return false;
   p += 4;
-  uint16_t version = rd16(p); p += 2;            // 3: every frame is pixels. 4: a frame may be instructions
-  if (version != 3 && version != 4) return false;
+  uint16_t version = rd16(p); p += 2;            // 3: every frame is pixels. 4: a frame may be instructions. 5: up to 65535 sequences
+  if (version < 3 || version > 5) return false;
   uint16_t nFrames = rd16(p); p += 2;
   uint8_t nMoods = *p++, fps = *p++, moodOf[MAX_MOODS];
   if (nMoods > MAX_MOODS) return false;
@@ -166,8 +167,9 @@ static bool parseArt(const uint8_t* buf, size_t size, int si) {
     if (base >= nMoods) return false;
   }
   if (!clip) { A.nMoods = nMoods; A.fps = fps; A.nFrames = nFrames; A.nSeqs = 0; memset(A.transOf, -1, sizeof(A.transOf)); }
-  if (!room(1)) return false;
-  int n = *p++, first = A.nSeqs;
+  int wide = version >= 5 ? 2 : 1;               // bytes in the sequence count
+  if (!room(wide)) return false;
+  int n = wide == 2 ? rd16(p) : *p, first = A.nSeqs; p += wide;
   if (first + n > MAX_SEQ) return false;
   for (int i = first; i < first + n; i++) {
     if (!room(4) || !room(4 + p[3] + 2)) return false;
@@ -295,8 +297,8 @@ static void setTarget(int m) {
 // (the bridge says "p 1") or the meeting alarm is ringing he only does meeting prep (tap_prep_<mood>).
 static bool prepMode = false;      // the bridge's meeting countdown is running
 static const char* pickTap() {
-  static const char* GAG[] = {"shock", "moto", "wolf", "accordion", "anvil", "disco", "glass", "banana", "balloon", "sneeze", "moon", "bomb"};
-  static const int W[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
+  static const char* GAG[] = {"shock", "moto", "wolf", "accordion", "anvil", "disco", "banana", "balloon", "sneeze", "moon", "bomb"};
+  static const int W[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
   constexpr int NG = sizeof(W) / sizeof(W[0]);
   static int last = -1;
   int total = 0; for (int i = 0; i < NG; i++) if (i != last) total += W[i];
@@ -309,7 +311,7 @@ static String pickTapClip() {
   static int last = -1;
   int ids[MAX_SRC], n = 0;
   for (int i = 1; i < MAX_SRC; i++) if (A.srcs[i].own && A.srcs[i].tap && i != last) ids[n++] = i;
-  if (!n || random(12 + n) < 12) return "";
+  if (!n || random(11 + n) < 11) return "";
   last = ids[random(n)];
   for (int s = 0; s < A.nSeqs; s++) if (A.src[s] == last && A.kind[s] == EVENT) return A.name[s];
   return "";

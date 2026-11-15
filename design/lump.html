@@ -501,13 +501,10 @@ Object.assign(D, {
   KO1: { ...D.T2, face: [['dot',158,144,4], ['dot',174,140,4], ['mouth',[[163,154],[171,153],[172,160],[167,163],[162,159]]]], fxm: 'none' },
   WT3: { ...D.WT2, prop: 'sign', tap: false },
 });
-// ---------- tap gags: face on the glass, banana peel, balloon pop, sneeze ----------
+// ---------- tap gags: banana peel, balloon pop, sneeze ----------
 const FACE = { aahEyes: [['stroke',[[110,110],[116,105],[122,110]],3], ['stroke',[[134,108],[140,103],[146,108]],3]], chooEyes: [['stroke',[[108,104],[116,109],[108,114]],3], ['stroke',[[148,102],[140,107],[148,112]],3]], lookup: [['dot',120,103,3.8], ['dot',144,101,3.8], ['stroke',[[123,121],[128,123],[133,121]],2.6]], lookr: [['dot',124,110,3.8], ['dot',148,108,3.8], ['stroke',[[126,124],[131,126],[136,124]],2.6]], lipsA: [['stroke',[[108,103],[116,108],[108,113]],3], ['stroke',[[148,101],[140,106],[148,111]],3], ['blush',100,122,9,6], ['blush',156,120,9,6], ['stroke',[[96,114],[100,122],[106,127]],2.4], ['stroke',[[160,112],[156,120],[150,125]],2.4], ['lips',128,124,13,8.5]], lipsB: [['stroke',[[108,103],[116,108],[108,113]],3], ['stroke',[[148,101],[140,106],[148,111]],3], ['blush',99,123,10,7], ['blush',157,121,10,7], ['stroke',[[94,114],[98,123],[105,129]],2.4], ['stroke',[[162,112],[158,121],[151,127]],2.4], ['lips',128,125,17,12]], cute: [['blush',100,121,8,4.5], ['blush',156,119,8,4.5], ['oval',116,108,5.2,5.8], ['oval',140,106,5.2,5.8], ['shine',118,105,1.8], ['shine',142,103,1.8], ['mouth',[[121,119],[135,118],[133,126],[128,129],[123,126]],[128,126,4,2]]], happy: [['dot',116,108,4.2], ['dot',140,106,4.2], ['mouth',[[118,120],[138,119],[136,130],[128,134],[120,130]],[128,131,5,3]]], shock: [['dot',116,108,4.6], ['dot',140,106,4.6], ['mouth',[[121,118],[135,117],[137,131],[128,136],[119,131]]]], spiral: [['spiral',116,110,5], ['spiral',140,108,5], ['stroke',[[120,126],[124,124],[128,126],[132,124],[136,126]],2.6]], puff: [['dot',116,108,3.6], ['dot',140,106,3.6], ['dot',128,122,2.6], ['stroke',[[100,116],[104,122],[110,124]],2.4], ['stroke',[[156,114],[152,120],[146,122]],2.4]], ah: [['stroke',[[110,109],[121,109]],2.8], ['stroke',[[134,107],[145,107]],2.8], ['stroke',[[110,99],[120,97]],2.4], ['stroke',[[136,95],[146,96]],2.4], ['mouth',[[124,120],[132,120],[133,126],[128,129],[123,126]]]], aah: [['stroke',[[110,110],[116,105],[122,110]],3], ['stroke',[[134,108],[140,103],[146,108]],3], ['mouth',[[121,118],[135,117],[137,130],[128,135],[119,130]]]], choo: [['stroke',[[108,104],[116,109],[108,114]],3], ['stroke',[[148,102],[140,107],[148,112]],3], ['mouth',[[116,118],[140,116],[140,128],[128,133],[116,128]]]], sheep: [['dot',112,110,3.6], ['dot',136,108,3.6], ['stroke',[[118,124],[123,122],[128,124],[133,122]],2.6]], grump: [['stroke',[[108,101],[121,106]],3], ['stroke',[[136,104],[149,99]],3], ['dot',119,112,3.4], ['dot',145,110,3.4], ['stroke',[[121,127],[135,127]],3]] };
 Object.assign(D, {
-  // face on the glass: runs up to the glass, squashes against it, slides down, wipes the smudge
-  FG1: xf(D.N, { k: 1.4, oy: 135, face: FACE.cute }),
-  FG2: xf(D.N, { k: 2.05, oy: 135, rot: -0.14, dx: 10, face: FACE.cute }),
-  // cheek-first, side-on: near eye squeezed shut, mouth smeared sideways, far eye wide open
+  // pressed flat against the glass, cheek-first and side-on: near eye squeezed shut, mouth smeared sideways, far eye wide open
   FG3: { body: Array.from({ length: 28 }, (_, i) => { const a = i / 28 * Math.PI * 2, w = 1 + 0.05 * Math.sin(a * 5 + 0.7) + 0.03 * Math.sin(a * 9),
                                                       x = Math.cos(a) * 120 * w, y = Math.sin(a) * 98 * w, r = -0.14;
                                                       return [142 + x * Math.cos(r) - y * Math.sin(r), 130 + x * Math.sin(r) + y * Math.cos(r)]; }),
@@ -515,16 +512,9 @@ Object.assign(D, {
          face: [['blush', 62, 126, 13, 8], ['blush', 140, 122, 13, 8],
                 ['stroke',[[66,92],[83,101],[66,110]],4], ['stroke',[[136,90],[119,99],[136,108]],4],
                 ['mouth',[[80,130],[89,125],[98,129],[107,124],[117,128],[120,135],[112,141],[103,138],[94,143],[85,140]]]],
-         shadow: [124, 0], fx: [124, 20], fxm: 'squeak', glare: true },
+         shadow: [124, 0], fx: [124, 20] },
 });
 Object.assign(D, {
-  FG4: xf(D.FG3, { dy: 30, extra: { smudge: [36, 142, 64, 160, 0.35], fxm: 'squeak' } }),
-  FG5: xf(D.FG3, { dy: 85, extra: { smudge: [36, 142, 64, 210, 0.35], fxm: 'none' } }),
-  FG6: xf(D.FG3, { dy: 170, extra: { smudge: [36, 142, 64, 240, 0.35], fxm: 'none' } }),
-  FG7: xf(D.N, { dy: 110, face: FACE.shock, extra: { smudge: [36, 142, 64, 240, 0.35] } }),
-  FG8: xf(D.N, { dy: 28, face: FACE.shock, extra: { smudge: [36, 142, 64, 240, 0.35] } }),
-  FG9: { ...D.N, face: FACE.cute, smudge: [36, 142, 64, 240, 0.35] },
-
   // banana peel: steps on it, feet fly up, thud, peel lands on his head
   BNa: { ...D.N, face: FACE.lookup, banana: [200, -12, 0.7, 0.95, 0.6] },
   BNb: { ...D.N, face: FACE.lookup, banana: [200, 64, -0.5, 0.95, -0.5] },
@@ -763,25 +753,6 @@ const TAP_OUT = {
   D.ZC2 = { ...D.O4, frizz: 26, outlet: OUT };
   D.ZC3 = { ...D.O5, frizz: 14, outlet: OUT };
 })();
-// Face on the glass, cleaning up: scrubs the smudge in little circles with a cloth; it clears wherever the cloth has been.
-(() => {
-  const SM = [36, 142, 64, 240, 0.35], SH = [94, 148];                    // the smudge, his near shoulder
-  const at = t => { const a = t * Math.PI * 2 * 7, cx = 88 + 34 * Math.sin(t * Math.PI * 4), cy = 84 + 106 * t;     // circles, sweeping side to side on the way down
-                    return [cx + Math.cos(a) * 14, cy + Math.sin(a) * 11, a]; };
-  const dense = Array.from({ length: 121 }, (_, i) => at(i / 120));
-  const N = 22;
-  for (let n = 0; n < N; n++) {
-    const t = n / (N - 1), [rx, ry, a] = at(t);
-    const wiped = dense.filter((_, i) => i / 120 <= t + 1e-9).map(([x, y]) => [x, y, 27]);
-    const ex = Math.max(-5, Math.min(2, (rx - 128) * 0.09)), ey = Math.max(-4, Math.min(3, (ry - 110) * 0.06));
-    const o = { rot: (rx - 128) * 0.0016, face: [['dot', 116 + ex, 110 + ey, 3.8], ['dot', 140 + ex, 108 + ey, 3.8], ['stroke', [[121 + ex * 0.5, 124], [126 + ex * 0.5, 126], [131 + ex * 0.5, 124]], 2.6]] };
-    D['FW' + n.toString(36)] = xf(D.N, { ...o, extra: { fxm: 'none', smudge: [...SM.slice(0, 4), SM[4] * (1 - 0.5 * t)], wiped, arm: [xpt(o, SH), [rx + 4, ry + 4]], rag: [rx, ry, Math.sin(a) * 0.35, 1.3, n % 2 ? 1 : -1] } });
-  }
-  const proud = [['stroke', [[110, 111], [116, 105], [122, 111]], 3], ['stroke', [[134, 109], [140, 103], [146, 109]], 3], ['blush', 102, 121, 8, 4.5], ['blush', 154, 119, 8, 4.5],
-                 ['mouth', [[119, 119], [137, 118], [135, 128], [128, 132], [121, 128]], [128, 129, 5, 3]]];
-  D.FWy = { ...D.N, face: proud, fxm: 'none', arm: [[94, 148], [74, 170]], rag: [70, 174, 0.5, 0.8, 0], glint: [[66, 94, 9], [112, 152, 5]] };
-  D.FWz = { ...D.N, face: proud, fxm: 'none', arm: [[94, 148], [74, 170]], rag: [70, 174, 0.5, 0.8, 0], glint: [[66, 94, 15], [112, 152, 8], [92, 70, 4]] };
-})();
 // The balloon flight: a loopy path round the screen, sampled at even speed, one drawing per frame.
 const ZIP = (() => {
   // all over the screen: corner to corner, off the walls, ceiling and floor, then sputters down in the middle
@@ -938,8 +909,6 @@ const TAP_REACT = {
             ['MCa', 8], ['MCb', 4], ['MCc', 4], ['MCd', 4], ['MCe', 4], ['MCf', 12], ['N', 3]],
   wolf:    [['WF0', 5], ['WF1', 8], ['WF2', 8], ['WF3', 3], ['WF4', 3], ['WF5', 3], ['WF6', 3], ['WF7', 12], ['WF8', 5], ['WF9', 30],
             ['WFa', 8], ['WFb', 3], ['WFc', 3], ['WFd', 6], ['N', 3], ['C1', 6]],
-  glass:   [['FG1', 3], ['FG2', 3], ['FG3', 14], ['FG4', 4], ['FG5', 4], ['FG6', 4], ['FG7', 3], ['FG8', 3], ['FG9', 8],
-            ...Array.from({ length: 22 }, (_, n) => ['FW' + n.toString(36), 2]), ['FWy', 4], ['FWz', 12], ['C1', 8]],
   banana:  [['BNa', 2], ['BNb', 2], ['BNc', 2], ['BNd', 2], ['BNe', 2], ['BNo', 2], ['BN0', 6], ['BN1', 4], ['BN2', 3], ['BN3', 2], ['BNs', 3], ['BN4', 3], ['BNf', 3], ['BN5', 3], ['BNg', 2], ['BNh', 2], ['BN6', 2], ['BNi', 2], ['BNj', 12],
             ['BN7', 6], ['BN8', 8], ['BNk', 4], ['BNl', 10], ['BN9', 3], ['BNm', 3], ['O5', 3], ['N', 4]],
   balloon: [['BL1', 6], ['BL2', 5], ['BL3', 5], ['BL4', 3], ['BL5', 3], ['BL4', 3], ['BL5', 3], ['BL6', 3],
@@ -958,7 +927,7 @@ const TAP_REACT = {
             ['MP7', 8], ['MP8', 4], ['MP9', 4], ['MP8', 4], ['MP9', 4], ['MPa', 18], ['MPb', 3], ['MPc', 3], ['MPb', 3], ['MPc', 6], ['MPd', 18]],
   anvil:   [['AV0', 10], ['AV1', 3], ['AV2', 2], ['AV3', 3], ['AV4', 22], ['AV5', 3], ['AV6', 3], ['A5', 3], ['O4', 3], ['O5', 3], ['N', 6]],
 };
-const TAP_LABEL = { shock: 'electric shock', moto: 'ring of fire', wolf: 'wolf howl', glass: 'face on the glass', banana: 'banana peel', balloon: 'balloon pop', sneeze: 'sneeze', moon: 'mooning', bomb: 'cartoon bomb', prep: 'meeting prep', startle: 'late-night startle', accordion: 'accordion', anvil: 'anvil', disco: 'disco' };
+const TAP_LABEL = { shock: 'electric shock', moto: 'ring of fire', wolf: 'wolf howl', banana: 'banana peel', balloon: 'balloon pop', sneeze: 'sneeze', moon: 'mooning', bomb: 'cartoon bomb', prep: 'meeting prep', startle: 'late-night startle', accordion: 'accordion', anvil: 'anvil', disco: 'disco' };
 // ---------- Slack: a VIP's letter (a mood he holds until you've read it) and the paper plane (any other
 // DM or @-mention: plays once, from whatever he's doing, like a gag). Every frame is placed by hand: the
 // envelope's spot and tilt, the plane's spot, heading and side of him, and where his eyes are. ----------
@@ -1066,7 +1035,7 @@ for (const m of Object.keys(TAP_IN)) for (const r of Object.keys(TAP_REACT)) {
 }
 // first tap: random; a second quick tap annoys him; a third knocks him over
 // every tap gets a gag, picked at random (never the same one twice running)
-const TAP_GAGS = [['shock', 2], ['moto', 2], ['wolf', 2], ['accordion', 2], ['anvil', 2], ['disco', 2], ['glass', 2], ['banana', 2], ['balloon', 2], ['sneeze', 2], ['moon', 2], ['bomb', 2]];
+const TAP_GAGS = [['shock', 2], ['moto', 2], ['wolf', 2], ['accordion', 2], ['anvil', 2], ['disco', 2], ['banana', 2], ['balloon', 2], ['sneeze', 2], ['moon', 2], ['bomb', 2]];
 let lastGag = '', meetingSoon = false;      // meetingSoon: the bridge's countdown is running (the board learns it from 'p 1')
 function pickTap() {
   const pool = TAP_GAGS.filter(([g]) => g !== lastGag), total = pool.reduce((a, [, w]) => a + w, 0);
@@ -1298,13 +1267,6 @@ function drawFX(c, m, d, tick, seed) {
     for (let k = 0; k < 3; k++) {
       const r = 12 + k * 13 + (step % 3) * 4;
       c.beginPath(); c.arc(fx, fy, r, dir - 0.5, dir + 0.5); c.stroke();
-    }
-  }
-  if (m === 'squeak') {                                       // squeaky lines where he's pressed on the glass
-    c.lineWidth = 2.4;
-    for (const side of [-1, 1]) for (let k = 0; k < 3; k++) {
-      const x = 120 + side * (100 + (step % 2) * 4), y = 70 + k * 26;
-      openPath(c, boil([[x, y], [x + side * 10, y - 6]], seed + k + side, 0.8)); c.stroke();
     }
   }
   if (m === 'zoom') {                                         // speed lines trailing behind him
@@ -1824,29 +1786,9 @@ function drawFrontProps(c, d, seed, tick) {
     const st = F([2.5, -66]); c.fillStyle = '#4A3010'; c.beginPath(); c.ellipse(st[0], st[1], 4.5, 3.5, 0.2, 0, Math.PI * 2); c.fill(); c.stroke();      // stalk end
     c.restore();
   }
-  if (d.glare) {                               // shine on the glass he's pressed against
-    c.save(); c.strokeStyle = L; c.globalAlpha = 0.55; c.lineCap = 'round';
-    c.lineWidth = 6; openPath(c, [[192, 46], [226, 12]]); c.stroke();
-    c.lineWidth = 3; openPath(c, [[204, 56], [230, 30]]); c.stroke();
-    c.lineWidth = 3; openPath(c, [[14, 226], [40, 200]]); c.stroke();
-    c.restore();
-  }
   if (d.peelZoom) {                            // the peel shooting off: lines behind it
     const [zx, zy, dir] = d.peelZoom; c.save(); c.strokeStyle = L; c.lineWidth = 2.2;
     for (let k = 0; k < 3; k++) { const y = zy - 4 - k * 9, x = zx - dir * (34 + (k % 2) * 6); openPath(c, boil([[x, y], [x - dir * 22, y]], seed + k, 0.8)); c.stroke(); }
-    c.restore();
-  }
-  if (d.smudge) {                               // face smudge left on the glass: [x0, x1, y0, y1, alpha]; d.wiped: [x, y, r] spots wiped clean
-    const [x0, x1, y0, y1, a] = d.smudge;
-    c.save(); c.fillStyle = L; c.strokeStyle = L;
-    // the wiped spots: clip to everything outside each one in turn, so the smudge can't be drawn there
-    (d.wiped || []).forEach(([x, y, r]) => { c.beginPath(); c.rect(0, 0, 240, 240); c.arc(x, y, r, 0, Math.PI * 2, true); c.clip(); });
-    const P = [], n = Math.max(2, Math.round((y1 - y0) / 20));
-    for (let i = 0; i <= n; i++) { const y = y0 + (y1 - y0) * i / n; P.push([x1 + Math.sin(i * 1.7) * 5, y]); }
-    for (let i = n; i >= 0; i--) { const y = y0 + (y1 - y0) * i / n; P.push([x0 + Math.sin(i * 2.3) * 5, y]); }
-    c.globalAlpha = a * 0.45; closedPath(c, boil(P, seed + 40, 2)); c.fill();
-    c.globalAlpha = a; c.lineWidth = 2;
-    for (let i = 1; i < 4; i++) { const x = x0 + (x1 - x0) * i / 4; openPath(c, boil([[x, y0 + 14], [x + 2, (y0 + y1) / 2], [x - 1, y1 - 10]], seed + 44 + i, 2)); c.stroke(); }
     c.restore();
   }
   if (d.arm) {                                 // a stubby little arm: [shoulder, hand]
@@ -1854,21 +1796,6 @@ function drawFrontProps(c, d, seed, tick) {
     c.save(); c.translate(x0, y0); c.rotate(a);
     closedPath(c, boil([[0, -7], [len * 0.5, -7], [len, -6], [len + 6, 0], [len, 6], [len * 0.5, 7], [0, 7]], seed + 98, 0.8));
     c.fillStyle = tint; c.fill(); c.strokeStyle = L; inkStroke(c, 3); c.restore();
-  }
-  if (d.rag) {                                 // a cleaning cloth held flat on the glass: [x, y, tilt, size, squeak side (0 none)]
-    const [gx, gy, gr, gs, sq] = d.rag;
-    if (sq) {                                  // squeaky little lines where it rubs
-      c.save(); c.strokeStyle = L; c.lineWidth = 2;
-      for (let k = 0; k < 3; k++) { const a = (sq > 0 ? -0.6 : Math.PI - 0.6) + k * 0.6, r1 = 24 * gs, r2 = 33 * gs;
-        openPath(c, boil([[gx + Math.cos(a) * r1, gy + Math.sin(a) * r1], [gx + Math.cos(a) * r2, gy + Math.sin(a) * r2]], seed + 130 + k, 0.6)); c.stroke(); }
-      c.restore();
-    }
-    c.save(); c.translate(gx, gy); c.rotate(gr); c.scale(gs, gs);
-    closedPath(c, boil([[-17,-15],[-5,-17],[7,-16],[18,-14],[16,-3],[18,9],[16,17],[3,15],[-9,18],[-18,15],[-15,3],[-18,-7]], seed + 120, 1), [0, 3, 6, 9]);
-    c.fillStyle = '#6FC3E8'; c.fill(); c.strokeStyle = '#D9F1FB'; c.lineWidth = 2.2; c.stroke();
-    closedPath(c, boil([[18, -14], [16, -3], [5, -9]], seed + 121, 0.6), [0, 1, 2]);          // a corner folded over
-    c.fillStyle = '#3E95BF'; c.fill(); c.stroke();
-    c.restore();
   }
   if (d.glint) {                               // sparkles on clean glass: [x, y, size]
     c.save(); c.fillStyle = L;
@@ -2399,7 +2326,7 @@ function loop(now) {
 }
 
 // ---------- tap gag gallery ----------
-const GAG_ORDER = ['letter', 'plane', 'moon', 'bomb', 'prep', 'prepAlarm', 'startle', 'shock', 'moto', 'wolf', 'glass', 'banana', 'balloon', 'sneeze', 'accordion', 'anvil', 'disco'];
+const GAG_ORDER = ['letter', 'plane', 'moon', 'bomb', 'prep', 'prepAlarm', 'startle', 'shock', 'moto', 'wolf', 'banana', 'balloon', 'sneeze', 'accordion', 'anvil', 'disco'];
 // situational ones: shown in the colour / light they actually play in
 const GAG_CARD = { letter: { seq: [['N', 8], ...TRANS['idle>letter'].slice(5), ...LOOPS.letter, ...LOOPS.letter, ...LOOPS.letter, ...TRANS['letter>idle'].slice(0, 3), ['N', 8]], label: 'VIP letter (Slack): arrives, held until read, tossed' },
                    prep: { tint: '#3D8BFF', note: 'countdown' }, prepAlarm: { seq: PREP_ALARM, tint: '#3D8BFF', label: 'meeting prep (alarm)' },
