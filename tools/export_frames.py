@@ -37,6 +37,7 @@ from urllib.parse import urlparse, parse_qs
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DESIGN = os.path.join(ROOT, "design")
 OUT = os.path.join(ROOT, "firmware", "data", "lump.bin")
+KIT = os.path.join(DESIGN, "clip_kit.js")          # props and helpers every clip script may use
 CLIPS = os.path.expanduser("~/.desk-buddy/clips")
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 PIXELS = 240 * 240 * 4
@@ -51,6 +52,7 @@ meta = {}
 done = threading.Event()
 result = {}
 out_path = OUT
+clip_name = None   # the clip being baked, if it is one
 
 EXPORT_JS = r"""
 (async () => {
@@ -206,6 +208,46 @@ def check(frames):
     return [(float(a), int(b), c == "1") for a, b, c in (line.split() for line in res if line)]
 
 
+def lint(name, pics, calls, vec, shows, size):
+    """What bakes but wastes space or will look wrong on him, for a clip: a list of plain sentences."""
+    notes = []
+    for s in meta["seqs"]:
+        ticks = sorted(t for (k, t) in where if k == s["key"]); d = [named[(s["key"], t)] for t in ticks]
+        odd = [d[i] for i in range(1, len(d)) if d[i] != d[i - 1] and i % 2 and d[i].startswith(name + "_")][1:]
+        if odd: notes.append(f"{len(odd)} drawings start on an odd tick, so they straddle two of his wobbles and are stored twice (first: {odd[0]}). "
+                             "Hold the first drawing after WAKE for 3 ticks and every other for an even number.")
+    pinks = set()
+    for frame in calls:
+        for c in frame:
+            if c[0] in ("=fillStyle", "=strokeStyle") and isinstance(c[1], str):
+                r, g, b, _ = colour(c[1]); beta = g / 241; alpha = r / 255 - beta
+                if max(r, g, b) >= 8 and alpha > 0.02 and b >= alpha * 255 + beta * 220 - 48 and abs(r - b) > 24: pinks.add(c[1])
+    if pinks: notes.append(f"The board will repaint {', '.join(sorted(pinks))} in his body colour: it takes pinks and purples for him.")
+    lit = lambda rgba, x, y: max(rgba[(y * 240 + x) * 4:(y * 240 + x) * 4 + 3]) > 110     # brighter than a wall or a sky
+    for side, cells in (("left", [(0, y) for y in range(186)]), ("right", [(239, y) for y in range(186)]), ("top", [(x, 0) for x in range(240)])):
+        framed = lambda f: any(c[0] == "scale" for c in calls[f][:14])      # seen through kit.view: the edges are meant to be crossed
+        cut = sorted(d for d, frames in shows.items() if d.startswith(name + "_") and any(not framed(f) and sum(lit(pics[f], x, y) for x, y in cells) > 10 for f in frames))
+        if cut: notes.append(f"Something bright touches the {side} edge in {', '.join(cut[:10])}{' and more' if len(cut) > 10 else ''}. "
+                             "Fine for a setting or a slide in or out; anywhere else a prop or a Lump is cut off.")
+    stuck = sorted(d for d, frames in shows.items() if d.startswith(name + "_") and any(vec[f] is None for f in frames))
+    if stuck: notes.append(f"Stored as pixels: {', '.join(stuck[:8])}. Look for a NaN or undefined coordinate, or a call the board can't draw.")
+    if size > 150000: notes.append(f"{size} bytes: over 150000 he takes longer to send and crowds the board's memory. Reuse drawings or simplify props.")
+    return notes
+
+
+def staging(name, pics, shows):
+    """Where he was and how big, across a clip's own drawings: to see at a glance whether a batch all looks alike."""
+    xs, hs = [], []
+    for d, frames in shows.items():
+        if not d.startswith(name + "_"): continue
+        rgba = pics[min(frames)]; hit = [(i % 80 * 3, i // 80 * 3) for i in range(6400) if rgba[(i // 80 * 720 + i % 80 * 3) * 4:(i // 80 * 720 + i % 80 * 3) * 4 + 3] == b"\xff\x00\xff"]
+        if hit: xs.append(sum(x for x, _ in hit) / len(hit)); hs.append(max(y for _, y in hit) - min(y for _, y in hit))
+    if not xs: return {}
+    side = lambda x: "left" if x < 100 else "right" if x > 156 else "centre"
+    return {"seconds": round(len(where) / 24, 1), "he_stands": sorted({side(x) for x in xs}), "his_size": [round(min(hs) / 128, 2), round(max(hs) / 128, 2)],
+            "drawings_without_him": sum(1 for d in shows if d.startswith(name + "_")) - len(xs)}
+
+
 def pstr(s):
     b = s.encode(); return bytes([len(b)]) + b
 
@@ -249,7 +291,8 @@ def build():
     with open(out_path, "wb") as f:
         f.write(out)
     as_pixels = sorted(d for d, frames in shows.items() if any(not blobs[f][0] for f in frames))
-    return {"frames_rendered": len(where), "unique_frames": len(blobs), "bytes": len(out), "moods": len(moods),
+    return {**({"lint": lint(clip_name, pics, calls, vec, shows, len(out)), "staging": staging(clip_name, pics, shows)} if clip_name else {}),
+            "frames_rendered": len(where), "unique_frames": len(blobs), "bytes": len(out), "moods": len(moods),
             "sequences": len(meta["seqs"]), "kept_as": why,
             "named_drawings": {"total": len(shows), "all_instructions": len(shows) - len(as_pixels), "with_pixel_frames": as_pixels},
             "instruction_bytes": sum(len(b) for k, b in blobs if k),
@@ -365,7 +408,8 @@ if __name__ == "__main__":
             config = {"define": json.load(open(args.define)) if args.define else {}, "only": [name]}
             out_path = args.out or os.path.join(CLIPS, name + ".clip")
             if args.sheet or args.gif: config["tint"] = "#FF7A45"; out_path = args.sheet or args.gif; finish = sheet if args.sheet else gif
-            headless(config, [source(name)] if os.path.exists(source(name)) else [])
+            clip_name = name
+            headless(config, [KIT, source(name)] if os.path.exists(source(name)) else [])
     elif args.bake:
         if args.out: out_path = args.out
         headless({})

@@ -32,7 +32,8 @@ props that move every frame, `raincloud.js` shows him moving about, and `tests_p
 The screen is 240 by 240 with the floor at y = 201. Standing (`D.N`) he spans about x 68 to 187
 and y 70 to 201, with eyes at (116, 110) and (140, 108) and his mouth near (128, 124).
 
-- `xf(base, options)` reshapes an existing drawing. Options: `k` (scale), `kx`, `ky` (stretch),
+- `xf(base, options)` reshapes an existing drawing (stretch, then turn, then scale, then move; the
+  face's marks scale with `k`, and `face: []` leaves him faceless). Options: `k` (scale), `kx`, `ky` (stretch),
   `rot` (radians), `dx`, `dy` (move), all about his feet at (128, 201) unless `ox`, `oy` say
   otherwise; `face` (a new face, in the base drawing's coordinates); `shadowK` (shrink his shadow
   as he leaves the floor); `extra` (props, in screen coordinates, which do not move with him).
@@ -47,6 +48,10 @@ and y 70 to 201, with eyes at (116, 110) and (140, 108) and his mouth near (128,
   `FACE`: `happy` `shock` `spiral` `puff` `ah` `aah` `choo` `sheep` `grump` `cute` `lookup` `lookr`
   `aahEyes` `chooEyes`.
   Keep faces simple (dot eyes, small mouths) and let props sell the gag.
+- Face marks are drawn dark, except `shine` (cream, so a `shine` under a `dot` makes an eye-white)
+  and `blush`. Also `['teeth', x, y, w, h]` and `['lips', x, y, rx, ry]`. `extra: { curl: [...] }`
+  replaces his cowlick, whose tip is at about y 52 standing; `extra: { shadow: [x, radius] }` moves
+  his shadow; `extra: { fx: [x, y] }` moves the marks or z's.
 - Arms: `extra: { arm: [[shoulderX, shoulderY], [handX, handY]], arm2: [...] }`. Left shoulder is
   near (90, 140), right near (166, 140). Arms are drawn before `front`, so a `front` prop covers
   his hands; a prop he should stand in front of goes in `back`.
@@ -61,6 +66,36 @@ and y 70 to 201, with eyes at (116, 110) and (140, 108) and his mouth near (128,
   on him, or use `d.curl[2]` to find the cowlick's tip. `front` draws over his face too.
 - `shadowK: 0` hides his shadow. Whatever is still on screen vanishes when `...DOZE` starts, so
   give a prop its own exit if that matters.
+
+## The kit
+
+`design/clip_kit.js` is loaded before every clip and adds `window.__lump.kit`, so the props and
+helpers clips keep needing aren't rewritten each time:
+
+- `clip(name)` gives `{ add(part, ticks, drawing), done() }`. It names drawings `<name>_<part>`,
+  wraps the sequence in `WAKE` and `DOZE`, and rounds holds so nothing is stored twice.
+- `steps(a, b, n)`: n eased values from a to b, for in-betweens. `pt(o, [x, y])`: where a point on
+  standing Lump lands after `xf(D.N, o)`. `flip(drawing)`: mirrored. `fade(c, alpha, fn)`.
+- `twin(c, drawing, seed, dx, dy)`: another Lump, with whatever face and arms the drawing has.
+  `arm(c, [shoulder, hand], seed)`: a loose arm. Props: `mug`, `steam`, `table`, `balloon`,
+  `sparkle`, `sweat`, `puff`, `room` (a wall, optionally with a picture), and
+  `mark(c, '?' | '!' | 'tick' | 'cross', x, y, size)`.
+- `HOME`, `cam(t, from, to)`: no view, and a view part-way between two others. `iris(c, x, y, r)`:
+  darkness with a round hole. `{ bare: true }` on `clip`: nothing added at either end.
+- Staging: `view(zoom, focus, to)` for `extra: { view }` shows the whole scene closer, further off or
+  shifted; `clip(name, { mirror: true })` flips a clip left to right; `tip(rot)` gives `xf` options that
+  lay him over without burying him; `gone(extra)` is a drawing without him; `walk(from, to, n, o)`
+  gives `xf` options for a waddle across.
+- Faces: `faces.closed wink sad smug worried wide`, and `look(dx, dy, mouth)` for eyes that follow
+  something, with mouth `smile flat frown o open wobble`. The ready-made `FACE` ones are: `happy`
+  (dot eyes, open smile), `shock` (dots, round open mouth), `spiral` (dizzy), `puff` (out of breath),
+  `ah` (eyes shut, brows up, small open mouth), `aah` (eyes squeezed, open mouth), `choo` (eyes
+  screwed up, wide mouth), `sheep` (sheepish), `grump` (angry brows, flat mouth), `cute` (big shiny
+  eyes, blush), `lookup`, `lookr` (looking up, looking right). Dot eyes are radius 3.6 to 4.6;
+  strokes 2.6 to 3 wide.
+- Colours: `CREAM DARK YELLOW RED BROWN GREEN BLUE GREY WHITE`.
+
+Read the file for each one's arguments; they are a line apiece.
 
 ## What the board can draw
 
@@ -91,5 +126,7 @@ curl -X POST --data wave 127.0.0.1:47823/play
 ```
 
 A script error stops the export and prints the message. In the bake's report, `kept_as` should
-show every frame as instructions. The sheet shows every distinct drawing, 24 to a picture: after
+show every frame as instructions. `lint` lists what bakes but wastes space or will look wrong: drawings
+stored twice, colours the board will repaint, props cut off by an edge, a clip that is too big. The sheet shows every stored frame (a held drawing appears up to
+three times, once per wobble), 24 to a picture: after
 `wave.png` come `wave_2.png`, `wave_3.png` and so on.

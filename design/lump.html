@@ -2058,6 +2058,9 @@ function render(c, m, id, tick, opts = {}) {
   const d = D[id], seed = opts.still ? 1 : (Math.floor(tick / 2) % 3) + idSeed(id);
   c.setTransform(1, 0, 0, 1, 0, 0);
   c.fillStyle = lineMode === 'paper' ? '#F4EFE6' : '#000'; c.fillRect(0, 0, 240, 240);
+  if (d.view) {                                 // the whole scene seen closer, further off, shifted or mirrored: [zoom, scene x, scene y, screen x, screen y, mirrored]
+    const [k, fx, fy, tx, ty, flip] = d.view; c.translate(tx, ty); c.scale(flip ? -k : k, k); c.translate(-fx, -fy);
+  }
   // shadow
   c.fillStyle = lineMode === 'paper' ? '#CFC8BC' : 'rgba(255,241,220,.10)';
   c.beginPath(); c.ellipse(d.shadow[0] + 4, 203, d.shadow[1], 6, 0, 0, Math.PI * 2); c.fill();
@@ -2096,6 +2099,7 @@ function render(c, m, id, tick, opts = {}) {
   if (d.front) d.front(c, d, seed, tick);        // ...and in front of him
   if (!opts.noFX) drawFX(c, m, d, tick, seed);
   if (d.boom) drawBoom(c, d, seed);
+  if (d.view) c.setTransform(1, 0, 0, 1, 0, 0);
   // night: the device dims its backlight instead, so baked frames skip this
   if (m === 'night' && opts.dim !== false && lineMode === 'glow') { c.fillStyle = 'rgba(0,0,0,.45)'; c.fillRect(0, 0, 240, 240); }
 }
@@ -2273,7 +2277,7 @@ setLabT(0);
 window.__lump = {
   render, fxFor, at, atSeq, seqLen, LOOPS, TRANS, CLIPS, MOMENTS, D,
   // for clips (design/clips/*.js), which add drawings made with the page's own helpers
-  xf, FACE, WAKE, DOZE, boil, openPath, closedPath, inkStroke, hash, mixHex, ink, tint: () => tint,
+  xf, FACE, WAKE, DOZE, boil, openPath, closedPath, inkStroke, drawFace, hash, mixHex, ink, tint: () => tint,
   meta: () => ({
     moments: MOMENTS.map(m => ({ name: m, base: MOMENTS.indexOf(BASE[m]) })),
     seqs: [
