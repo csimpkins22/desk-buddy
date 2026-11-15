@@ -85,6 +85,7 @@ recolours them, so avoid those. For something that should match his body, use `t
 
 ```bash
 python3 tools/export_frames.py --clip wave --sheet design/clips/previews/wave.png   # every drawing, side by side
+python3 tools/export_frames.py --clip wave --gif design/clips/previews/wave.gif     # the whole clip, moving (needs ffmpeg)
 python3 tools/export_frames.py --clip wave                                          # bake ~/.desk-buddy/clips/wave.clip
 curl -X POST --data wave 127.0.0.1:47823/play
 ```

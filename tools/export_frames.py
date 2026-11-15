@@ -280,6 +280,14 @@ def sheet():
     return {"drawings": len(order), "ticks": len(where), "seconds": round(len(where) / 24, 1), "out": outs}
 
 
+def gif():
+    """Instead of baking: the sequences played through once as an animated GIF (needs ffmpeg)."""
+    raw = b"".join(units[where[(s["key"], t)]][0] for s in meta["seqs"] for t in sorted(t for (k, t) in where if k == s["key"]))
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgba", "-s", "240x240", "-r", "24", "-i", "-",
+                    "-vf", "split[a][b];[a]palettegen[p];[b][p]paletteuse=dither=none", out_path], input=raw, check=True)
+    return {"ticks": len(where), "seconds": round(len(where) / 24, 1), "bytes": os.path.getsize(out_path), "out": out_path}
+
+
 finish = build
 
 
@@ -344,6 +352,7 @@ if __name__ == "__main__":
     ap.add_argument("--bake", action="store_true", help="bake everything into firmware/data/lump.bin with headless Chrome")
     ap.add_argument("--clip", metavar="NAME", help="bake only the sequences called NAME or NAME_*, as a clip ('all': every design/clips/*.js)")
     ap.add_argument("--sheet", metavar="PNG", help="with --clip: save its drawings as one picture instead of baking")
+    ap.add_argument("--gif", metavar="GIF", help="with --clip: save it as an animated GIF instead of baking")
     ap.add_argument("--define", metavar="JSON", help="a file of extra sequences made from existing drawings")
     ap.add_argument("--out", help="where to write (default: lump.bin, or ~/.desk-buddy/clips/NAME.clip)")
     args = ap.parse_args()
@@ -353,7 +362,7 @@ if __name__ == "__main__":
         for name in names:
             config = {"define": json.load(open(args.define)) if args.define else {}, "only": [name]}
             out_path = args.out or os.path.join(CLIPS, name + ".clip")
-            if args.sheet: config["tint"] = "#FF7A45"; out_path = args.sheet; finish = sheet
+            if args.sheet or args.gif: config["tint"] = "#FF7A45"; out_path = args.sheet or args.gif; finish = sheet if args.sheet else gif
             headless(config, [source(name)] if os.path.exists(source(name)) else [])
     elif args.bake:
         if args.out: out_path = args.out

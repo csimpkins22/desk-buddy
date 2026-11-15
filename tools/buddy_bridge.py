@@ -145,7 +145,11 @@ CLIP_SETS = {
              "paddle_rally", "falling_blocks", "brick_breaker", "snake_tail", "maze_chase", "descending_rows", "road_crossing",
              "block_bonk", "barrel_ladders", "rock_field", "cave_dig", "battle_menu", "health_bars", "kart_drift", "extra_life",
              "bow_of_the_ship", "boulder_run", "moon_bike", "rain_dance", "bullet_lean", "wire_drop", "cub_lift", "stair_run",
-             "water_ripple", "floor_piano", "balloon_house", "shared_noodle", "boombox", "tower_climb", "crane_pose"],
+             "water_ripple", "floor_piano", "balloon_house", "shared_noodle", "boombox", "tower_climb", "crane_pose",
+             "this_is_fine", "distracted", "nope_yep", "dinner_standoff", "obvious_outcome", "big_brain", "line_goes_up", "is_this",
+             "two_buttons", "change_my_mind", "think_about_it", "take_my_money", "sip_tea", "rainbow_flight", "keyboard_solo",
+             "dramatic_turn", "deal_with_it", "table_flip", "pointing_twins", "hedge_retreat", "fits_sits", "shelf_push", "cucumber",
+             "panic_calm", "bottle_flip"],
 }
 CLIP_HOURS = [("morning_stretch", 6, 9.5), ("coffee", 7, 11), ("lunch", 12, 13.5), ("afternoon_slump", 14.5, 16),    # once a day each, the
               ("golden_hour", 17, 18.5), ("clock_out", 17.5, 20), ("night_light", 20, 22), ("midnight_snack", 22, 24)]  # first time you're around
