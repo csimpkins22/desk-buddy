@@ -1100,7 +1100,7 @@ function at(m, tick) { // which exposure-sheet entry is showing on this frame
 }
 
 /* ---------- rendering ---------- */
-let tint = '#FF7A45', lineMode = 'glow', workProp = 'lap3d-60', smudgeCv = null;
+let tint = '#FF7A45', lineMode = 'glow', workProp = 'lap3d-60';
 const ink = () => lineMode === 'glow' ? '#FFF1DC' : '#17161A';
 
 // Move/scale/rotate a drawing: k scales about (ox, oy), rot turns about it, then shift by (dx, dy).
@@ -1837,9 +1837,10 @@ function drawFrontProps(c, d, seed, tick) {
     c.restore();
   }
   if (d.smudge) {                               // face smudge left on the glass: [x0, x1, y0, y1, alpha]; d.wiped: [x, y, r] spots wiped clean
-    const [x0, x1, y0, y1, a] = d.smudge, out = c;
-    if (d.wiped) { smudgeCv = smudgeCv || document.createElement('canvas'); smudgeCv.width = smudgeCv.height = 240; c = smudgeCv.getContext('2d'); c.lineCap = c.lineJoin = 'round'; }
+    const [x0, x1, y0, y1, a] = d.smudge;
     c.save(); c.fillStyle = L; c.strokeStyle = L;
+    // the wiped spots: clip to everything outside each one in turn, so the smudge can't be drawn there
+    (d.wiped || []).forEach(([x, y, r]) => { c.beginPath(); c.rect(0, 0, 240, 240); c.arc(x, y, r, 0, Math.PI * 2, true); c.clip(); });
     const P = [], n = Math.max(2, Math.round((y1 - y0) / 20));
     for (let i = 0; i <= n; i++) { const y = y0 + (y1 - y0) * i / n; P.push([x1 + Math.sin(i * 1.7) * 5, y]); }
     for (let i = n; i >= 0; i--) { const y = y0 + (y1 - y0) * i / n; P.push([x0 + Math.sin(i * 2.3) * 5, y]); }
@@ -1847,11 +1848,6 @@ function drawFrontProps(c, d, seed, tick) {
     c.globalAlpha = a; c.lineWidth = 2;
     for (let i = 1; i < 4; i++) { const x = x0 + (x1 - x0) * i / 4; openPath(c, boil([[x, y0 + 14], [x + 2, (y0 + y1) / 2], [x - 1, y1 - 10]], seed + 44 + i, 2)); c.stroke(); }
     c.restore();
-    if (d.wiped) {
-      c.globalCompositeOperation = 'destination-out'; c.fillStyle = '#000';
-      d.wiped.forEach(([x, y, r]) => { c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); });
-      c = out; c.drawImage(smudgeCv, 0, 0); c.strokeStyle = L; c.fillStyle = L;
-    }
   }
   if (d.arm) {                                 // a stubby little arm: [shoulder, hand]
     const [[x0, y0], [x1, y1]] = d.arm, a = Math.atan2(y1 - y0, x1 - x0), len = Math.hypot(x1 - x0, y1 - y0);
@@ -2139,6 +2135,7 @@ function render(c, m, id, tick, opts = {}) {
   c.fillStyle = lineMode === 'paper' ? '#CFC8BC' : 'rgba(255,241,220,.10)';
   c.beginPath(); c.ellipse(d.shadow[0] + 4, 203, d.shadow[1], 6, 0, 0, Math.PI * 2); c.fill();
   drawBackProps(c, d, seed, tick);
+  if (d.back) d.back(c, d, seed, tick);          // a clip's own drawing behind him (design/clips/*.js)
   const body = boil(d.body, seed, 2.2);
   // off-register fill
   c.save(); c.translate(4, 2.5); closedPath(c, boil(d.body, seed + 50, 2.2), d.corners); c.fillStyle = d.soot ? '#3B342E' : d.inverse ? '#000' : tint; c.fill(); c.restore();
@@ -2169,6 +2166,7 @@ function render(c, m, id, tick, opts = {}) {
   if (d.blanketFly) drawBlanketFly(c, d, seed);
   drawFace(c, d, seed);
   drawFrontProps(c, d, seed, tick);
+  if (d.front) d.front(c, d, seed, tick);        // ...and in front of him
   if (!opts.noFX) drawFX(c, m, d, tick, seed);
   if (d.boom) drawBoom(c, d, seed);
   // night: the device dims its backlight instead, so baked frames skip this
@@ -2347,6 +2345,8 @@ setLabT(0);
 // Hook for tools/export_frames.py: renders the exact frames the device plays.
 window.__lump = {
   render, fxFor, at, atSeq, seqLen, LOOPS, TRANS, CLIPS, MOMENTS, D,
+  // for clips (design/clips/*.js), which add drawings made with the page's own helpers
+  xf, FACE, WAKE, DOZE, boil, openPath, closedPath, inkStroke, hash, mixHex, ink, tint: () => tint,
   meta: () => ({
     moments: MOMENTS.map(m => ({ name: m, base: MOMENTS.indexOf(BASE[m]) })),
     seqs: [

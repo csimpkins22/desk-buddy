@@ -18,6 +18,9 @@ enclosure/previews/box.png
 enclosure/previews/section.png
 enclosure/previews/back_notch.png
 
+# regenerable from the clip scripts (tools/export_frames.py --clip <name> --sheet ...)
+design/clips/previews/
+
 # working notes between Claude sessions: local only
 HANDOFF.md
 

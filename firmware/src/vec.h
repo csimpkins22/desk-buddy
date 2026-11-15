@@ -23,6 +23,7 @@ struct State {
   float lineWidth = 1, dash[MAX_DASH], dashOff = 0;
   uint8_t alpha = 255, nDash = 0;
   int8_t clip = -1;
+  bool ownClip = false;                // the clip mask was made since the last save, so it can be cut into in place
 };
 
 struct Canvas {
@@ -55,7 +56,7 @@ struct Canvas {
         case 11: fill(); break;
         case 12: stroke(); break;
         case 13: clip(); break;
-        case 14: if (sp < MAX_STATES) stack[sp++] = st; else overflow = true; break;
+        case 14: if (sp < MAX_STATES) { stack[sp++] = st; st.ownClip = false; } else overflow = true; break;
         case 15: if (sp > 0) { st = stack[--sp]; clipTop = st.clip + 1; } break;
         case 16: { float x = px(), y = px(); st.e += st.a * x + st.c * y; st.f += st.b * x + st.d * y; break; }
         case 17: { float t = ang(), cs = cosf(t), sn = sinf(t), a = st.a, b = st.b;
@@ -69,6 +70,7 @@ struct Canvas {
         case 24: { int n = *p++; st.nDash = 0; for (int i = 0; i < n; i++) { float v = u16() / 16.f; if (i < MAX_DASH) st.dash[st.nDash++] = v; } break; }
         case 25: { float x = px(), y = px(), w = px(), h = px(), r = px(); roundRect(x, y, w, h, r); break; }
         case 26: st.dashOff = px(); break;
+        case 27: clip(true); break;
         default: overflow = true; return;                 // unknown instruction: stop rather than misread the rest
       }
     }
@@ -115,8 +117,8 @@ struct Canvas {
   static int steps(float n) { return n < 1 ? 1 : n > 40 ? 40 : int(ceilf(n)); }
   void arc(float cx, float cy, float rx, float ry, float rot, float a0, float a1, bool ccw) {
     float sweep = a1 - a0, two = 2 * PI_F;
-    if (!ccw) { if (sweep >= two) sweep = two; else { sweep = fmodf(sweep, two); if (sweep < 0) sweep += two; } }
-    else { if (sweep <= -two) sweep = -two; else { sweep = fmodf(sweep, two); if (sweep > 0) sweep -= two; } }
+    if (!ccw) { if (sweep >= two) sweep = two; else if (sweep < 0) sweep = fmodf(sweep, two) + two; }       // as the canvas has it
+    else { if (sweep <= -two) sweep = -two; else if (sweep > 0) sweep = fmodf(sweep, two) - two; }
     float r = fmaxf(rx, ry) * scale();
     int n = r <= TOL * 1.5f ? 3 : int(ceilf(fabsf(sweep) / (2 * acosf(1 - TOL / r))));
     n = n < 2 ? 2 : n > 96 ? 96 : n;
@@ -183,8 +185,9 @@ struct Canvas {
     r += ((c[0] - r) * k) >> 8; g += ((c[1] - g) * k) >> 8; b += ((c[2] - b) * k) >> 8;
     *dst = sw(uint16_t(((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3)));
   }
-  // Turn the accumulated edges into pixels of one colour (or into a clip mask), and leave acc zeroed.
-  void paint(const uint8_t* col, uint8_t* mask = nullptr, const uint8_t* maskIn = nullptr) {
+  // Turn the accumulated edges into pixels of one colour (or into a clip mask, or with cut, out of
+  // one), and leave acc zeroed.
+  void paint(const uint8_t* col, uint8_t* mask = nullptr, const uint8_t* maskIn = nullptr, bool cut = false) {
     if (maxY < minY || maxX < 0) return;
     float op = col ? col[3] * st.alpha / 255.f : 255.f;
     const uint8_t* cm = (col && st.clip >= 0) ? clips[st.clip] : maskIn;
@@ -195,6 +198,8 @@ struct Canvas {
         if (x >= W) continue;
         float cov = fabsf(s); if (cov < 0.004f) continue;
         uint32_t a = uint32_t((cov > 1 ? 1 : cov) * op + 0.5f);
+        if (!col && !mask) continue;
+        if (cut) { uint8_t& m = mask[y * W + x]; m = uint8_t(m * (255 - a) / 255); continue; }
         if (cm) a = a * cm[y * W + x] / 255;
         if (!a) continue;
         if (mask) mask[y * W + x] = uint8_t(a); else blend(fb + y * W + x, col, a);
@@ -218,11 +223,14 @@ struct Canvas {
     }
     resetBounds(); edge(a, b); edge(b, c); edge(c, d); edge(d, a); paint(st.fill);
   }
-  void clip() {
-    if (clipTop >= MAX_CLIPS || !clips[clipTop]) { overflow = true; return; }
-    uint8_t* m = clips[clipTop]; memset(m, 0, W * H);
-    resetBounds(); outline(); paint(nullptr, m, st.clip >= 0 ? clips[st.clip] : nullptr);
-    st.clip = int8_t(clipTop++);
+  void clip(bool outside = false) {                  // outside: keep what is not in the path
+    resetBounds(); outline();
+    if (outside && st.ownClip) { paint(nullptr, clips[st.clip], nullptr, true); return; }
+    if (clipTop >= MAX_CLIPS || !clips[clipTop]) { overflow = true; paint(nullptr, nullptr); return; }
+    uint8_t* m = clips[clipTop]; const uint8_t* was = st.clip >= 0 ? clips[st.clip] : nullptr;
+    if (!outside) { memset(m, 0, W * H); paint(nullptr, m, was); }
+    else { if (was) memcpy(m, was, W * H); else memset(m, 255, W * H); paint(nullptr, m, nullptr, true); }
+    st.clip = int8_t(clipTop++); st.ownClip = true;
   }
 
   // ---- strokes: every segment becomes a rectangle and every end or corner a disc, all wound the

@@ -112,6 +112,43 @@ HEARTBEAT_EVERY = 15
 NET_PORT = 4210                                    # the board's command port on Wi-Fi (tools/wifi_setup.py)
 STATE_FILE = os.path.join(HOME, "state.json")     # sessions etc. survive a bridge restart
 CLIPS_DIR = os.path.join(HOME, "clips")           # extra animations sent to him over Wi-Fi when asked for (<name>.clip)
+# Clips he plays unprompted. These tables say what sets one off; a clip that isn't in CLIPS_DIR is
+# skipped. He plays at most one every CLIP_GAP seconds, none at night or at a meeting alarm, and while
+# something needs you only the "waiting" ones. config.json: "auto_clips": false turns all of it off.
+# While he's idle he does one thing about every IDLE_EVERY seconds: an idle clip if you're around,
+# otherwise one of his own fidgets (the board leaves fidgeting to the bridge while it's connected).
+CLIP_GAP = 120
+IDLE_EVERY = (50, 70)
+FIDGETS = ["fidget_toss", "fidget_twitch", "fidget_bubble"]
+CLIP_EVERY = {"done": 10 * 60, "waiting": 3 * 60, "limit": 60 * 60}    # least time between two of a kind
+CLIP_COMMANDS = [                       # a Bash command Claude ran: (pattern, clip if it worked, clip if it failed)
+    (r"\b(pytest|unittest|jest|vitest|mocha|rspec|phpunit|go test|cargo test|swift test|ctest|(npm|pnpm|yarn|bun)( run)? test|make (test|check))\b", "tests_pass", "tests_fail"),
+    (r"\bgit push\b", "git_push", None),
+    (r"\bgit (merge|rebase|pull|cherry-pick)\b", None, "merge_conflict"),
+    (r"\bgit (revert|reset|restore)\b", "rollback", None),
+    (r"\b(eslint|ruff|flake8|pylint|clippy|rubocop|shellcheck|prettier|(npm|pnpm|yarn|bun) run lint)\b", "lint_fluff", None),
+    (r"\b(deploy|kubectl apply|terraform apply|ota\.py)\b", "deploy_lever", None),
+    (r"\b((npm|pnpm|yarn|bun) run build|cargo build|go build|pio run|xcodebuild|docker build|tsc)\b", "build_bike", None),
+]
+CLIP_SETS = {
+    "waiting": ["polite_cough", "sign_spinner", "semaphore", "paper_note", "doorbell", "tin_can_phone", "hourglass", "flare_gun",
+                "bottle_message", "tumbleweed"],
+    "done": ["confetti_cannon", "trophy", "mic_drop", "fireworks", "victory_lap", "crowd_surf", "medal", "champagne", "pinata", "slow_clap"],
+    "meeting": ["tie_panic", "mute_button", "stand_up", "screen_share", "ringing_phone"],
+    "slack": ["carrier_pigeon", "mailbox"],
+    "tap": ["jelly_wobble", "whack_a_mole", "trapdoor", "jack_in_the_box", "magnet", "tuning_fork", "bowling_pin", "hiccups", "pinball", "fortune"],
+    "idle": ["shadow_puppets", "knitting", "card_house", "hula_hoop", "spinning_plate", "sock_puppet", "dandelion", "yoyo", "bubblegum",
+             "juggle", "counting_sheep", "dream_bubble", "calendar_avalanche", "sticky_notes", "raincloud", "snow_globe", "sunburn",
+             "windy", "autumn_leaves", "snowman", "puddle", "rainbow", "thunder", "heatwave", "rubber_duck", "magnifying_glass", "wrench",
+             "vacuum", "paint_roller", "telescope", "typewriter", "umbrella", "fishing_rod", "jetpack", "clone", "gravity_off",
+             "shrink_ray", "portal", "origami", "taffy_stretch", "bubble_wrap", "rocket_launch", "invisible_box", "curtain_call",
+             "paddle_rally", "falling_blocks", "brick_breaker", "snake_tail", "maze_chase", "descending_rows", "road_crossing",
+             "block_bonk", "barrel_ladders", "rock_field", "cave_dig", "battle_menu", "health_bars", "kart_drift", "extra_life",
+             "bow_of_the_ship", "boulder_run", "moon_bike", "rain_dance", "bullet_lean", "wire_drop", "cub_lift", "stair_run",
+             "water_ripple", "floor_piano", "balloon_house", "shared_noodle", "boombox", "tower_climb", "crane_pose"],
+}
+CLIP_HOURS = [("morning_stretch", 6, 9.5), ("coffee", 7, 11), ("lunch", 12, 13.5), ("afternoon_slump", 14.5, 16),    # once a day each, the
+              ("golden_hour", 17, 18.5), ("clock_out", 17.5, 20), ("night_light", 20, 22), ("midnight_snack", 22, 24)]  # first time you're around
 # Slack, polled with your user token (see class SlackWatch). config.json: "slack_token" (xoxp-..., never
 # logged), "slack_vips" (names as Slack shows them), optional "slack_vip_minutes" (how long a letter lasts).
 SLACK_EVERY = 20                        # seconds between polls
@@ -127,6 +164,19 @@ _h.setFormatter(logging.Formatter("%(asctime)s %(message)s"))
 log.addHandler(_h)
 if sys.stderr.isatty():          # under launchd stderr is bridge.out, which only needs crashes
     log.addHandler(logging.StreamHandler())
+
+
+def command_clip(cmd, worked, payload):
+    """The clip that goes with a Bash command Claude just ran, if there is one."""
+    if re.search(r"\b(pip3?|brew|npm|pnpm|yarn|bun|cargo|apt(-get)?) (install|add|i)\b", cmd):
+        return None
+    if worked and re.search(r"\bgit (diff|show)\b", cmd) and len(json.dumps(payload.get("tool_response") or "")) > 20000:
+        return "big_diff"
+    for pattern, good, bad in CLIP_COMMANDS:
+        if re.search(pattern, cmd):
+            name = good if worked else bad
+            return None if name == "merge_conflict" and "conflict" not in json.dumps(payload).lower() else name
+    return None
 
 
 def clip_names():
@@ -236,7 +286,7 @@ class Device:
                     # board rebooted, or it had given up on us (no heartbeat) and gone its own way
                     if "lump ready" in text or text == "resync":
                         self._call(self.on_ready)
-                    elif (text == "tap" or text.startswith(("gag ", "clip gone "))) and self.on_line:
+                    elif (text == "tap" or text.startswith(("gag ", "clip gone ", "tapclip "))) and self.on_line:
                         self._call(self.on_line, text)
                     elif text == "err pairing":
                         log.info("the board refused our pairing token: run tools/wifi_setup.py again")
@@ -649,6 +699,11 @@ class Buddy:
         self.letters = {}                         # Slack: VIP DMs you haven't read, channel -> {"from", "ts", "since"}
         self.last_plane = 0.0
         self.clips_sent = {}                      # clip name -> file time of the copy the board has
+        self.last_clip, self.clip_kind, self.recent_clips = 0.0, {}, []    # clips played unprompted: when, by kind, which
+        self.clip_days = {}                       # time-of-day clip -> the day it last played
+        self.meeting_clipped = set()              # meeting starts and ends he's already done a clip for
+        self.taps_loaded = 0.0
+        self.next_idle = time.time() + random.uniform(*IDLE_EVERY)
         self.load_state()
         self.dev = dev or Device(self.resend, self.board_line)
         if start:
@@ -663,7 +718,7 @@ class Buddy:
                 "usage": self.usage, "last_event": self.last_event, "last_active": self.last_active,
                 "goodnight_night": self.goodnight_night,
                 "meeting_dismissed": sorted(self.meeting_dismissed), "meeting_alerted": sorted(self.meeting_alerted),
-                "letters": self.letters}
+                "letters": self.letters, "clip_days": self.clip_days}
 
     def save_state(self):
         with self.lock:
@@ -694,6 +749,7 @@ class Buddy:
         self.meeting_dismissed = set(st.get("meeting_dismissed") or [])
         self.meeting_alerted = set(st.get("meeting_alerted") or [])
         self.letters = {k: v for k, v in (st.get("letters") or {}).items() if isinstance(v, dict) and v.get("since")}
+        self.clip_days = st.get("clip_days") or {}
         log.info("restored %d session(s) from %s", len(self.sessions), STATE_FILE)
 
     # ---- session bookkeeping ----
@@ -746,7 +802,13 @@ class Buddy:
                 else:
                     event = None
             log.info("hook %s %s%s -> %s", ev, sid[:8], "" if s.get("account", PERSONAL) == PERSONAL else " (%s)" % s["account"], state or "-")
-        if event:
+        clip = None
+        if ev in ("PostToolUse", "PostToolUseFailure") and p.get("tool_name") == "Bash":
+            name = command_clip((p.get("tool_input") or {}).get("command") or "", ev == "PostToolUse", p)
+            clip = name and self.auto_clip("command", [name])
+        elif ev == "Stop":
+            clip = self.auto_clip("done", CLIP_SETS["done"])
+        if event and not (clip and event == "oops"):    # a clip about the failure stands in for the plain "oops"
             self.event(event)
             self.sound({"hello": "hello", "oops": "uh_oh"}[event])
         self.update()
@@ -821,6 +883,8 @@ class Buddy:
                 return False
             self.last_plane = now
         log.info("slack: %s from %s -> plane", kind, sender)
+        if clip_names() and random.random() < 0.34 and self.auto_clip("slack", CLIP_SETS["slack"]):
+            return True
         return self.event("tap_plane")
 
     def _set(self, s, state, now):
@@ -853,6 +917,8 @@ class Buddy:
             self.gag_sound(text[4:].strip())
         elif text.startswith("clip gone "):          # he made room for a newer clip: send this one again when it's next asked for
             self.clips_sent.pop(text[10:].strip(), None)
+        elif text.startswith("tapclip "):            # a tap set off one of the clips, which ends asleep: put his mood back after it
+            self.resync_at = time.time() + 8
 
     def gag_sound(self, event):
         """A gag just started on the board: its sound, unless it's night and you've not been around
@@ -947,13 +1013,15 @@ class Buddy:
         # just been up to something (or you have): plain sleep for a few minutes, then the blanket comes up
         return "idle" if now - max(self.last_up, self.last_active) < NIGHT_SETTLE else "night"
 
-    def next_meeting(self, now):
+    def meetings(self):
         try:
             with open(MEETINGS_FILE) as f:
-                ms = json.load(f)
+                return json.load(f)
         except Exception:
-            return None
-        live = [m for m in ms if m.get("start") and now < m["start"] + MEETING_HOLD]
+            return []
+
+    def next_meeting(self, now):
+        live = [m for m in self.meetings() if m.get("start") and now < m["start"] + MEETING_HOLD]
         return min(live, key=lambda m: m["start"]) if live else None
 
     def mood_locked(self, now):
@@ -1048,10 +1116,17 @@ class Buddy:
         if changed:
             log.info("usage %s", {k: round(v["pct"]) for k, v in self.usage.items()})
         self.update()
+        with self.lock:
+            frac = self.usage_frac(time.time())
+        if frac is not None and frac >= 0.97:
+            self.auto_clip("limit", ["rate_limited"])
 
     def resend(self):
         self.sent_mood = self.sent_overlay = self.sent_colour = self.sent_prep = None
         self.clips_sent = {}                            # he may have restarted, and clips don't survive that
+        if time.time() - self.taps_loaded > 60:
+            self.taps_loaded = time.time()
+            threading.Thread(target=self.load_tap_clips, daemon=True).start()
         self.last_beat = 0.0                            # and tell him the time straight away
         if time.time() - self.woke_at > 60:            # board plugged in or restarted
             self.woke_at = time.time()
@@ -1085,6 +1160,7 @@ class Buddy:
     def event(self, name):
         # an event plays in its home mood (oops: working, hello: idle); the board walks
         # there by itself, so re-assert our mood once it has finished
+        self.next_idle = time.time() + random.uniform(*IDLE_EVERY)      # whatever it is, it counts as his thing for this minute
         if self.dev.send("e " + name):
             self.resync_at = time.time() + 8
             return True
@@ -1104,7 +1180,67 @@ class Buddy:
         log.info("play: %s", name)
         return self.event(ev)
 
-    def send_clip(self, name):
+    def auto_clip(self, kind, names):
+        """Play one of these clips unprompted, if this is a moment for it. Returns the one chosen, or None."""
+        now = time.time()
+        have = [n for n in names if n in clip_names()]
+        if not have or read_config().get("auto_clips") is False or not self.dev.connected:
+            return None
+        with self.lock:
+            mood = self.mood_locked(now)
+            if (now - self.last_clip < CLIP_GAP or now - self.clip_kind.get(kind, 0) < CLIP_EVERY.get(kind, 0)
+                    or mood in ("night", "meeting") or (mood == "alert" and kind != "waiting")):
+                return None
+            name = random.choice([n for n in have if n not in self.recent_clips] or have)
+            self.last_clip = self.clip_kind[kind] = now
+            self.recent_clips = (self.recent_clips + [name])[-20:]
+        log.info("clip (%s): %s", kind, name)
+        threading.Thread(target=self.play, args=(name,), daemon=True).start()    # sending it can take a second or two
+        return name
+
+    def clip_tick(self, now):
+        """Clips that come from time passing: you've kept him waiting, the time of day, a meeting coming or over."""
+        with self.lock:
+            waiting = any(s["state"] == "alert" and now - s["t"] >= 60 and self._effective(s, now) == "alert" for s in self.sessions.values())
+            around = now - self.last_active < 30 * 60
+        if waiting:
+            self.auto_clip("waiting", CLIP_SETS["waiting"])
+            return
+        for m in self.meetings():
+            start, end = m.get("start"), m.get("end")
+            if start and 0 < start - now < MEETING_LEAD and start not in self.meeting_clipped:
+                if self.auto_clip("meeting", CLIP_SETS["meeting"]): self.meeting_clipped.add(start)
+            elif end and 0 <= now - end < 180 and end not in self.meeting_clipped:
+                if self.auto_clip("meeting", ["meeting_over"]): self.meeting_clipped.add(end)
+        if around:
+            lt = time.localtime(now); hour, today = lt.tm_hour + lt.tm_min / 60, time.strftime("%Y-%m-%d", lt)
+            for name, h0, h1 in CLIP_HOURS:
+                if h0 <= hour < h1 and self.clip_days.get(name) != today:
+                    if self.auto_clip("hour", [name]): self.clip_days[name] = today
+                    break
+        # idle: one animation about every minute, counted from his last one
+        with self.lock:
+            idle = self.mood_locked(now) == "idle"
+            if not idle:
+                self.next_idle = now + random.uniform(*IDLE_EVERY)
+            if not idle or now < self.next_idle:
+                return
+            self.next_idle = now + random.uniform(*IDLE_EVERY)
+            pool = [n for n in CLIP_SETS["idle"] if n in clip_names()] if around and read_config().get("auto_clips") is not False else []
+            name = random.choice([n for n in pool + FIDGETS if n not in self.recent_clips] or FIDGETS)
+            self.recent_clips = (self.recent_clips + [name])[-20:]
+        log.info("idle: %s", name)
+        threading.Thread(target=self.play, args=(name,), daemon=True).start()
+
+    def load_tap_clips(self):
+        """Give him the tap reactions to keep, so a tap on the glass can pick one of those as well as his own gags."""
+        if read_config().get("auto_clips") is False:
+            return
+        for name in CLIP_SETS["tap"]:
+            if name in clip_names() and not self.send_clip(name, tap=True):
+                break
+
+    def send_clip(self, name, tap=False):
         """Give the board a clip over Wi-Fi (it keeps clips in RAM, so again after it restarts or the file changes)."""
         path = os.path.join(CLIPS_DIR, name + ".clip")
         stamp = os.path.getmtime(path)
@@ -1118,7 +1254,7 @@ class Buddy:
                 data = f.read()
             req = urllib.request.Request(f"http://{ip}/clip", data=data, method="POST", headers={
                 "X-Lump-Token": cfg.get("lump_token", ""), "X-Lump-Size": str(len(data)), "X-Lump-Name": name,
-                "Content-Type": "application/octet-stream"})
+                "X-Lump-Tap": "1" if tap else "0", "Content-Type": "application/octet-stream"})
             t0 = time.time()
             urllib.request.urlopen(req, timeout=20).read()
         except Exception as e:
@@ -1148,6 +1284,8 @@ class Buddy:
                 self.last_beat = now
         try: self.sound_tick(now)
         except Exception: log.exception("sound tick failed")
+        try: self.clip_tick(now)
+        except Exception: log.exception("clip tick failed")
         try: self.save_state()
         except Exception: log.exception("saving %s failed", STATE_FILE)
 

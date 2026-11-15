@@ -7,7 +7,8 @@
                                                           # first: it adds the clip's drawings and its sequence
     python3 tools/export_frames.py --clip all             # every design/clips/*.js
     python3 tools/export_frames.py --clip encore --sheet encore.png
-                                                          # don't bake: save its drawings side by side to look at
+                                                          # don't bake: save its drawings side by side to look at,
+                                                          # 24 to a picture (encore.png, encore_2.png, ...)
     python3 tools/export_frames.py --clip encore --define my_clips.json
                                                           # ...where the JSON adds sequences built from his
                                                           # existing drawings: {"encore": {"home": "idle", "seq": [["S1", 4], ...]}}
@@ -30,7 +31,7 @@ lump.bin layout (little-endian), version 4:
               an instruction frame is u16 length, then the instructions (see encode())
 A clip is the same layout holding only its own sequences and frames.
 """
-import argparse, glob, hashlib, http.server, json, os, re, shutil, socket, struct, subprocess, sys, tempfile, threading, zlib
+import argparse, glob, hashlib, http.server, json, math, os, re, shutil, socket, struct, subprocess, sys, tempfile, threading, zlib
 from urllib.parse import urlparse, parse_qs
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -44,6 +45,7 @@ MAX_MEAN, MAX_FAR = 2.0, 300      # an instruction frame may differ from the bro
 
 units = {}    # frame id -> (rgba bytes, canvas calls)
 where = {}    # (sequence key, tick) -> frame id
+named = {}    # (sequence key, tick) -> the named drawing shown there
 meta = {}
 done = threading.Event()
 result = {}
@@ -63,7 +65,7 @@ EXPORT_JS = r"""
   let ops = [];
   const rec = new Proxy(c, {
     get(t, p) { const v = t[p]; if (typeof v !== 'function') return v;
-      return (...a) => { ops.push([p, ...a.map(x => (typeof x === 'number' || typeof x === 'string' || Array.isArray(x)) ? x : null)]); return v.apply(t, a); }; },
+      return (...a) => { ops.push([p, ...a.map(x => (typeof x === 'number' || typeof x === 'string' || typeof x === 'boolean' || Array.isArray(x)) ? x : null)]); return v.apply(t, a); }; },
     set(t, p, v) { t[p] = v; ops.push(['=' + p, (p === 'fillStyle' || p === 'strokeStyle') ? t[p] : v]); return true; }
   });
   const meta = L.meta();
@@ -79,8 +81,9 @@ EXPORT_JS = r"""
              ['=globalAlpha', c.globalAlpha], ['setLineDash', c.getLineDash()], ['=lineDashOffset', c.lineDashOffset]];
       L.render(rec, s.kind === 0 ? s.key : L.fxFor(a.id), a.id, t, { dim: false });
       const calls = JSON.stringify(ops), q = `seq=${encodeURIComponent(s.key)}&tick=${t}`, was = seen.get(calls);
-      if (was !== undefined && !calls.includes('"drawImage"')) await fetch(`/same?${q}&as=${was}`, { method: 'POST' });   // same calls, same picture
-      else { seen.set(calls, n); await fetch(`/frame?${q}&id=${n}`, { method: 'POST', body: new Blob([c.getImageData(0, 0, 240, 240).data, calls]) }); }
+      const q2 = q + '&d=' + encodeURIComponent(a.id);
+      if (was !== undefined && !calls.includes('"drawImage"')) await fetch(`/same?${q2}&as=${was}`, { method: 'POST' });   // same calls, same picture
+      else { seen.set(calls, n); await fetch(`/frame?${q2}&id=${n}`, { method: 'POST', body: new Blob([c.getImageData(0, 0, 240, 240).data, calls]) }); }
       n++;
     }
   }
@@ -111,6 +114,7 @@ OP = {"beginPath": 1, "closePath": 2, "moveTo": 3, "lineTo": 4, "quadraticCurveT
       "ellipse": 8, "rect": 9, "fillRect": 10, "fill": 11, "stroke": 12, "clip": 13, "save": 14, "restore": 15,
       "translate": 16, "rotate": 17, "scale": 18, "setTransform": 19, "=fillStyle": 20, "=strokeStyle": 21,
       "=lineWidth": 22, "=globalAlpha": 23, "setLineDash": 24, "roundRect": 25, "=lineDashOffset": 26}
+CLIP_OUT = 27     # keep what is outside the path. The canvas has no such call: see hole()
 # every stroke is drawn with round ends and corners, which is all his drawings use bar a few pointed corners
 SAME = {"=lineCap": ("round",), "=lineJoin": ("round", "miter"), "=globalCompositeOperation": ("source-over",)}
 
@@ -126,11 +130,42 @@ def colour(s):
     return bytes([int(p[0]), int(p[1]), int(p[2]), round((p[3] if len(p) > 3 else 1) * 255)])
 
 
+def turn(a):
+    """An angle brought within half a turn of zero, so any amount of spinning fits in 16 bits."""
+    return (a + math.pi) % math.tau - math.pi
+
+
+def arc_angles(a0, a1, anticlockwise):
+    """The same arc as the canvas would draw, with both angles within one turn of zero."""
+    d = a1 - a0
+    if anticlockwise: d = -math.tau if d <= -math.tau else d % math.tau - math.tau if d > 0 else d
+    else: d = math.tau if d >= math.tau else d % -math.tau + math.tau if d < 0 else d
+    a0 %= math.tau
+    if d > 0: a0 -= math.tau
+    return q(a0, 4096) + q(a0 + d, 4096) + bytes([1 if anticlockwise else 0])
+
+
+def hole(calls, i):
+    """The page cuts a round hole in what follows with beginPath, rect(whole screen), arc(anticlockwise), clip.
+    If that is what starts at calls[i], the arc."""
+    c = calls[i:i + 4]
+    if [o[0] for o in c] == ["beginPath", "rect", "arc", "clip"] and c[1][1:] == [0, 0, 240, 240] and len(c[2]) > 6 and c[2][6] and len(c[3]) == 1:
+        return c[2]
+
+
 def encode(calls):
     """The instructions for one frame's canvas calls, or None if it uses something vec.h can't draw."""
-    out = bytearray()
+    out = bytearray(); i = 0; calls = list(calls)
     try:
-        for o in calls:
+        while i < len(calls):
+            if hole(calls, i):                           # a run of holes becomes a path and a cut (a few, if there are many)
+                out.append(OP["beginPath"]); room = 800  # points a path may hold, with some to spare
+                while hole(calls, i) and room > 0:
+                    a = hole(calls, i)[1:]; i += 4; room -= 8 + 12 * abs(a[2]) ** 0.5
+                    out.append(OP["moveTo"]); out += q(a[0] + a[2]) + q(a[1])
+                    out.append(OP["arc"]); out += q(a[0]) + q(a[1]) + q(a[2]) + arc_angles(a[3], a[4], True)
+                out.append(CLIP_OUT); continue
+            o = calls[i]; i += 1
             n, a = o[0], o[1:]
             if n in SAME:
                 if a[0] not in SAME[n]: return None
@@ -140,11 +175,11 @@ def encode(calls):
             if n in ("moveTo", "lineTo", "translate"): out += q(a[0]) + q(a[1])
             elif n == "quadraticCurveTo": out += b"".join(q(v) for v in a[:4])
             elif n == "bezierCurveTo": out += b"".join(q(v) for v in a[:6])
-            elif n == "arc": out += q(a[0]) + q(a[1]) + q(a[2]) + q(a[3], 4096) + q(a[4], 4096) + bytes([1 if len(a) > 5 and a[5] else 0])
-            elif n == "ellipse": out += b"".join(q(v) for v in a[:4]) + b"".join(q(v, 4096) for v in a[4:7]) + bytes([1 if len(a) > 7 and a[7] else 0])
+            elif n == "arc": out += q(a[0]) + q(a[1]) + q(a[2]) + arc_angles(a[3], a[4], len(a) > 5 and a[5])
+            elif n == "ellipse": out += b"".join(q(v) for v in a[:4]) + q(turn(a[4]), 4096) + arc_angles(a[5], a[6], len(a) > 7 and a[7])
             elif n in ("rect", "fillRect"): out += b"".join(q(v) for v in a[:4])
             elif n == "roundRect": out += b"".join(q(v) for v in a[:4]) + q(a[4][0] if isinstance(a[4], list) else a[4])
-            elif n == "rotate": out += q(a[0], 4096)
+            elif n == "rotate": out += q(turn(a[0]), 4096)
             elif n == "scale": out += q(a[0], 256) + q(a[1], 256)
             elif n == "setTransform": out += b"".join(q(v, 256) for v in a[:4]) + q(a[4]) + q(a[5])
             elif n in ("=fillStyle", "=strokeStyle"): out += colour(a[0])
@@ -176,7 +211,7 @@ def pstr(s):
 
 def build():
     moods = [m["name"] for m in meta["moments"]]
-    uniq, pics, calls, body = {}, [], [], bytearray()
+    uniq, pics, calls, body, shows = {}, [], [], bytearray(), {}
     for s in meta["seqs"]:
         ticks = sorted(t for (k, t) in where if k == s["key"])
         seq = []
@@ -184,7 +219,7 @@ def build():
             rgba, ops = units[where[(s["key"], t)]]; h = hashlib.sha1(rgba).digest()
             if h not in uniq:
                 uniq[h] = len(pics); pics.append(rgba); calls.append(ops)
-            seq.append(uniq[h])
+            seq.append(uniq[h]); shows.setdefault(named[(s["key"], t)], set()).add(uniq[h])
         body += struct.pack("<BBB", s["kind"], moods.index(s["from"]), moods.index(s["to"])) + pstr(s["name"])
         body += struct.pack("<H", len(seq)) + struct.pack(f"<{len(seq)}H", *seq)
     vec = [encode(c) for c in calls]
@@ -211,32 +246,38 @@ def build():
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     with open(out_path, "wb") as f:
         f.write(out)
+    as_pixels = sorted(d for d, frames in shows.items() if any(not blobs[f][0] for f in frames))
     return {"frames_rendered": len(where), "unique_frames": len(blobs), "bytes": len(out), "moods": len(moods),
-            "sequences": len(meta["seqs"]), "kept_as": why, "instruction_bytes": sum(len(b) for k, b in blobs if k),
+            "sequences": len(meta["seqs"]), "kept_as": why,
+            "named_drawings": {"total": len(shows), "all_instructions": len(shows) - len(as_pixels), "with_pixel_frames": as_pixels},
+            "instruction_bytes": sum(len(b) for k, b in blobs if k),
             "pixel_bytes": sum(len(b) for k, b in blobs if not k),
             "worst_instruction_frame": {"mean_difference_pct": worst[0], "pixels_far_off": worst[1]}, "out": out_path}
 
 
 def sheet():
-    """Instead of baking: the distinct drawings, in the order they first appear, side by side in one PNG."""
+    """Instead of baking: every distinct drawing, in the order they first appear, side by side, 24 to a PNG
+    (name.png, then name_2.png, name_3.png ...)."""
     order, seen = [], set()
     for s in meta["seqs"]:
         for t in sorted(t for (k, t) in where if k == s["key"]):
             i = where[(s["key"], t)]
             if i not in seen: seen.add(i); order.append(i)
-    order = order[::max(1, -(-len(order) // 30))]                 # at most 30 of them
-    cols = min(6, len(order)); rows = -(-len(order) // cols)
-    px = bytearray(cols * 240 * rows * 240 * 3)
-    for n, i in enumerate(order):
-        rgba = units[i][0]; x0, y0 = (n % cols) * 240, (n // cols) * 240
-        for y in range(240):
-            row = rgba[y * 960:(y + 1) * 960]; at = ((y0 + y) * cols * 240 + x0) * 3
-            px[at:at + 720] = bytes(b for k in range(0, 960, 4) for b in row[k:k + 3])
-    raw = b"".join(b"\x00" + bytes(px[y * cols * 720:(y + 1) * cols * 720]) for y in range(rows * 240))
     chunk = lambda t, d: struct.pack(">I", len(d)) + t + d + struct.pack(">I", zlib.crc32(t + d))
-    with open(out_path, "wb") as f:
-        f.write(b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", cols * 240, rows * 240, 8, 2, 0, 0, 0)) + chunk(b"IDAT", zlib.compress(raw, 6)) + chunk(b"IEND", b""))
-    return {"drawings": len(seen), "shown": len(order), "ticks": len(where), "seconds": round(len(where) / 24, 1), "out": out_path}
+    root, ext = os.path.splitext(out_path); outs = []
+    for page in range(0, len(order), 24):
+        ids = order[page:page + 24]; cols = min(6, len(ids)); rows = -(-len(ids) // cols)
+        px = bytearray(cols * 240 * rows * 240 * 3)
+        for n, i in enumerate(ids):
+            rgba = units[i][0]; x0, y0 = (n % cols) * 240, (n // cols) * 240
+            for y in range(240):
+                row = rgba[y * 960:(y + 1) * 960]; at = ((y0 + y) * cols * 240 + x0) * 3
+                px[at:at + 720] = bytes(b for k in range(0, 960, 4) for b in row[k:k + 3])
+        raw = b"".join(b"\x00" + bytes(px[y * cols * 720:(y + 1) * cols * 720]) for y in range(rows * 240))
+        outs.append(out_path if not page else f"{root}_{page // 24 + 1}{ext}")
+        with open(outs[-1], "wb") as f:
+            f.write(b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", cols * 240, rows * 240, 8, 2, 0, 0, 0)) + chunk(b"IDAT", zlib.compress(raw, 6)) + chunk(b"IEND", b""))
+    return {"drawings": len(order), "ticks": len(where), "seconds": round(len(where) / 24, 1), "out": outs}
 
 
 finish = build
@@ -261,11 +302,12 @@ class H(http.server.SimpleHTTPRequestHandler):
         u = urlparse(self.path); n = int(self.headers.get("Content-Length", 0)); body = self.rfile.read(n)
         q = parse_qs(u.query)
         if u.path == "/meta":
-            meta.clear(); meta.update(json.loads(body)); units.clear(); where.clear(); res = b"ok"
+            meta.clear(); meta.update(json.loads(body)); units.clear(); where.clear(); named.clear(); res = b"ok"
         elif u.path == "/frame":
-            units[int(q["id"][0])] = (body[:PIXELS], json.loads(body[PIXELS:])); where[(q["seq"][0], int(q["tick"][0]))] = int(q["id"][0]); res = b"ok"
+            at = (q["seq"][0], int(q["tick"][0])); named[at] = q["d"][0]
+            units[int(q["id"][0])] = (body[:PIXELS], json.loads(body[PIXELS:])); where[at] = int(q["id"][0]); res = b"ok"
         elif u.path == "/same":
-            where[(q["seq"][0], int(q["tick"][0]))] = int(q["as"][0]); res = b"ok"
+            at = (q["seq"][0], int(q["tick"][0])); named[at] = q["d"][0]; where[at] = int(q["as"][0]); res = b"ok"
         elif u.path == "/error":                    # the page hit a script error (headless: say so and stop)
             result["error"] = body.decode(errors="replace"); done.set(); res = b"ok"
         elif u.path == "/finish":

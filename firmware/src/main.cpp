@@ -54,6 +54,8 @@
 //                                    he restarts and plays like any other event ("e <name>"). No restart.
 //                                    When there's no room for another he drops the one played longest ago and
 //                                    prints "clip gone <name>", so the bridge knows to send it again.
+//                                    X-Lump-Tap: 1 makes it a tap reaction: he keeps it, and a tap on the glass
+//                                    may pick it instead of one of his own gags (he prints "tapclip <name>").
 // While an update streams in he shows a progress bar instead of animating. If the art is missing or
 // bad he says so on screen but keeps Wi-Fi and updates working, so it can be fixed without a cable.
 // On its own the device also: fidgets every minute or so while asleep, escalates "alert" to
@@ -125,6 +127,7 @@ struct Src {                                    // where a sequence's frames liv
   const uint8_t* offsets = nullptr; const uint8_t* data = nullptr; const uint8_t* end = nullptr;
   uint8_t* own = nullptr; String name;           // a clip's RAM buffer and name
   uint32_t used = 0;                             // when it was last played (or arrived)
+  bool tap = false;                              // a tap reaction: kept, and in the running when the glass is tapped
 };
 struct Anim {
   uint16_t nFrames = 0; uint8_t fps = 24, nMoods = 0, nSeqs = 0;
@@ -276,6 +279,7 @@ static void settle(int m) {  // arrived in mood m's loop
     int e = pendingEvent; pendingEvent = -1;
     // tell the bridge the moment a gag actually starts (it may have waited for a transition), so it can play its sound in step
     if (A.name[e].startsWith("tap_")) say("gag %s", A.name[e].c_str());
+    else if (A.srcs[A.src[e]].tap) say("tapclip %s", A.name[e].c_str());     // it ends asleep: the bridge puts his mood back
     return startSeq(e);
   }
   startSeq(A.loopOf[m]); loopSince = millis();
@@ -300,10 +304,22 @@ static const char* pickTap() {
   for (int i = 0; i < NG; i++) { if (i == last) continue; if ((x -= W[i]) < 0) { last = i; return GAG[i]; } }
   return GAG[0];
 }
+// Now and then a tap picks one of the tap reactions the bridge has given him, each as likely as one of his own gags.
+static String pickTapClip() {
+  static int last = -1;
+  int ids[MAX_SRC], n = 0;
+  for (int i = 1; i < MAX_SRC; i++) if (A.srcs[i].own && A.srcs[i].tap && i != last) ids[n++] = i;
+  if (!n || random(12 + n) < 12) return "";
+  last = ids[random(n)];
+  for (int s = 0; s < A.nSeqs; s++) if (A.src[s] == last && A.kind[s] == EVENT) return A.name[s];
+  return "";
+}
 static bool playEvent(String n) {
   if (n == "tap") {
     const String& m = A.moodName[target];
-    n = m == "night" ? String("tap_startle") : (prepMode || m == "meeting") ? String("tap_prep") : String("tap_") + pickTap();
+    if (m == "night") n = "tap_startle";
+    else if (prepMode || m == "meeting") n = "tap_prep";
+    else { n = pickTapClip(); if (!n.length()) n = String("tap_") + pickTap(); }
   }
   int e = eventIndex(n);
   if (e < 0) {  // generic names like "tap" resolve per mood: tap_idle, tap_working, ...
@@ -337,10 +353,11 @@ static void runDemo(uint32_t now) {
 }
 
 // ---------- things he does on his own ----------
+static bool hostAlive(uint32_t now);
 static void autoBehaviour(uint32_t now) {
   if (demo || A.kind[curSeq] != LOOP || target != curMood) return;
   const String& m = A.moodName[curMood];
-  if (m == "idle" && pendingEvent < 0) {
+  if (m == "idle" && pendingEvent < 0 && !hostAlive(now)) {      // with the bridge connected, it decides when he fidgets
     if (!nextFidget) nextFidget = now + 40000 + random(50000);
     if (now > nextFidget) {
       static const char* F[] = {"fidget_toss", "fidget_twitch", "fidget_bubble"};
@@ -735,7 +752,7 @@ static void dropClip(int si) {
 // Make room by dropping the clip played longest ago; false if there's none he can drop.
 static bool dropOldestClip() {
   int old = -1;
-  for (int i = 1; i < MAX_SRC; i++) if (A.srcs[i].own && !clipBusy(i) && (old < 0 || int32_t(A.srcs[i].used - A.srcs[old].used) < 0)) old = i;
+  for (int i = 1; i < MAX_SRC; i++) if (A.srcs[i].own && !A.srcs[i].tap && !clipBusy(i) && (old < 0 || int32_t(A.srcs[i].used - A.srcs[old].used) < 0)) old = i;
   if (old < 0) return false;
   say("clip gone %s", A.srcs[old].name.c_str());
   dropClip(old);
@@ -743,7 +760,7 @@ static bool dropOldestClip() {
 }
 // A clip arrives whole in buf (which we own from here on success). One with a name he already has
 // replaces the older one.
-static String addClip(uint8_t* buf, size_t size, String name) {
+static String addClip(uint8_t* buf, size_t size, String name, bool tap) {
   name.toLowerCase();
   if (!name.length()) return "a clip needs a name (X-Lump-Name)";
   for (int i = 1; i < MAX_SRC; i++) if (A.srcs[i].own && A.srcs[i].name == name) {
@@ -754,7 +771,7 @@ static String addClip(uint8_t* buf, size_t size, String name) {
     int si = -1;
     for (int i = 1; i < MAX_SRC && si < 0; i++) if (!A.srcs[i].own) si = i;
     if (si > 0 && parseArt(buf, size, si)) {
-      A.srcs[si].own = buf; A.srcs[si].name = name; A.srcs[si].used = millis();
+      A.srcs[si].own = buf; A.srcs[si].name = name; A.srcs[si].used = millis(); A.srcs[si].tap = tap;
       Serial.printf("clip %s: %u bytes\n", name.c_str(), (unsigned)size);
       return "";
     }
@@ -781,13 +798,13 @@ static void onClipData() {
   else if (r.status == RAW_ABORTED) clipFail("upload cut short");
 }
 static void onClipDone() {
-  if (clipBuf) { clipErr = addClip(clipBuf, clipSize, web.header("X-Lump-Name")); if (clipErr.length()) free(clipBuf); clipBuf = nullptr; }
+  if (clipBuf) { clipErr = addClip(clipBuf, clipSize, web.header("X-Lump-Name"), web.header("X-Lump-Tap") == "1"); if (clipErr.length()) free(clipBuf); clipBuf = nullptr; }
   if (clipErr.length()) web.send(clipErr == "pairing token needed" ? 401 : 400, "text/plain", "err " + clipErr + "\n");
   else web.send(200, "text/plain", "ok\n");
 }
 static void webBegin() {
-  static const char* keep[] = {"X-Lump-Token", "X-Lump-Size", "X-Lump-MD5", "X-Lump-Sha256", "X-Lump-Name"};
-  web.collectHeaders(keep, 5);
+  static const char* keep[] = {"X-Lump-Token", "X-Lump-Size", "X-Lump-MD5", "X-Lump-Sha256", "X-Lump-Name", "X-Lump-Tap"};
+  web.collectHeaders(keep, 6);
   web.on("/info", HTTP_GET, onInfo);
   web.on("/update/app", HTTP_POST, onUpdateDone, onAppData);
   web.on("/update/art", HTTP_POST, onUpdateDone, onArtData);

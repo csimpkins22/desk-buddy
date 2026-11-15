@@ -157,6 +157,25 @@ curl -X POST --data coffee 127.0.0.1:47823/play
 python3 tools/showreel.py                                         # everything he can do, back to back
 ```
 
+The bridge also plays clips by itself when the moment fits:
+
+| When | What he plays |
+|---|---|
+| Claude runs tests, pushes, builds, lints, deploys, or hits a merge conflict | the matching clip (`tests_pass`, `tests_fail`, `git_push`, ...) |
+| A session finishes | a celebration, at most every 10 minutes |
+| A session has needed you for a minute | a "waiting" clip, every 3 minutes until you answer |
+| Certain hours, once a day, if you're around | `coffee`, `lunch`, `afternoon_slump`, `clock_out` and friends |
+| A meeting is 10 minutes away, or has just ended | a meeting clip, then `meeting_over` |
+| A Slack DM or mention | sometimes a pigeon or a mailbox instead of the paper plane |
+| Your usage limit is nearly spent | `rate_limited` |
+| Nothing is happening | one of the idle clips, in place of a fidget sound |
+| You tap the glass | one of ten extra tap reactions, in the mix with his own gags |
+
+He plays at most one every two minutes, none at night or at a meeting alarm, and while something
+needs you only the waiting ones. The tables are at the top of `tools/buddy_bridge.py`
+(`CLIP_COMMANDS`, `CLIP_SETS`, `CLIP_HOURS`); `"auto_clips": false` in `~/.desk-buddy/config.json`
+turns all of it off.
+
 Keep props to cream, greys, yellows, reds, browns, greens and blues: the board takes pinks and
 purples for his body colour and recolours them. `--define file.json` makes a clip from his existing
 drawings with no script: `{"encore": {"home": "idle", "seq": [["S1", 4], ["HL1", 5], ...]}}`.
