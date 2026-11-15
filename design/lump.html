@@ -1795,7 +1795,7 @@ function drawFrontProps(c, d, seed, tick) {
     const [[x0, y0], [x1, y1]] = d.arm, a = Math.atan2(y1 - y0, x1 - x0), len = Math.hypot(x1 - x0, y1 - y0);
     c.save(); c.translate(x0, y0); c.rotate(a);
     closedPath(c, boil([[0, -7], [len * 0.5, -7], [len, -6], [len + 6, 0], [len, 6], [len * 0.5, 7], [0, 7]], seed + 98, 0.8));
-    c.fillStyle = tint; c.fill(); c.strokeStyle = L; inkStroke(c, 3); c.restore();
+    c.fillStyle = d.fill && d.fill !== 'none' ? d.fill : tint; c.fill(); c.strokeStyle = d.line && d.line !== 'none' ? d.line : L; inkStroke(c, 3); c.restore();
   }
   if (d.glint) {                               // sparkles on clean glass: [x, y, size]
     c.save(); c.fillStyle = L;
@@ -1819,7 +1819,7 @@ function drawFrontProps(c, d, seed, tick) {
     const [[x0, y0], [x1, y1]] = d.arm2, a = Math.atan2(y1 - y0, x1 - x0), len = Math.hypot(x1 - x0, y1 - y0);
     c.save(); c.translate(x0, y0); c.rotate(a);
     closedPath(c, boil([[0, -7], [len * 0.5, -7], [len, -6], [len + 6, 0], [len, 6], [len * 0.5, 7], [0, 7]], seed + 99, 0.8));
-    c.fillStyle = tint; c.fill(); c.strokeStyle = L; inkStroke(c, 3); c.restore();
+    c.fillStyle = d.fill && d.fill !== 'none' ? d.fill : tint; c.fill(); c.strokeStyle = d.line && d.line !== 'none' ? d.line : L; inkStroke(c, 3); c.restore();
   }
   if (d.tongue) {                              // tongue stuck out: [x, y (root), direction, length]
     const [tx, ty, ta, tl] = d.tongue;
@@ -2055,11 +2055,11 @@ function drawFace(c, d, seed) {
 function mixHex(a, b, k) { const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)); const A = p(a), B = p(b); return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * k).toString(16).padStart(2, '0')).join(''); }
 
 function render(c, m, id, tick, opts = {}) {
-  const d = D[id], seed = opts.still ? 1 : (Math.floor(tick / 2) % 3) + idSeed(id);
+  const d = D[id], seed = opts.still ? 1 : (d.still ? 0 : Math.floor(tick / 2) % 3) + idSeed(id);   // d.still: his line stops wobbling
   c.setTransform(1, 0, 0, 1, 0, 0);
   c.fillStyle = lineMode === 'paper' ? '#F4EFE6' : '#000'; c.fillRect(0, 0, 240, 240);
-  if (d.view) {                                 // the whole scene seen closer, further off, shifted or mirrored: [zoom, scene x, scene y, screen x, screen y, mirrored]
-    const [k, fx, fy, tx, ty, flip] = d.view; c.translate(tx, ty); c.scale(flip ? -k : k, k); c.translate(-fx, -fy);
+  if (d.view) {                                 // the whole scene seen closer, further off, shifted or mirrored: [zoom, scene x, scene y, screen x, screen y, mirrored, turned (radians)]
+    const [k, fx, fy, tx, ty, flip, rot] = d.view; c.translate(tx, ty); if (rot) c.rotate(rot); c.scale(flip ? -k : k, k); c.translate(-fx, -fy);
   }
   // shadow
   c.fillStyle = lineMode === 'paper' ? '#CFC8BC' : 'rgba(255,241,220,.10)';
@@ -2068,7 +2068,7 @@ function render(c, m, id, tick, opts = {}) {
   if (d.back) d.back(c, d, seed, tick);          // a clip's own drawing behind him (design/clips/*.js)
   const body = boil(d.body, seed, 2.2);
   // off-register fill
-  c.save(); c.translate(4, 2.5); closedPath(c, boil(d.body, seed + 50, 2.2), d.corners); c.fillStyle = d.soot ? '#3B342E' : d.inverse ? '#000' : tint; c.fill(); c.restore();
+  if (d.fill !== 'none') { c.save(); c.translate(4, 2.5); closedPath(c, boil(d.body, seed + 50, 2.2), d.corners); c.fillStyle = d.fill ? d.fill : d.soot ? '#3B342E' : d.inverse ? '#000' : tint; c.fill(); c.restore(); }   // d.fill: his body in another colour, or 'none'
   if (d.press) {                                // squashed flat against the glass
     const [px, py, rx, ry] = d.press;
     c.save(); c.beginPath(); c.ellipse(px + 3, py + 2, rx, ry, 0, 0, Math.PI * 2); c.fillStyle = 'rgba(255,241,220,.2)'; c.fill();
@@ -2081,9 +2081,9 @@ function render(c, m, id, tick, opts = {}) {
     c.restore();
   }
   // outline + cowlick
-  c.strokeStyle = ink(); c.lineJoin = 'round'; c.lineCap = 'round';
-  closedPath(c, body, d.corners); inkStroke(c, 4);
-  if (d.frizz) {                                // hair standing on end: zigzag strands fanning up from the cowlick
+  c.strokeStyle = d.line && d.line !== 'none' ? d.line : ink(); c.lineJoin = 'round'; c.lineCap = 'round';   // d.line: his outline in another colour, or 'none'
+  if (d.line !== 'none') { closedPath(c, body, d.corners); inkStroke(c, 4); }
+  if (d.line === 'none') {} else if (d.frizz) {                                // hair standing on end: zigzag strands fanning up from the cowlick
     const [hx, hy] = d.curl[0], n = 9;
     for (let k = 0; k < n; k++) {
       const a = -Math.PI / 2 + (k / (n - 1) - 0.5) * 2.6, len = d.frizz * (0.7 + 0.3 * Math.abs(Math.sin(k * 2.3 + 0.4))), P = [[hx, hy]];

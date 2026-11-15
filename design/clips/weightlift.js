@@ -1,38 +1,42 @@
-// Weightlift: he strains at a barbell that won't move, heaves it overhead, and its weight tips him over backwards.
+// An extreme close-up of his straining face, teeth gritted, sweating and trembling; then the view pulls back to show he is lifting a tiny dumbbell with one nub.
 (() => {
-  const { D, xf, FACE, kit } = window.__lump, k = kit.clip('weightlift'), { CREAM, GREY, DARK } = kit;
-  const bar = (c, x, y) => {
-    c.save(); c.translate(x, y); c.lineCap = c.lineJoin = 'round';
-    c.beginPath(); c.moveTo(-60, 0); c.lineTo(60, 0);
-    c.strokeStyle = CREAM; c.lineWidth = 8; c.stroke(); c.strokeStyle = GREY; c.lineWidth = 3.5; c.stroke();
-    [-62, 48].forEach(px => {
-      c.fillStyle = GREY; c.strokeStyle = CREAM; c.lineWidth = 2.6; c.beginPath(); c.roundRect(px, -17, 14, 34, 5); c.fill(); c.stroke();
-      c.fillStyle = DARK; c.fillRect(px + 5, -10, 4, 20);
-    });
-    c.restore();
-  };
-  const pose = (o, face, bx, by, arms = true, alpha = 1, extra = {}) => xf(D.N, { ...o, face, extra: {
-    ...(arms ? { arm: [kit.pt(o, [90, 140]), [bx - 40, by]], arm2: [kit.pt(o, [166, 140]), [bx + 40, by]] } : {}),
-    front: c => kit.fade(c, alpha, () => bar(c, bx, by)), ...extra } });
+  const { D, xf, FACE, kit } = window.__lump;
+  const k = kit.clip('weightlift');
+  const F = [122, 112], CLOSE = 2.8;
+  const strain = [['stroke', [[106, 103], [121, 109], [106, 115]], 3.2], ['stroke', [[150, 101], [135, 107], [150, 113]], 3.2],
+                  ['stroke', [[104, 93], [122, 99]], 2.8], ['stroke', [[134, 98], [152, 91]], 2.8], ['teeth', 128, 127, 30, 12]];
 
-  [0.35, 0.7, 1].forEach((a, i) => k.add('in' + i, 2, pose({}, FACE.lookr, 128, 184, false, a)));
-  k.add('grab', 6, pose({ ky: 0.96 }, FACE.grump, 128, 184));
-  k.add('sa', 4, pose({ ky: 0.93, kx: 1.03 }, FACE.puff, 128, 183, true, 1, { back: c => kit.sweat(c, 190, 92, 0, 1) }));
-  k.add('sb', 4, pose({ ky: 0.95, kx: 1.02 }, FACE.puff, 128, 185, true, 1, { back: c => kit.sweat(c, 62, 96, 1, -1) }));
-  k.add('sa', 4); k.add('sb', 4);
-  k.add('antic', 4, pose({ ky: 0.86, kx: 1.06 }, FACE.grump, 128, 186));
-  const kys = kit.steps(1, 1.1, 3);
-  kit.steps(150, 46, 3).forEach((y, i) => k.add('up' + i, 2, pose({ ky: kys[i] }, FACE.puff, 128, y)));
-  k.add('triumph', 12, pose({ ky: 1.05 }, FACE.happy, 128, 44));
-  k.add('wobble', 4, pose({ rot: -0.07 }, FACE.shock, 122, 46));
-  const rot = kit.steps(-0.3, -1.5, 4), dx = kit.steps(15, 100, 4), dy = kit.steps(-8, -52, 4), ks = kit.steps(1, 0.92, 4);
-  const lie = { rot: -1.5, dx: 100, dy: -52, k: 0.92 };
-  rot.forEach((r, i) => {
-    const o = { rot: r, dx: dx[i], dy: dy[i], k: ks[i] }, [bx, by] = i < 2 ? kit.pt(o, [128, 44]) : i === 2 ? [112, 80] : [140, 98];
-    k.add('tip' + i, 2, pose(o, FACE.shock, bx, by, i < 2));
-  });
-  k.add('flat', 12, pose(lie, FACE.spiral, 140, 98, false));
-  [0.6, 0.3].forEach((a, i) => k.add('out' + i, 2, pose(lie, FACE.spiral, 140, 98, false, a)));
-  [[-1, 66, -35, 0.95], [-0.5, 33, -17, 0.98], [0, 0, 0, 1]].forEach(([r, x, y, s], i) => k.add('rise' + i, 2, xf(D.N, { rot: r, dx: x, dy: y, k: s, face: FACE.spiral })));
+  const bead = (c, x, y, r = 4.5) => {
+    c.save(); c.fillStyle = kit.BLUE; c.strokeStyle = kit.CREAM; c.lineWidth = 1.6; c.lineJoin = 'round';
+    c.beginPath(); c.moveTo(x, y - r * 1.9); c.quadraticCurveTo(x + r * 1.2, y, x, y + r); c.quadraticCurveTo(x - r * 1.2, y, x, y - r * 1.9); c.fill(); c.stroke(); c.restore();
+  };
+  // two beads of sweat running down his temples; p is how far down they are
+  const sweat = (c, p, dx = 0) => { const q = (p + 0.5) % 1; bead(c, 97 - 5 * p + dx, 88 + 44 * p); bead(c, 160 + 6 * q + dx, 84 + 44 * q); };
+  const bell = (c, x, y, a = -0.5) => {
+    c.save(); c.translate(x, y); c.rotate(a); c.lineCap = c.lineJoin = 'round';
+    c.strokeStyle = kit.GREY; c.lineWidth = 5; c.beginPath(); c.moveTo(-10, 0); c.lineTo(10, 0); c.stroke();
+    c.fillStyle = '#4A5568'; c.strokeStyle = kit.CREAM; c.lineWidth = 2.4;
+    c.beginPath(); c.roundRect(-18, -10, 8, 20, 2); c.roundRect(10, -10, 8, 20, 2); c.fill(); c.stroke(); c.restore();
+  };
+  // straining: shaking by `sh`, the nub up on the right with the dumbbell in it once the view is wide enough to see it
+  const lift = (sh, view, p, shown = true) => {
+    const hand = [200, 116 + sh * 1.5];
+    return xf(D.N, { dx: sh, face: strain, extra: { ...(view && { view }), arm2: [[166 + sh, 140], hand], front: c => { sweat(c, p, sh); if (shown) bell(c, hand[0] + 5, hand[1] - 5); } } });
+  };
+
+  const zin = kit.steps(1, CLOSE, 4).slice(1);
+  k.add('in0', 2, xf(D.N, { face: kit.look(0, 0, 'flat'), extra: { view: kit.zoom(zin[0], F) } }));
+  k.add('in1', 2, xf(D.N, { face: strain, extra: { view: kit.zoom(zin[1], F) } }));
+  for (let i = 0; i < 6; i++) k.add('grit' + i, 2, lift(i % 2 ? 1.2 : -1.2, kit.view(CLOSE, F), i / 6, false));
+  for (let n = 0; n < 2; n++) for (let i = 0; i < 6; i++) k.add('grit' + i, 2);
+  kit.steps(CLOSE, 1, 5).slice(1).forEach((z, i) => k.add('back' + i, 2, lift(i % 2 ? 1.2 : -1.2, kit.zoom(z, F), i / 6)));
+  k.add('tiny0', 2, lift(-1.2, null, 0.7)); k.add('tiny1', 2, lift(1.2, null, 0.85));
+  for (let n = 0; n < 2; n++) { k.add('tiny0', 2); k.add('tiny1', 2); }
+
+  const held = { arm2: [[166, 140], [200, 118]], front: c => bell(c, 205, 113) };
+  k.add('us', 8, xf(D.N, { face: kit.look(0, 0, 'flat'), extra: held }));
+  k.add('shrug', 8, xf(D.N, { ky: 1.03, face: FACE.sheep, extra: { arm: [[90, 140], [64, 126]], arm2: [[166, 140], [198, 122]], front: c => bell(c, 203, 117) } }));
+  [[222, 98, [196, 126]], [240, 100, [192, 136]], [262, 122, null]].forEach(([x, y, hand], i) =>
+    k.add('toss' + i, 2, xf(D.N, { face: FACE.happy, extra: { ...(hand && { arm2: [[166, 140], hand] }), front: c => bell(c, x, y, -0.5 + i * 0.6) } })));
   k.done();
 })();

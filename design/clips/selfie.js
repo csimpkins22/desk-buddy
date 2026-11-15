@@ -1,29 +1,34 @@
-// Selfie: he holds a phone out at arm's length, tries two poses, and the flash leaves him seeing stars.
+// We are the phone: he leans in until his face fills the screen, pulls four quick faces, the flash goes off, and he drifts back dazzled.
 (() => {
-  const { D, xf, FACE, kit } = window.__lump, k = kit.clip('selfie');
-  const phone = (c, x, y, a = 1) => kit.fade(c, a, () => {
-    c.save(); c.lineJoin = c.lineCap = 'round'; c.translate(x + 4, y - 8); c.rotate(0.2);
-    c.fillStyle = kit.GREY; c.strokeStyle = kit.CREAM; c.lineWidth = 2.6;
-    c.beginPath(); c.roundRect(-9, -15, 18, 30, 4); c.fill(); c.stroke();
-    c.fillStyle = kit.DARK; c.beginPath(); c.arc(-3, -8, 3.2, 0, kit.TAU); c.fill();
+  const { D, xf, FACE } = window.__lump, kit = window.__lump.kit;
+  const k = kit.clip('selfie'), cam = z => kit.zoom(z, [128, 116], [120, 120]), Z = 2.8;
+  const dizzy = [['spiral', 116, 109, 7], ['spiral', 140, 107, 7], ['stroke', [[119, 126], [123, 123], [128, 126], [133, 123], [137, 126]], 2.6]];
+  // the flash, drawn on the glass itself: wedges of light in from every edge, or the whole screen white
+  const flash = len => c => {
+    c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
+    if (!len) { c.fillStyle = '#FFFFFF'; c.fillRect(0, 0, 240, 240); }
+    else for (let i = 0; i < 12; i++) {
+      const a = i / 12 * kit.TAU + 0.26, tip = 175 - len * (i % 2 ? 0.7 : 1), p = (b, r) => [120 + Math.cos(b) * r, 120 + Math.sin(b) * r];
+      c.fillStyle = i % 2 ? kit.YELLOW : '#FFFFFF'; c.beginPath(); c.moveTo(...p(a - 0.15, 190)); c.lineTo(...p(a, tip)); c.lineTo(...p(a + 0.15, 190)); c.closePath(); c.fill();
+    }
     c.restore();
-  });
-  const flash = (c, a) => { c.save(); c.globalAlpha = a; c.fillStyle = kit.WHITE; c.fillRect(0, 0, 240, 240); c.restore(); };
-  const stars = (c, a) => [0, 1, 2].forEach(i => kit.sparkle(c, 128 + Math.cos(a + i * kit.TAU / 3) * 54, 62 + Math.sin(a + i * kit.TAU / 3) * 12, 9, kit.YELLOW));
-  const held = (o, hand, extra = {}, fl = 0) => xf(D.N, { ...o, extra: { ...extra, arm2: [kit.pt(o, [166, 140]), hand], front: c => { phone(c, ...hand); if (fl) flash(c, fl); } } });
+  };
+  const head = (rot, o = {}) => ({ rot, ox: 128, oy: 126, ...o });
 
-  k.add('see', 6, xf(D.N, { face: FACE.lookr }));
-  const hx = kit.steps(186, 204, 3), hy = kit.steps(166, 100, 3);
-  [0.35, 0.7, 1].forEach((a, i) => k.add('raise' + i, 2, xf(D.N, { face: FACE.lookr, extra: { arm2: [[166, 140], [hx[i], hy[i]]], front: c => phone(c, hx[i], hy[i], a) } })));
-  const p1 = { face: FACE.happy, rot: -0.08 }, p2 = { face: FACE.cute, rot: 0.06, ky: 1.03 };
-  k.add('pose1', 12, held(p1, [204, 100]));
-  k.add('pose2', 12, held(p2, [204, 100], { arm: [kit.pt(p2, [90, 140]), [62, 106]] }));
-  k.add('flash1', 2, held(p2, [204, 100], { arm: [kit.pt(p2, [90, 140]), [62, 106]] }, 0.8));
-  k.add('flash2', 2, held({ face: FACE.shock }, [204, 104], {}, 0.65));
-  for (let i = 0; i < 10; i++) {
-    const a = [1, 0.6, 0.3][i], hand = [198, 120 + i * 18];
-    k.add('daze' + i, 2, xf(D.N, { face: FACE.spiral, rot: i % 2 ? 0.04 : -0.04, extra: { ...(a ? { arm2: [[166, 140], hand] } : {}), front: c => { if (a) phone(c, ...hand, a); stars(c, i * 0.7); } } }));
-  }
-  k.add('after', 6, xf(D.N, { face: FACE.shock }));
-  k.done();
+  kit.steps(1, Z, 5).slice(1).forEach((z, i) => k.add('in' + i, 2, xf(D.N, { face: kit.look(0, 0, 'smile'), extra: { view: cam(z) } })));
+  k.add('f1', 4, xf(D.N, { ...head(-0.1), face: FACE.happy, extra: { view: cam(Z) } }));
+  k.add('f2', 4, xf(D.N, { ...head(0.12), face: kit.faces.wink, extra: { view: cam(Z) } }));
+  k.add('f3', 4, xf(D.N, { ...head(-0.07, { ky: 0.96 }), face: kit.faces.smug, extra: { view: cam(Z) } }));
+  k.add('f4', 4, xf(D.N, { ...head(0.08), face: FACE.cute, extra: { view: cam(Z) } }));
+  k.add('fl0', 2, xf(D.N, { ...head(0.08), face: FACE.cute, extra: { view: cam(Z), front: flash(70) } }));
+  k.add('fl1', 2, xf(D.N, { face: FACE.shock, extra: { view: cam(Z), front: flash(0) } }));
+  k.add('fl2', 2, xf(D.N, { face: dizzy, extra: { view: cam(Z), front: flash(115) } }));
+  k.add('fl3', 2, xf(D.N, { face: dizzy, extra: { view: cam(Z), front: flash(55) } }));
+  k.add('dz0', 4, xf(D.N, { ...head(0.09), face: dizzy, extra: { view: cam(Z) } }));
+  k.add('dz1', 4, xf(D.N, { ...head(-0.09), face: dizzy, extra: { view: cam(Z) } }));
+  kit.steps(Z, 1, 5).slice(1).forEach((z, i) => k.add('out' + i, i === 3 ? 4 : 2, xf(D.N, { rot: i % 2 ? -0.07 : 0.07, face: dizzy, extra: { view: cam(z) } })));
+  k.add('t1', 4, xf(D.T1, { face: [['spiral', 116, 117, 7], ['spiral', 140, 115, 7], ['stroke', [[121, 131], [125, 129], [129, 132], [133, 129], [137, 131]], 2.6]] }));
+  k.add('t2', 4, xf(D.T2, { face: [['spiral', 166, 150, 7], ['dot', 180, 162, 2.8]] }));
+  k.add('s1', 8, xf(D.S1, { face: [['spiral', 175, 168, 7], ['dot', 187, 181, 3]], extra: { fxm: 'idle' } }));
+  k.done({ doze: false });
 })();

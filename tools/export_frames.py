@@ -208,7 +208,7 @@ def check(frames):
     return [(float(a), int(b), c == "1") for a, b, c in (line.split() for line in res if line)]
 
 
-def lint(name, pics, calls, vec, shows, size):
+def lint(name, pics, calls, stuck, shows, size):
     """What bakes but wastes space or will look wrong on him, for a clip: a list of plain sentences."""
     notes = []
     for s in meta["seqs"]:
@@ -229,8 +229,8 @@ def lint(name, pics, calls, vec, shows, size):
         cut = sorted(d for d, frames in shows.items() if d.startswith(name + "_") and any(not framed(f) and sum(lit(pics[f], x, y) for x, y in cells) > 10 for f in frames))
         if cut: notes.append(f"Something bright touches the {side} edge in {', '.join(cut[:10])}{' and more' if len(cut) > 10 else ''}. "
                              "Fine for a setting or a slide in or out; anywhere else a prop or a Lump is cut off.")
-    stuck = sorted(d for d, frames in shows.items() if d.startswith(name + "_") and any(vec[f] is None for f in frames))
-    if stuck: notes.append(f"Stored as pixels: {', '.join(stuck[:8])}. Look for a NaN or undefined coordinate, or a call the board can't draw.")
+    if stuck: notes.append(f"Stored as pixels: {', '.join(stuck[:8])}. Look for a NaN or undefined coordinate, a call the board can't draw, "
+                           "a translucent full-screen fill, or a scale that isn't a whole number of 256ths.")
     if size > 150000: notes.append(f"{size} bytes: over 150000 he takes longer to send and crowds the board's memory. Reuse drawings or simplify props.")
     return notes
 
@@ -291,7 +291,7 @@ def build():
     with open(out_path, "wb") as f:
         f.write(out)
     as_pixels = sorted(d for d, frames in shows.items() if any(not blobs[f][0] for f in frames))
-    return {**({"lint": lint(clip_name, pics, calls, vec, shows, len(out)), "staging": staging(clip_name, pics, shows)} if clip_name else {}),
+    return {**({"lint": lint(clip_name, pics, calls, [d for d in as_pixels if d.startswith(clip_name + "_")], shows, len(out)), "staging": staging(clip_name, pics, shows)} if clip_name else {}),
             "frames_rendered": len(where), "unique_frames": len(blobs), "bytes": len(out), "moods": len(moods),
             "sequences": len(meta["seqs"]), "kept_as": why,
             "named_drawings": {"total": len(shows), "all_instructions": len(shows) - len(as_pixels), "with_pixel_frames": as_pixels},

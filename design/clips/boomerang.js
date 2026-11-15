@@ -1,34 +1,46 @@
-// Boomerang: he throws a boomerang off one side, waits, shrugs, and it comes back and bonks him from behind.
+// He throws a boomerang off the right edge and waits, and waits; it comes all the way round from the left and shaves his cowlick flat.
 (() => {
-  const { D, xf, FACE, kit } = window.__lump, k = kit.clip('boomerang'), { CREAM, YELLOW } = kit;
-  const rang = (c, x, y, a = 0, alpha = 1) => kit.fade(c, alpha, () => {
+  const { D, xf, kit } = window.__lump, k = kit.clip('boomerang'), H = 32;
+  const boom = (c, x, y, a) => {
     c.save(); c.translate(x, y); c.rotate(a); c.lineCap = c.lineJoin = 'round';
-    c.beginPath(); c.moveTo(-15, 9); c.lineTo(0, -8); c.lineTo(15, 9);
-    c.strokeStyle = CREAM; c.lineWidth = 12; c.stroke(); c.strokeStyle = '#C98A3A'; c.lineWidth = 6.5; c.stroke(); c.restore();
-  });
-  const f = (o, face, { r, hand, shrug, q, star, stars } = {}) => xf(D.N, { ...o, face, extra: {
-    ...(hand ? { arm2: [kit.pt(o, [166, 140]), hand] } : {}),
-    ...(shrug ? { arm: [[90, 140], [60, 126]], arm2: [[166, 140], [196, 126]] } : {}),
-    front: c => {
-      if (r) rang(c, ...r);
-      if (q) kit.mark(c, '?', 128, 58);
-      if (star) kit.sparkle(c, 74, 92, 13, YELLOW);
-      if (stars) { kit.sparkle(c, 104, 56, 8, YELLOW); kit.sparkle(c, 150, 52, 7, YELLOW); }
-    } } });
+    [[kit.CREAM, 13], [kit.BROWN, 7]].forEach(([col, w]) => { c.strokeStyle = col; c.lineWidth = w; c.beginPath(); c.moveTo(-19, 13); c.lineTo(0, -10); c.lineTo(19, 13); c.stroke(); });
+    c.strokeStyle = kit.YELLOW; c.lineWidth = 7; c.beginPath(); c.moveTo(-19, 13); c.lineTo(-14, 7); c.moveTo(19, 13); c.lineTo(14, 7); c.stroke();
+    c.restore();
+  };
+  // his cowlick knocked over, on standing Lump
+  const BENT = [[128, 71], [134, 61], [144, 56], [153, 58]], FLAT = [[128, 71], [133, 64], [146, 61], [160, 61], [169, 66]], HALF = [[128, 71], [130, 60], [136, 54], [142, 56]], OVER = [[128, 71], [121, 56], [125, 45], [135, 49], [131, 58]];
+  const curl = (o, pts) => pts.map(p => kit.pt(o, p));
+  const SH = [166 + H, 140], BORED = kit.look(5, 0, 'flat');
+  const add = (name, ticks, o, face, extra) => k.add(name, ticks, xf(D.N, { dx: H, ...o, face, extra }));
 
-  [0.35, 0.7, 1].forEach((a, i) => k.add('in' + i, 2, f({}, FACE.happy, { r: [204, 148, 0.4, a], hand: [194, 152] })));
-  k.add('antic', 4, f({ rot: -0.08, ky: 0.97 }, FACE.happy, { r: [200, 96, -0.6], hand: [192, 104] }));
-  k.add('throw', 2, f({ rot: 0.1, ky: 1.03 }, FACE.happy, { r: [224, 116, 1], hand: [204, 132] }));
-  k.add('fly0', 2, f({ rot: 0.06 }, FACE.lookr, { r: [252, 106, 2.4], hand: [200, 144] }));
-  k.add('fly1', 2, f({}, FACE.lookr, { hand: [190, 156] }));
-  k.add('wait', 10, f({}, FACE.lookr));
-  k.add('shrug', 10, f({ ky: 0.96 }, FACE.grump, { shrug: true, q: true }));
-  [[-22, 0], [12, 1.6], [42, 3.2]].forEach(([x, a], i) => k.add('ret' + i, 2, f({ ky: 0.96 }, FACE.grump, { shrug: true, q: true, r: [x, 98, a] })));
-  k.add('bonk', 2, f({ rot: 0.12, kx: 0.95, dx: 6 }, FACE.shock, { r: [60, 96, 4.4], star: true }));
-  [[46, 70, 5.2, 0.1], [36, 104, 6, 0.08], [34, 150, 6.8, 0.04], [36, 190, 7.4, 0]].forEach(([x, y, a, rot], i) => k.add('drop' + i, 2, f({ rot, dx: 4 }, FACE.spiral, { r: [x, y, a], stars: i > 1 })));
-  k.add('dz0', 4, f({ rot: 0.06 }, FACE.spiral, { r: [36, 192, 0.3], stars: true }));
-  k.add('dz1', 4, f({ rot: -0.05 }, FACE.spiral, { r: [36, 192, 0.3], stars: true }));
-  k.add('dz0', 4); k.add('dz1', 4);
-  [0.6, 0.3].forEach((a, i) => k.add('out' + i, 2, f({}, FACE.spiral, { r: [36, 192, 0.3, a] })));
+  kit.walk(0, H, 4, { face: kit.look(4, 0, 'smile') }).forEach((o, i) => k.add('go' + i, 2, xf(D.N, o)));
+  // out from behind his back
+  add('p0', 2, {}, kit.look(4, 3, 'smile'), { arm2: [SH, [214, 154]], back: c => boom(c, 220, 150, 0.9) });
+  add('p1', 2, {}, kit.look(5, 0, 'smile'), { arm2: [SH, [220, 132]], front: c => boom(c, 224, 122, 0.5) });
+  add('p2', 6, {}, kit.look(5, -3, 'open'), { arm2: [SH, [216, 112]], front: c => boom(c, 216, 94, 0.2) });
+  // wind up, throw
+  const BACK = { rot: -0.14 }, FWD = { rot: 0.16 };
+  add('wind', 4, BACK, kit.look(5, -2, 'flat'), { arm2: [kit.pt({ dx: H, ...BACK }, [166, 140]), [198, 104]], front: c => boom(c, 198, 88, -0.5) });
+  add('throw', 2, FWD, kit.look(5, 0, 'open'), { arm2: [kit.pt({ dx: H, ...FWD }, [166, 140]), [232, 136]], front: c => boom(c, 232, 116, 1.2) });
+  add('after', 2, { rot: 0.1 }, kit.look(5, -1, 'open'), { arm2: [kit.pt({ dx: H, rot: 0.1 }, [166, 140]), [228, 146]] });
+  // the wait
+  add('watch', 14, {}, kit.look(5, -1, 'smile'));
+  add('up', 10, {}, kit.look(4, -6, 'flat'));
+  add('left', 10, {}, kit.look(-5, 0, 'flat'));
+  add('right', 8, {}, BORED);
+  const tap = [{ arm2: [SH, [212, 163]] }, { arm2: [SH, [222, 154]] }];
+  add('tapa', 4, {}, BORED, tap[0]); add('tapb', 4, {}, BORED, tap[1]); k.add('tapa', 4); k.add('tapb', 4);
+  // round it comes, behind him, while he is still tapping
+  const X = [-16, 12, 40, 68, 96, 124, 150], Y = [74, 70, 66, 63, 61, 59, 58];
+  X.forEach((x, i) => add('round' + i, 2, {}, BORED, { ...tap[(i >> 1) % 2], ...(i === 6 ? { curl: curl({ dx: H }, BENT) } : {}), front: c => boom(c, x, Y[i], i * 1.1) }));
+  const JUMP = { kx: 1.06, ky: 0.9 };
+  add('hit0', 2, JUMP, kit.faces.wide, { curl: curl({ dx: H, ...JUMP }, FLAT), front: c => boom(c, 176, 62, 1.4) });
+  add('hit1', 2, JUMP, kit.faces.wide, { curl: curl({ dx: H, ...JUMP }, FLAT), front: c => boom(c, 204, 60, 2.5) });
+  add('hit2', 2, { ky: 0.96 }, kit.look(4, -5, 'o'), { curl: curl({ dx: H, ky: 0.96 }, FLAT), front: c => boom(c, 234, 64, 3.6) });
+  add('flat', 14, {}, kit.look(1, -7, 'flat'), { curl: curl({ dx: H }, FLAT) });
+  // home, and it springs back up
+  kit.walk(H, 0, 4, { face: kit.look(-3, 0, 'flat') }).forEach((o, i) => k.add('home' + i, 2, xf(D.N, { ...o, extra: { curl: curl(o, FLAT) } })));
+  k.add('boing0', 2, xf(D.N, { ky: 0.97, face: kit.look(0, -6, 'o'), extra: { curl: curl({ ky: 0.97 }, HALF) } }));
+  k.add('boing1', 2, xf(D.N, { ky: 1.03, face: kit.look(0, -6, 'smile'), extra: { curl: curl({ ky: 1.03 }, OVER) } }));
   k.done();
 })();

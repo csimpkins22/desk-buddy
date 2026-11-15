@@ -52,6 +52,12 @@ and y 70 to 201, with eyes at (116, 110) and (140, 108) and his mouth near (128,
   and `blush`. Also `['teeth', x, y, w, h]` and `['lips', x, y, rx, ry]`. `extra: { curl: [...] }`
   replaces his cowlick, whose tip is at about y 52 standing; `extra: { shadow: [x, radius] }` moves
   his shadow; `extra: { fx: [x, y] }` moves the marks or z's.
+- His own drawing can be changed through `extra`: `fill: '#E9E2D2'` paints his body another colour
+  and `fill: 'none'` leaves it out; `line: '#9FB0C4'` recolours his outline and cowlick and
+  `line: 'none'` leaves them out; `still: true` stops his line wobbling; `face: []` in the options
+  leaves him faceless; `shadowK: 0` hides his shadow. With the body or line left out, a `front` or
+  `back` hook can draw him its own way from `d.body` and `d.curl` (a pencil sketch, a dotted
+  outline, a body half full of colour clipped to `d.body`).
 - Arms: `extra: { arm: [[shoulderX, shoulderY], [handX, handY]], arm2: [...] }`. Left shoulder is
   near (90, 140), right near (166, 140). Arms are drawn before `front`, so a `front` prop covers
   his hands; a prop he should stand in front of goes in `back`.
@@ -80,8 +86,14 @@ helpers clips keep needing aren't rewritten each time:
   `arm(c, [shoulder, hand], seed)`: a loose arm. Props: `mug`, `steam`, `table`, `balloon`,
   `sparkle`, `sweat`, `puff`, `room` (a wall, optionally with a picture), and
   `mark(c, '?' | '!' | 'tick' | 'cross', x, y, size)`.
+- `morph(a, b, t)`: a drawing part-way between two others (his outline, cowlick and shadow ease).
+  `round(cx, cy, rx, ry, face)`: him as an oval that `morph` can reach, for a ball, a puddle, a disc
+  from above, a sheet. A recoloured Lump's arms and `twin` take his `fill` and `line`;
+  `arm(c, pts, seed, { fill, line })` does the same for a loose one. `SKIN`, `PALE`, `safe(hex)`.
 - `HOME`, `cam(t, from, to)`: no view, and a view part-way between two others. `iris(c, x, y, r)`:
   darkness with a round hole. `{ bare: true }` on `clip`: nothing added at either end.
+- `view(zoom, focus, to, turn)`: `turn` tips the whole scene by that many radians, as if the cube were
+  tilted; `cam` eases it like the rest.
 - Staging: `view(zoom, focus, to)` for `extra: { view }` shows the whole scene closer, further off or
   shifted; `clip(name, { mirror: true })` flips a clip left to right; `tip(rot)` gives `xf` options that
   lay him over without burying him; `gone(extra)` is a drawing without him; `walk(from, to, n, o)`

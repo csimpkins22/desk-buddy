@@ -1,48 +1,57 @@
-// Campfire: he toasts a marshmallow over a small fire, it catches alight, and he blows it out sooty-faced.
+// A quiet night, seen from far off: he sits small by a little fire under a few stars, warms his nubs, yawns, leans, and falls asleep beside it as it burns low.
 (() => {
-  const { D, xf, FACE, boil, closedPath, kit } = window.__lump, k = kit.clip('campfire');
-  const { CREAM, DARK, YELLOW, RED, BROWN, WHITE, TAU } = kit;
-  const tw = (a, b, n) => kit.steps(a, b, n + 1).slice(1);
-  const pose = t => ({ k: 1 - 0.1 * t, dx: -30 * t }), O = pose(1), HAND = [152, 154], OVER = [192, 146], NEAR = [162, 112];
-  const fire = (c, seed) => {
-    c.save(); c.lineCap = c.lineJoin = 'round';
-    [[CREAM, 10], [BROWN, 6]].forEach(([col, w]) => { c.strokeStyle = col; c.lineWidth = w; c.beginPath(); c.moveTo(175, 198); c.lineTo(209, 191); c.moveTo(175, 191); c.lineTo(209, 198); c.stroke(); });
-    c.strokeStyle = CREAM; c.lineWidth = 2.4; c.fillStyle = RED;
-    closedPath(c, boil([[178, 190], [182, 170], [188, 176], [192, 156], [198, 174], [204, 168], [206, 190], [192, 196]], seed, 2.5)); c.fill(); c.stroke();
-    c.fillStyle = YELLOW; closedPath(c, boil([[185, 190], [189, 177], [193, 168], [198, 180], [199, 190], [192, 194]], seed + 5, 2)); c.fill();
-    c.restore();
-  };
-  const stick = (c, [x, y], burnt, flame, seed) => {
-    c.save(); c.lineCap = c.lineJoin = 'round';
-    [[CREAM, 6], [BROWN, 3]].forEach(([col, w]) => { c.strokeStyle = col; c.lineWidth = w; c.beginPath(); c.moveTo(HAND[0], HAND[1]); c.lineTo(x, y); c.stroke(); });
-    c.strokeStyle = CREAM; c.lineWidth = 2.4; c.fillStyle = burnt ? '#3A3A40' : WHITE; c.beginPath(); c.roundRect(x - 8, y - 7, 16, 13, 4); c.fill(); c.stroke();
-    if (flame) { const f = flame; c.fillStyle = YELLOW; c.strokeStyle = RED; closedPath(c, boil([[x - 7 * f, y - 6], [x - 4 * f, y - 6 - 11 * f], [x, y - 6 - 22 * f], [x + 5 * f, y - 6 - 10 * f], [x + 7 * f, y - 6]], seed, 1.5)); c.fill(); c.stroke(); }
-    c.restore();
-  };
-  const soot = (c, d, o) => {
-    const [fx, fy] = kit.pt(o, [128, 116]);
-    c.save(); closedPath(c, d.body); c.clip(); c.globalAlpha *= 0.7; c.fillStyle = DARK; c.beginPath(); c.ellipse(fx, fy, 36, 28, 0, 0, TAU); c.fill(); c.restore();
-    [[116, 110], [140, 108]].forEach(p => { const [x, y] = kit.pt(o, p); c.fillStyle = CREAM; c.beginPath(); c.arc(x, y, 6, 0, TAU); c.fill(); c.fillStyle = DARK; c.beginPath(); c.arc(x, y, 2.6, 0, TAU); c.fill(); });
-  };
-  // s.a: opacity of the props; s.tip: where the marshmallow is; s.flame: size of its flame; s.burnt; s.soot; s.smoke: [x, y, r, opacity]
-  const L = (face, o, s = {}) => xf(D.N, { ...o, face, extra: { arm2: [kit.pt(o, [166, 140]), HAND], front: (c, d, seed) => {
-    kit.fade(c, s.a ?? 1, () => { fire(c, seed); stick(c, s.tip || OVER, s.burnt, s.flame, seed); if (s.soot) soot(c, d, o); });
-    if (s.smoke) kit.fade(c, s.smoke[3], () => kit.puff(c, s.smoke[0], s.smoke[1], seed, s.smoke[2]));
-  } } });
+  const { D, xf, boil, closedPath, kit } = window.__lump, { TAU } = kit;
+  const k = kit.clip('campfire');
+  const cam = t => kit.view(1 - 0.4 * t, [128, 201], [128 - 8 * t, 201 - t]), wide = cam(1), X = 150, HIM = -94;
+  const STARS = [[-40, -96], [40, -60], [120, -108], [210, -70], [290, -100], [252, -18]];
 
-  tw(0, 1, 3).forEach((t, i) => k.add('go' + i, 2, L(FACE.lookr, pose(t), { a: t })));
-  k.add('toast', 14, L(FACE.happy, O));
-  k.add('sniff', 6, L(FACE.lookup, { ...O, ky: 1.03 }));
-  [0.5, 1].forEach((flame, i) => k.add('lit' + i, 2, L(i ? FACE.shock : FACE.lookr, O, { flame })));
-  k.add('eek', 4, L(FACE.shock, { ...O, ky: 0.96 }, { flame: 1.1 }));
-  k.add('pull0', 2, L(FACE.shock, O, { flame: 1, tip: [178, 126] }));
-  k.add('pull1', 2, L(FACE.shock, O, { flame: 1, tip: NEAR }));
-  k.add('inhale', 2, L(FACE.ah, { ...O, ky: 1.06 }, { flame: 1.1, tip: NEAR }));
-  k.add('blow0', 2, L(FACE.puff, { ...O, rot: 0.06 }, { flame: 0.7, tip: NEAR }));
-  k.add('blow1', 2, L(FACE.puff, { ...O, rot: 0.06 }, { flame: 0.4, tip: NEAR }));
-  k.add('blow2', 2, L(FACE.puff, { ...O, rot: 0.06 }, { burnt: 1, tip: NEAR, smoke: [128, 116, 20, 1] }));
-  k.add('sooty0', 2, L([], O, { burnt: 1, tip: NEAR, soot: 1, smoke: [132, 92, 16, 0.5] }));
-  k.add('sooty', 16, L([], O, { burnt: 1, tip: NEAR, soot: 1 }));
-  [0.66, 0.33, 0].forEach((a, i) => k.add('off' + i, 2, L(a ? [] : FACE.grump, pose(a), { burnt: 1, tip: NEAR, soot: 1, a })));
-  k.done();
+  // the night: stars, two crossed logs and a flame of the given size (0 is unlit) with sparks climbing off it
+  const night = (c, seed, tick, size, logs = 1, stars = true) => {
+    if (stars) STARS.forEach(([x, y], i) => kit.sparkle(c, x, y, i % 2 ? 13 : 17));
+    if (logs <= 0) return;
+    c.save(); c.globalAlpha = logs; c.lineCap = c.lineJoin = 'round';
+    [[kit.CREAM, 15], [kit.BROWN, 9]].forEach(([col, w]) => {
+      c.strokeStyle = col; c.lineWidth = w; c.beginPath(); c.moveTo(X - 26, 197); c.lineTo(X + 22, 187); c.moveTo(X + 26, 197); c.lineTo(X - 22, 187); c.stroke();
+    });
+    c.globalAlpha = 1;
+    if (size > 0) {
+      const flame = (s, col, line) => {
+        closedPath(c, boil([[X - 17 * s, 188], [X - 13 * s, 188 - 22 * s], [X, 188 - 50 * s], [X + 13 * s, 188 - 22 * s], [X + 17 * s, 188]], seed, 6 * s));
+        c.fillStyle = col; c.fill(); if (line) { c.strokeStyle = kit.CREAM; c.lineWidth = 4; c.stroke(); }
+      };
+      flame(size, kit.RED, true); flame(size * 0.55, kit.YELLOW);
+      const ph = Math.floor(tick / 2) % 6; c.fillStyle = kit.YELLOW;
+      for (let j = 0; j < (size > 0.7 ? 3 : size > 0.3 ? 1 : 0); j++) {
+        const step = (ph + j * 2) % 6;
+        c.beginPath(); c.arc(X + [-11, 9, -2][j] + (step % 2 ? 4 : -4), 174 - 50 * size - step * 13, 6.5 - step * 0.7, 0, TAU); c.fill();
+      }
+    }
+    c.restore();
+  };
+  const set = (size, more = {}) => ({ view: wide, back: (c, d, seed, tick) => night(c, seed, tick, size), ...more });
+  const sit = { dx: HIM, ky: 0.93, kx: 1.04 };
+
+  kit.steps(0, 1, 6).forEach((t, i) => k.add('out' + i, 2, xf(D.N, { dx: HIM * t, rot: i % 2 ? 0.05 : -0.05, face: kit.look(-4, 0),
+    extra: { view: cam(t), back: (c, d, seed, tick) => night(c, seed, tick, 0, (t - 0.4) / 0.6, t > 0.3) } })));
+  [0.15, 0.4, 0.75, 1].forEach((s, i) => k.add('light' + i, 4, xf(D.N, { ...sit, face: kit.look(5, 2, i < 2 ? 'o' : 'smile'), extra: set(s) })));
+  k.add('sit', 30, xf(D.N, { ...sit, face: kit.look(5, 2, 'smile'), extra: set(1) }));
+
+  // warming his nubs: the near one held out to the fire, the far one peeping out from behind him
+  const warm = (name, lift) => {
+    const o = { ...sit, rot: 0.07 }, sh = kit.pt(o, [166, 140]), far = kit.pt(o, [150, 154]);
+    k.add(name, 6, xf(D.N, { ...o, face: kit.look(5, 3, 'smile'), extra: { view: wide, arm2: [sh, [sh[0] + 34, sh[1] - 6 - lift]],
+      back: (c, d, seed, tick) => { night(c, seed, tick, 1); kit.arm(c, [far, [far[0] + 54, far[1] - 2 + lift]], seed); } } }));
+  };
+  warm('warm0', 0); warm('warm1', 6); k.add('warm0', 6); k.add('warm1', 6);
+  k.add('content', 20, xf(D.N, { ...sit, face: kit.faces.closed, extra: set(1) }));
+
+  const yawn = [['stroke', [[109, 108], [116, 104], [123, 108]], 3], ['stroke', [[133, 106], [140, 102], [147, 106]], 3], ['mouth', [[116, 114], [140, 113], [143, 132], [128, 141], [113, 132]], [128, 136, 8, 5]]];
+  k.add('yawn0', 4, xf(D.N, { ...sit, face: kit.look(0, -2, 'o'), extra: set(1) }));
+  k.add('yawn1', 14, xf(D.N, { dx: HIM, ky: 1.06, kx: 0.98, face: yawn, extra: set(1) }));
+  k.add('heavy', 16, xf(D.N, { ...sit, face: D.Y3.face, extra: set(1) }));
+  k.add('lean0', 8, xf(D.N, { ...sit, rot: 0.14, face: D.Y3.face, extra: set(1) }));
+  k.add('lean1', 8, xf(D.T1, { dx: HIM, rot: 0.1, extra: set(1) }));
+  k.add('lean2', 8, xf(D.T2, { dx: HIM, extra: set(0.9) }));
+  [[0.8, 12], [0.62, 12], [0.5, 12], [0.4, 28]].forEach(([s, ticks], i) => k.add('asleep' + i, ticks, xf(D.S1, { dx: HIM, extra: set(s, { fxm: 'idle' }) })));
+  k.done({ doze: false });
 })();

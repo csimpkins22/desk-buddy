@@ -1,37 +1,42 @@
-// Toaster: he waits by a toaster, taps his side impatiently, and the toast launches and lands on his head.
+// He sleeps through it: a toaster off to the left pops, and the toast arcs over and lands flat on his back.
 (() => {
-  const { D, xf, FACE, kit } = window.__lump, k = kit.clip('toaster');
-  const toast = (c, x, y, rot) => {
-    c.save(); c.translate(x, y); c.rotate(rot); c.lineJoin = 'round'; c.strokeStyle = kit.CREAM; c.lineWidth = 2.4;
-    c.fillStyle = '#D9A441'; c.beginPath(); c.roundRect(-11, -10, 22, 20, 4); c.fill(); c.stroke();
-    c.fillStyle = '#A8742A'; c.fillRect(-6, -5, 12, 10);
+  const { D, xf } = window.__lump, kit = window.__lump.kit, { CREAM, GREY, DARK, YELLOW, RED, TAU } = kit;
+  const k = kit.clip('toaster', { asleep: true });
+  const cam = t => kit.view(1 - 0.2 * t, [120 - 42 * t, 201], [120, 201 - 5 * t]), TX = -34, STEEL = '#5E6B7C';
+  // the toaster stands just off the left of the screen until the view pulls back; lever 1 is down, 0 is up
+  const toaster = (c, hop, lever, glow) => {
+    c.save(); c.translate(TX, 201 - hop); c.scale(1.3, 1.3); c.lineCap = c.lineJoin = 'round'; c.strokeStyle = CREAM; c.lineWidth = 2.6;
+    c.fillStyle = STEEL; c.fillRect(-22, -5, 10, 5); c.fillRect(12, -5, 10, 5);
+    c.fillStyle = GREY; c.beginPath(); c.roundRect(-28, -47, 56, 43, 9); c.fill(); c.stroke();
+    c.fillStyle = glow ? YELLOW : DARK; c.beginPath(); c.roundRect(-18, -43, 36, 6, 2); c.fill();
+    c.fillStyle = STEEL; c.fillRect(-20, -16, 40, 4);
+    c.fillStyle = RED; c.lineWidth = 1.8; c.beginPath(); c.roundRect(26, -36 + lever * 16, 11, 7, 2); c.fill(); c.stroke();
     c.restore();
   };
-  const scene = (c, seed, a, t, up) => kit.fade(c, a, () => {
-    kit.table(c, 190, seed, { w: 64 });
-    toast(c, ...t);
-    c.save(); c.lineJoin = c.lineCap = 'round'; c.strokeStyle = kit.CREAM; c.lineWidth = 2.6;
-    c.fillStyle = kit.CREAM; c.fillRect(211, up ? 144 : 154, 8, 5);
-    c.fillStyle = kit.GREY; c.beginPath(); c.roundRect(168, 138, 44, 27, 6); c.fill(); c.stroke();
-    c.strokeStyle = kit.DARK; c.lineWidth = 4; c.beginPath(); c.moveTo(178, 143); c.lineTo(202, 143); c.stroke();
+  // a slice h tall before it is drawn 1.4 times over: 26 is face on, 10 is lying flat
+  const toast = (c, x, y, rot, h = 26) => {
+    c.save(); c.translate(x, y); c.rotate(rot); c.scale(1.4, 1.4); c.lineJoin = 'round'; c.strokeStyle = CREAM; c.lineWidth = 2.1;
+    c.fillStyle = '#C98A3C'; c.beginPath(); c.roundRect(-13, -h / 2, 26, h, Math.min(5, h / 3)); c.fill(); c.stroke();
+    c.fillStyle = '#F2D08A'; c.beginPath(); c.roundRect(-8, -h / 2 + 3, 16, h - 6, 2); c.fill();
     c.restore();
-  });
-  const IN = [190, 153, 0];
-  const T = (o, { a = 1, t = IN, up = false, tap } = {}) => {
-    const p = { dx: -34, ...o };
-    return xf(D.N, { ...p, extra: { ...(tap ? { arm: [kit.pt(p, [90, 140]), tap] } : {}), front: (c, d, seed) => scene(c, seed, a, t, up) } });
   };
+  const shot = (t, { hop = 0, lever = 1, glow = true, bread, a = 1 } = {}) => xf(D.S1, { extra: { fxm: 'idle', view: cam(t), back: c => toaster(c, hop, lever, glow),
+    front: c => { if (bread) kit.fade(c, a, () => toast(c, ...bread)); } } });
 
-  [0.3, 0.65, 1].forEach((a, i) => k.add('in' + i, 2, T({ face: FACE.lookr }, { a })));
-  k.add('wait', 6, T({ face: FACE.lookr }));
-  k.add('t0', 2, T({ face: FACE.grump }, { tap: [44, 168] }));
-  k.add('t1', 2, T({ face: FACE.grump }, { tap: [34, 156] }));
-  for (let i = 0; i < 3; i++) { k.add('t0', 2); k.add('t1', 2); }
-  k.add('wait2', 4, T({ face: FACE.grump }, { tap: [44, 168] }));
-  [[190, 122, 0], [188, 86, 0.3], [180, 52, 0.8], [160, 30, 1.4], [130, 26, 2.2], [106, 42, 2.8]].forEach((t, i) =>
-    k.add('pop' + i, 2, T({ face: i ? FACE.lookup : FACE.shock, ky: i ? 1 : 1.05 }, { t, up: true })));
-  k.add('land', 2, T({ face: FACE.shock, ky: 0.93, kx: 1.04 }, { t: [95, 70, 3.3], up: true }));
-  k.add('hat', 14, T({ face: FACE.happy }, { t: [94, 62, 3.3], up: true }));
-  [0.7, 0.4, 0.15].forEach((a, i) => k.add('out' + i, 2, T({ face: FACE.happy }, { a, t: [94, 62, 3.3], up: true })));
+  [0.35, 0.75, 1].forEach((t, i) => k.add('back' + i, 2, shot(t)));
+  for (let n = 0; n < 2; n++) { k.add('hum0', 2, shot(1, { hop: 1.5 })); k.add('hum1', 2, shot(1)); }
+  k.add('pop', 2, shot(1, { hop: 7, lever: 0, glow: false, bread: [TX, 136, 0] }));
+  const LAND = [124, 133];
+  for (let j = 1; j < 9; j++) {
+    const t = j / 9, h = t < 0.7 ? 26 : 26 - 16 * (t - 0.7) / 0.3;
+    k.add('fly' + j, 2, shot(1, { hop: j === 1 ? 3 : 0, lever: 0, glow: false, bread: [TX + (LAND[0] - TX) * t, 140 + (LAND[1] - 140) * t - 512 * t * (1 - t), t * TAU * 1.5, h] }));
+  }
+  const lain = [...LAND, -0.04, 10];
+  k.add('hit', 2, shot(1, { lever: 0, glow: false, bread: lain }));
+  k.add('hop', 2, shot(1, { lever: 0, glow: false, bread: [LAND[0] + 2, LAND[1] - 7, 0.12, 10] }));
+  k.add('hit', 16);
+  [0.65, 0.3, 0].forEach((t, i) => k.add('in' + i, 2, shot(t, { lever: 0, glow: false, bread: lain })));
+  k.add('fade0', 2, shot(0, { lever: 0, glow: false, bread: lain, a: 0.6 }));
+  k.add('fade1', 2, shot(0, { lever: 0, glow: false, bread: lain, a: 0.3 }));
   k.done();
 })();

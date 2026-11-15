@@ -1,6 +1,7 @@
 // Props and helpers that clips keep needing, as window.__lump.kit. The exporter loads this before every clip script.
 (() => {
   const L = window.__lump, { D, CLIPS, xf, WAKE, DOZE, boil, openPath, closedPath, inkStroke } = L, TAU = Math.PI * 2;
+  const SKIN = '#E0D8A8', PALE = '#E9E2D2';     // tones for a hand and for a drained or unpainted Lump that the board leaves alone
   const CREAM = '#FFF1DC', DARK = '#17161A', YELLOW = '#FFD23F', RED = '#FF5A4D', BROWN = '#6B4A1F', GREEN = '#58D68D', BLUE = '#5AB8FF', GREY = '#9FB0C4', WHITE = '#F4F8FF';
   const line = (c, w = 3) => { c.lineCap = c.lineJoin = 'round'; c.strokeStyle = CREAM; c.lineWidth = w; };
 
@@ -16,7 +17,7 @@
     return {
       add(part, ticks, drawing) {
         const id = name + '_' + part;
-        if (drawing) D[id] = mirror ? { ...drawing, view: drawing.view ? [...drawing.view.slice(0, 5), !drawing.view[5]] : [1, 120, 0, 120, 0, true] } : drawing;
+        if (drawing) D[id] = mirror ? { ...drawing, view: drawing.view ? [...drawing.view.slice(0, 5), !drawing.view[5], -(drawing.view[6] || 0)] : [1, 120, 0, 120, 0, true, 0] } : drawing;
         else if (!D[id]) throw new Error(`${id} has not been added with a drawing yet`);
         const first = seq.length === start, even = Math.max(2, ticks + (ticks % 2));
         seq.push([id, first && odd ? even + 1 : even]);
@@ -30,13 +31,14 @@
   // The whole scene through a camera, for extra: { view }. zoom 2 with focus on his face is a close-up; 0.6 is a wide shot with room
   // for a big setting; moving `to` across drawings pans. focus is the scene point that lands on the screen point `to`.
   // The zoom is rounded to the 256ths the board stores, or a wide shot lands a fraction of a pixel off and is stored as pixels.
-  const view = (zoom, focus = [128, 130], to = [120, 120]) => [Math.round(zoom * 256) / 256, focus[0], focus[1], to[0], to[1], false];
+  // turn tips the whole scene by that many radians about `to`, as if the cube were tilted.
+  const view = (zoom, focus = [128, 130], to = [120, 120], turn = 0) => [Math.round(zoom * 256) / 256, focus[0], focus[1], to[0], to[1], false, turn];
   // a view that eases: zoom(1, focus) changes nothing, and by zoom(z, focus) the focus has moved to the middle of the screen. For steps(1, 2, n).
   const zoom = (z, focus = [128, 130], to = [120, 120]) => { const t = z === 1 ? 0 : Math.min(1, Math.abs(z - 1) / 0.5); return view(z, focus, [focus[0] + (to[0] - focus[0]) * t, focus[1] + (to[1] - focus[1]) * t]); };
   // the view that changes nothing, and a view part of the way (t from 0 to 1) between two others: for pans, pull-backs and returns.
   // cam(t, HOME, view(0.6, ...)) with t from steps(0, 1, n) eases out to a wide shot; swap the two to come back.
-  const HOME = [1, 120, 120, 120, 120, false];
-  const cam = (t, a, b) => { const m = i => a[i] + (b[i] - a[i]) * t; return [Math.round(m(0) * 256) / 256, m(1), m(2), m(3), m(4), false]; };
+  const HOME = [1, 120, 120, 120, 120, false, 0];
+  const cam = (t, a, b) => { const m = i => (a[i] || 0) + ((b[i] || 0) - (a[i] || 0)) * t; return [Math.round(m(0) * 256) / 256, m(1), m(2), m(3), m(4), false, m(6)]; };
   // xf options that tip him over by rot and keep him on the floor (turning about his feet would bury half of him). 1.57 is flat on his side.
   const tip = (rot, o = {}) => ({ rot, ox: 128, oy: 136, dy: 65 - Math.abs(Math.sin(rot)) * 60 - Math.abs(Math.cos(rot)) * 65 + (o.dy || 0), ...o, dy: 65 - Math.abs(Math.sin(rot)) * 60 - Math.abs(Math.cos(rot)) * 65 + (o.dy || 0) });
   // a drawing with him off screen altogether, for a beat where only the setting or the props are seen
@@ -62,26 +64,41 @@
     const r = o.rot || 0, k = o.k ?? 1, ox = o.ox ?? 128, oy = o.oy ?? 201, u = (x - ox) * (o.kx ?? 1), v = (y - oy) * (o.ky ?? 1);
     return [ox + (u * Math.cos(r) - v * Math.sin(r)) * k + (o.dx || 0), oy + (u * Math.sin(r) + v * Math.cos(r)) * k + (o.dy || 0)];
   };
+  // A drawing part of the way (t from 0 to 1) between two others: his outline, cowlick and shadow ease from a's to b's, and the face is
+  // a's until half way. Both need the same number of points, which any two made with xf from the same base have, as does round().
+  const morph = (a, b, t) => {
+    const mix = (p, q) => p.map((v, i) => Array.isArray(v) ? mix(v, q[i]) : v + (q[i] - v) * t);
+    return { ...(t < 0.5 ? a : b), body: mix(a.body, b.body), curl: mix(a.curl, b.curl), shadow: mix(a.shadow, b.shadow) };
+  };
+  // him as a plain oval, point for point with his standing outline, so morph(xf(D.N, ...), round(...), t) turns him into a ball, a disc
+  // seen from above, a puddle (a wide flat one) or a sheet. Give it a face if it wants one.
+  const round = (cx, cy, rx, ry, face = []) => {
+    const B = D.N.body, mx = B.reduce((s, p) => s + p[0], 0) / B.length, my = B.reduce((s, p) => s + p[1], 0) / B.length;
+    return { ...D.N, face, body: B.map(([x, y]) => { const a = Math.atan2(y - my, x - mx); return [cx + Math.cos(a) * rx, cy + Math.sin(a) * ry]; }),
+             curl: D.N.curl.map(([x, y]) => [cx + (x - D.N.curl[0][0]) * 0.6, cy - ry + (y - D.N.curl[0][1]) * 0.6]), shadow: [cx, rx * 0.9] };
+  };
+  // whether the board leaves a colour alone (true) or would repaint it as his body (false): for choosing pale and warm tones
+  const safe = hex => { const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)), beta = g / 241, alpha = r / 255 - beta; return Math.max(r, g, b) < 8 || alpha <= 0.02 || b < alpha * 255 + beta * 220 - 48; };
   // a drawing mirrored left to right about the middle of the screen (x 128), arms included. Flip last: xf a drawing, then flip it.
   const flip = d => ({ ...d, shadow: [256 - d.shadow[0], d.shadow[1]], body: d.body.map(([x, y]) => [256 - x, y]), curl: d.curl.map(([x, y]) => [256 - x, y]),
     ...Object.fromEntries(['arm', 'arm2'].filter(n => d[n]).map(n => [n, d[n].map(([x, y]) => [256 - x, y])])),
     face: d.face.map(mk => mk[0] === 'stroke' || mk[0] === 'mouth' ? [mk[0], mk[1].map(([x, y]) => [256 - x, y]), ...mk.slice(2)] : [mk[0], 256 - mk[1], ...mk.slice(2)]) });
   // a stubby arm from [shoulder, hand], as the page draws his
-  const arm = (c, [[x0, y0], [x1, y1]], seed = 0) => {
+  const arm = (c, [[x0, y0], [x1, y1]], seed = 0, { fill, line = CREAM } = {}) => {
     const len = Math.hypot(x1 - x0, y1 - y0);
     c.save(); c.lineJoin = c.lineCap = 'round'; c.translate(x0, y0); c.rotate(Math.atan2(y1 - y0, x1 - x0));
     closedPath(c, boil([[0, -7], [len * 0.5, -7], [len, -6], [len + 6, 0], [len, 6], [len * 0.5, 7], [0, 7]], seed, 0.8));
-    c.fillStyle = L.tint(); c.fill(); c.strokeStyle = CREAM; inkStroke(c, 3); c.restore();
+    c.fillStyle = fill || L.tint(); c.fill(); c.strokeStyle = line; inkStroke(c, 3); c.restore();
   };
   // another Lump, drawn the way the page draws him, from a drawing such as xf(D.N, { k: 0.6, dx: 60, face, extra: { arm2 } }).
   // Any face works, and arm and arm2 are drawn; other extras are not. Below 0.6 scale his face stops reading.
   const twin = (c, d, seed, dx = 0, dy = 0) => {
+    const fill = d.fill || L.tint(), line = d.line || CREAM; if (d.still) seed = 0;
     c.save(); c.lineJoin = c.lineCap = 'round'; c.translate(dx, dy);
     c.fillStyle = 'rgba(255,241,220,.10)'; c.beginPath(); c.ellipse(d.shadow[0] + 4, 203, d.shadow[1], 6, 0, 0, TAU); c.fill();
-    c.save(); c.translate(4, 2.5); closedPath(c, boil(d.body, seed + 57, 2.2)); c.fillStyle = L.tint(); c.fill(); c.restore();
-    c.strokeStyle = CREAM; closedPath(c, boil(d.body, seed + 7, 2.2)); inkStroke(c, 4);
-    openPath(c, boil(d.curl, seed + 27, 1.2)); inkStroke(c, 3.4);
-    [[d.arm, 98], [d.arm2, 99]].forEach(([a, n]) => a && arm(c, a, seed + n));
+    if (fill !== 'none') { c.save(); c.translate(4, 2.5); closedPath(c, boil(d.body, seed + 57, 2.2)); c.fillStyle = fill; c.fill(); c.restore(); }
+    if (line !== 'none') { c.strokeStyle = line; closedPath(c, boil(d.body, seed + 7, 2.2)); inkStroke(c, 4); openPath(c, boil(d.curl, seed + 27, 1.2)); inkStroke(c, 3.4); }
+    [[d.arm, 98], [d.arm2, 99]].forEach(([a, n]) => a && arm(c, a, seed + n, { fill: fill === 'none' ? undefined : fill, line: line === 'none' ? CREAM : line }));
     L.drawFace(c, d, seed);
     c.restore();
   };
@@ -170,5 +187,5 @@
   // draw fn at an opacity, for a prop fading in or out
   const fade = (c, alpha, fn) => { c.save(); c.globalAlpha = alpha; fn(); c.restore(); };
 
-  L.kit = { CREAM, DARK, YELLOW, RED, BROWN, GREEN, BLUE, GREY, WHITE, TAU, HOME, clip, view, zoom, cam, iris, tip, gone, walk, look, faces, steps, pt, flip, twin, arm, mug, steam, table, balloon, sparkle, sweat, mark, puff, room, fade };
+  L.kit = { SKIN, PALE, morph, round, safe, CREAM, DARK, YELLOW, RED, BROWN, GREEN, BLUE, GREY, WHITE, TAU, HOME, clip, view, zoom, cam, iris, tip, gone, walk, look, faces, steps, pt, flip, twin, arm, mug, steam, table, balloon, sparkle, sweat, mark, puff, room, fade };
 })();

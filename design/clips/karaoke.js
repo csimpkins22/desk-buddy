@@ -1,42 +1,63 @@
-// Karaoke: he sings into a microphone with notes drifting up, goes for the high note, and a hanging lightbulb pops.
+// Two Lumps share one microphone, swaying; they go for the high note together, the little one's note cracks, and he gives it a look.
 (() => {
-  const { D, xf, FACE, kit } = window.__lump, k = kit.clip('karaoke'), { CREAM, GREY, YELLOW, DARK, TAU } = kit;
-  const ink = (c, w = 2.8) => { c.lineCap = c.lineJoin = 'round'; c.strokeStyle = CREAM; c.lineWidth = w; };
-  const mic = c => {
-    ink(c, 3.4); c.beginPath(); c.moveTo(190, 199); c.lineTo(218, 199); c.moveTo(204, 199); c.lineTo(204, 120); c.lineTo(172, 112); c.stroke();
-    ink(c, 2.6); c.fillStyle = GREY; c.beginPath(); c.arc(166, 111, 8, 0, TAU); c.fill(); c.stroke();
-    c.fillStyle = DARK; c.fillRect(162, 109, 8, 3);
-  };
-  const bulb = (c, len, sx, st) => {
-    c.save(); ink(c, 3); c.beginPath(); c.moveTo(40, 0); c.lineTo(40 + sx, len); c.stroke();
-    c.translate(40 + sx, len); c.lineWidth = 2.4; c.fillStyle = GREY; c.beginPath(); c.rect(-6, 0, 12, 9); c.fill(); c.stroke();
-    if (st === 0) { c.fillStyle = YELLOW; c.beginPath(); c.arc(0, 22, 14, 0, TAU); c.fill(); c.stroke(); }
-    else if (st === 1) {
-      c.strokeStyle = YELLOW; c.lineWidth = 3.5;
-      for (let i = 0; i < 7; i++) { const a = i * TAU / 7 + 0.3; c.beginPath(); c.moveTo(Math.cos(a) * 8, 22 + Math.sin(a) * 8); c.lineTo(Math.cos(a) * 25, 22 + Math.sin(a) * 25); c.stroke(); }
-    } else { c.beginPath(); [[-6, 9], [-8, 17], [-3, 13], [0, 20], [4, 13], [8, 17], [6, 9]].forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.stroke(); }
+  const { D, xf, FACE, kit } = window.__lump, k = kit.clip('karaoke', { mirror: true });
+  // drawn with the pair on the left: the mirror puts them on the right
+  const cam = z => kit.view(z, [120, 201], [120, 201]), HIS = -83, ITS = 20;
+  const shut = kit.faces.closed.slice(0, 2), SING = [[...shut, kit.look(0, 0, 'open')[2]], [...shut, kit.look(0, 0, 'o')[2]]];
+  const SIDE = [...kit.look(5, 1, 'flat'), ['stroke', [[110, 103], [125, 105]], 2.8], ['stroke', [[135, 103], [150, 102]], 2.8]];
+  const stand = (c, y) => {
+    c.save(); c.translate(0, y); c.lineCap = 'round'; c.strokeStyle = kit.CREAM; c.lineWidth = 3.6;
+    c.beginPath(); c.moveTo(108, 201); c.lineTo(108, 130); c.moveTo(93, 201); c.lineTo(123, 201); c.stroke();
+    c.fillStyle = kit.DARK; c.lineWidth = 2.6; c.beginPath(); c.rect(103, 124, 10, 9); c.fill(); c.stroke();
+    c.fillStyle = kit.GREY; c.lineWidth = 3; c.beginPath(); c.arc(108, 115, 10, 0, kit.TAU); c.fill(); c.stroke();
     c.restore();
   };
-  const note = (c, x, y) => {
-    c.fillStyle = CREAM; c.beginPath(); c.ellipse(x, y, 6, 4.5, -0.4, 0, TAU); c.fill();
-    ink(c, 3); c.beginPath(); c.moveTo(x + 5, y - 1); c.lineTo(x + 5, y - 19); c.lineTo(x + 13, y - 14); c.stroke();
+  // stem and flag on the left, so the mirror shows them the right way round
+  const note = (c, x, y, s, col) => {
+    c.save(); c.lineCap = c.lineJoin = 'round'; c.fillStyle = c.strokeStyle = col; c.lineWidth = 3.8;
+    c.beginPath(); c.ellipse(x, y, 7 * s, 5.2 * s, 0.4, 0, kit.TAU); c.fill();
+    c.beginPath(); c.moveTo(x - 6 * s, y - s); c.lineTo(x - 6 * s, y - 23 * s); c.quadraticCurveTo(x - 13 * s, y - 19 * s, x - 15 * s, y - 10 * s); c.stroke();
+    c.restore();
   };
-  const f = (o, face, { a = 1, len = 44, st = 0, notes, shake } = {}) => xf(D.N, { dx: -14, ...o, face, extra: { front: (c, d, seed, tick) => {
-    const t = Math.floor(tick / 2) * 2;
-    bulb(c, len, shake ? (t % 4 ? 3 : -3) : 0, st);
-    kit.fade(c, a, () => mic(c));
-    if (notes) [0, 1].forEach(j => { const p = (t * 2.5 + j * 38) % 76; note(c, 186 + j * 20 + (p % 20 < 10 ? 2 : -2), 94 - p); });
-  } } });
+  // the same note snapped in two, its halves `gap` apart and dropping
+  const cracked = (c, x, y, s, gap) => {
+    c.save(); c.lineCap = c.lineJoin = 'round'; c.fillStyle = c.strokeStyle = kit.BLUE; c.lineWidth = 3.8;
+    c.beginPath(); c.ellipse(x - gap, y + gap * 0.6, 7 * s, 5.2 * s, 0.4, 1.2, 1.2 + Math.PI); c.fill();
+    c.beginPath(); c.ellipse(x + gap, y + gap * 1.4, 7 * s, 5.2 * s, 0.4, 1.2 + Math.PI, 1.2 + kit.TAU); c.fill();
+    c.beginPath(); c.moveTo(x - 6 * s - gap, y - s); c.lineTo(x - 7 * s - gap * 1.6, y - 11 * s); c.stroke();
+    c.beginPath(); c.moveTo(x - 4 * s + gap, y - 13 * s - gap); c.lineTo(x - 2 * s + gap * 1.5, y - 24 * s - gap); c.stroke();
+    c.strokeStyle = kit.CREAM; c.lineWidth = 3.6; c.beginPath(); c.moveTo(x - 6, y - 16 - gap); c.lineTo(x + 5, y - 7); c.lineTo(x - 5, y + 2); c.lineTo(x + 6, y + 12 + gap); c.stroke();
+    c.restore();
+  };
+  const twin = (o, face) => xf(D.N, { k: 0.75, dx: ITS, face, ...o });
+  const shot = (z, him, face, it, front, standY = 0) => xf(D.N, { dx: HIS, ...him, face, extra: { view: cam(z),
+    back: (c, d, seed) => kit.twin(c, it, seed),
+    front: c => { stand(c, standY); if (front) front(c); } } });
 
-  const lens = kit.steps(-30, 44, 3);
-  kit.steps(0, -14, 3).forEach((x, i) => k.add('in' + i, 2, f({ dx: x }, FACE.lookr, { a: [0.35, 0.7, 1][i], len: lens[i] })));
-  k.add('s0', 4, f({ rot: 0.04 }, FACE.ah, { notes: true })); k.add('s1', 4, f({ rot: -0.04, ky: 1.03 }, FACE.aah, { notes: true }));
-  for (let i = 0; i < 2; i++) { k.add('s0', 4); k.add('s1', 4); }
-  k.add('inhale', 4, f({ ky: 0.9, kx: 1.05 }, FACE.puff));
-  k.add('high', 10, f({ ky: 1.12, kx: 0.96 }, FACE.aah, { notes: true, shake: true }));
-  k.add('pop', 2, f({ ky: 1.1, kx: 0.97 }, FACE.aah, { st: 1 }));
-  k.add('oops', 14, f({ ky: 0.97 }, FACE.shock, { st: 2 }));
-  k.add('out0', 2, f({ dx: -7 }, FACE.shock, { st: 2, a: 0.6, len: 10 }));
-  k.add('out1', 2, f({ dx: 0 }, FACE.shock, { st: 2, a: 0.3, len: -30 }));
+  // he shuffles over, a small one joins him and a microphone comes down between them
+  const Z = kit.steps(1, 0.8, 5), HX = kit.steps(-16, HIS, 5), TX = kit.steps(180, ITS, 5), SY = kit.steps(-230, 0, 5);
+  Z.forEach((z, i) => k.add('in' + i, 2, shot(z, { dx: HX[i], rot: i % 2 ? -0.05 : 0.05 }, kit.look(4, 0, 'smile'), twin({ dx: TX[i], rot: i % 2 ? 0.05 : -0.05 }, kit.faces.wide), null, SY[i])));
+  // singing, swaying in time, a stream of notes from each
+  for (let j = 0; j < 12; j++) {
+    const rot = j % 2 ? 0.07 : -0.07, f = SING[j % 2];
+    k.add('sing' + j, 4, shot(0.8, { rot }, f, twin({ rot }, f), c => {
+      [0, 1].forEach(n => { const a = (j * 14 + n * 44) % 88; note(c, 44 + (n ? 9 : -7), 52 - a, Math.min(1, 0.55 + a / 30), kit.YELLOW); });
+      [0, 1].forEach(n => { const a = (j * 14 + 22 + n * 44) % 88; note(c, 158 + a * 0.4, 90 - a, Math.min(0.85, 0.5 + a / 30), kit.BLUE); });
+    }));
+  }
+  // a breath, then the high note: his sails off the top, the little one's wobbles
+  k.add('breath', 4, shot(0.8, { ky: 0.9, kx: 1.05 }, SING[1], twin({ ky: 0.9, kx: 1.05 }, SING[1])));
+  const UP = { ky: 1.1, kx: 0.96, rot: -0.05 }, UP2 = { ky: 1.12, kx: 0.96, rot: 0.05 };
+  [0, 1, 2, 3].forEach(i => k.add('high' + i, 2, shot(0.8, UP, FACE.aah, twin(UP2, FACE.aah), c => {
+    note(c, 46, 34 - i * 22, 1.8, kit.YELLOW); note(c, 182 + (i % 2 ? 5 : -5), 74 - i * 13, 1.7, kit.BLUE);
+    if (i > 1) { c.save(); c.strokeStyle = kit.CREAM; c.lineWidth = 2.6; c.lineCap = 'round'; c.beginPath(); [146, 214].forEach(x => { c.moveTo(x, 62 - i * 13); c.lineTo(x + 5, 68 - i * 13); c.lineTo(x, 74 - i * 13); }); c.stroke(); c.restore(); }
+  })));
+  k.add('crack0', 2, shot(0.8, UP, FACE.aah, twin({ ky: 1.04 }, kit.faces.wide), c => { note(c, 46, -54, 1.8, kit.YELLOW); cracked(c, 182, 34, 1.7, 5); }));
+  k.add('crack1', 4, shot(0.8, { ky: 1.03 }, kit.look(0, 0, 'o'), twin({ ky: 0.96 }, kit.faces.wide), c => cracked(c, 182, 40, 1.7, 10)));
+  k.add('crack2', 4, shot(0.8, {}, SIDE, twin({ ky: 0.94, rot: 0.05 }, FACE.sheep), c => cracked(c, 182, 56, 1.7, 15)));
+  k.add('crack3', 4, shot(0.8, {}, SIDE, twin({ ky: 0.92, rot: 0.08 }, FACE.sheep), c => kit.fade(c, 0.5, () => cracked(c, 182, 80, 1.7, 20))));
+  k.add('look', 14, shot(0.8, { rot: 0.04 }, SIDE, twin({ ky: 0.9, rot: 0.1 }, FACE.sheep)));
+  // the little one slinks off, the microphone goes back up
+  Z.slice().reverse().forEach((z, n) => { const i = 4 - n; k.add('out' + n, 2, shot(z, { dx: HX[i], rot: n % 2 ? 0.05 : -0.05 }, n < 2 ? SIDE : kit.look(0, 0, 'smile'), twin({ dx: TX[i], rot: n % 2 ? -0.05 : 0.05 }, FACE.sheep), null, SY[i])); });
   k.done();
 })();

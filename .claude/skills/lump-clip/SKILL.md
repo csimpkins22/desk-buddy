@@ -48,7 +48,8 @@ writing, decide these on purpose, and when making several, spread them so no two
 - he goes somewhere: crosses the screen, leaves and comes back changed, is chased;
 - the view is the joke: a close-up on his face, a wide shot that reveals what he is standing on, a slow pan;
 - several Lumps, and what passes between them;
-- he plays with the screen itself: its edges, its corners, the glass in front of him;
+- he plays with the screen itself: its edges, its corners, the glass in front of him, the cube being tilted (`kit.view` takes a turn);
+- he knows he is a drawing: his line, his colour and his wobble are things that can go wrong (`fill`, `line`, `still` in `extra`);
 - pure pantomime with nothing but him and a mark or two;
 - a quiet mood piece with no punchline.
 
@@ -117,6 +118,9 @@ Things to know about views, tipping and endings:
   drawing that is him asleep in the usual place hands over without a jump and anything else it
   shows simply stays to the last tick. On your own asleep drawings `fxm: 'idle'` brings back the
   snoring z's (set `fx` in `extra` to place them).
+- To end on an exit, bring him back: after the clip his idle loop shows him asleep at centre, so a
+  clip that leaves him off screen pops him back. Let the empty screen hold for a beat, then have him
+  return (from the other side is funnier) and doze as usual.
 - For something that is there from the very first frame, or a clip where he never stands at
   centre, use `kit.clip(name, { bare: true })`: nothing is added at either end, so open and close
   on drawings of him asleep (`D.S1`) with the scene already round him.
@@ -161,6 +165,8 @@ Detail
   and a faint smirk all vanished on the device. Make the gesture bigger instead of finer.
 - Build a prop from a few shapes with a cream outline (`kit.CREAM`, width 2.4 to 3) and a second
   tone, so it reads without the story. Wobble its outline with `boil` to match his.
+- Hands and other pale warm things: most skin-like tones are repainted as his body. `kit.SKIN` and
+  `kit.PALE` are safe, and `kit.safe(hex)` says whether a colour is.
 - No words. Marks only: `kit.mark` draws `?`, `!`, a tick and a cross.
 
 What the board refuses or repaints

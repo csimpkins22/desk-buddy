@@ -1,40 +1,52 @@
-// Cactus hug: he admires a potted cactus, hugs it, freezes, and backs away covered in prickles.
+// Close on his face: he rests a cheek on a cactus at the left edge and its prickles ping into him one at a time, until he gives up.
 (() => {
-  const { D, xf, FACE, kit } = window.__lump, k = kit.clip('cactus_hug'), { CREAM, GREEN, BROWN, YELLOW, TAU } = kit;
-  const ink = (c, w = 2.8) => { c.lineCap = c.lineJoin = 'round'; c.strokeStyle = CREAM; c.lineWidth = w; };
-  const limb = (c, pts, w) => {
-    c.beginPath(); pts.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y));
-    ink(c, w + 5.5); c.stroke(); c.strokeStyle = GREEN; c.lineWidth = w; c.stroke();
-  };
-  const cactus = c => {
-    limb(c, [[192, 160], [210, 160], [210, 142]], 9); limb(c, [[192, 152], [175, 152], [175, 134]], 9); limb(c, [[192, 176], [192, 124]], 20);
-    c.strokeStyle = '#2E9E5E'; c.lineWidth = 3; c.beginPath(); c.moveTo(192, 170); c.lineTo(192, 128); c.stroke();
-    ink(c); c.fillStyle = BROWN; c.beginPath(); c.moveTo(174, 178); c.lineTo(210, 178); c.lineTo(205, 201); c.lineTo(179, 201); c.closePath(); c.fill(); c.stroke();
-    c.fillStyle = YELLOW; c.beginPath(); c.arc(192, 113, 5.5, 0, TAU); c.fill(); c.stroke();
-  };
-  const prickles = (c, o) => {
-    c.lineCap = 'round'; c.strokeStyle = GREEN; c.lineWidth = 3.2;
-    [[178, 118], [184, 146], [180, 172], [158, 92], [150, 134], [164, 160], [138, 150], [172, 100]].forEach((p, i) => {
-      const [x, y] = kit.pt(o, p); c.beginPath(); c.moveTo(x, y); c.lineTo(x + 10, y - 6 + (i % 3) * 4); c.stroke();
-    });
-  };
-  const OW = [['stroke', [[110, 106], [120, 110], [110, 114]], 3], ['stroke', [[146, 104], [136, 108], [146, 112]], 3], ['stroke', [[120, 126], [125, 123], [130, 127], [135, 124]], 3]];
-  const f = (o, face, { a = 1, hug, pr, bang } = {}) => xf(D.N, { ...o, face, extra: { front: (c, d, seed) => {
-    kit.fade(c, a, () => { cactus(c); if (pr) prickles(c, o); });
-    if (hug) kit.arm(c, [kit.pt(o, [166, 140]), [214, 150]], seed);
-    if (bang) kit.mark(c, '!', 100, 56);
-  } } });
-  const hug = { dx: -10, rot: 0.1 };
+  const { D, xf, boil, closedPath, kit } = window.__lump;
+  const k = kit.clip('cactus_hug'), V = kit.view(1.7, [112, 115]);
+  // where each prickle lands on standing Lump, and the way its tail points
+  const SPOTS = [[92, 120, 3.5], [104, 90, 4.0], [152, 86, 4.6], [108, 154, 3.2], [166, 128, 5.2], [140, 162, 2.7], [128, 146, 3.9]];
+  const GRIM = [['stroke', [[110, 110], [122, 110]], 3], ['stroke', [[134, 108], [146, 108]], 3], ['stroke', [[122, 126], [134, 126]], 2.8]];
+  const WINCE = [['stroke', [[111, 105], [120, 109], [111, 114]], 3], ['stroke', [[146, 103], [137, 107], [146, 112]], 3], ['oval', 128, 126, 4, 5]];
+  const LEAN = { rot: -0.18 }, JOLT = { rot: -0.14, kx: 1.05, ky: 0.94, dx: 3 };
 
-  kit.steps(0, -34, 3).forEach((x, i) => k.add('in' + i, 2, f({ dx: x }, FACE.lookr, { a: [0.35, 0.7, 1][i] })));
-  k.add('admire', 12, f({ dx: -34, rot: 0.04 }, FACE.cute));
-  k.add('antic', 2, f({ dx: -38, rot: -0.05, ky: 0.96 }, FACE.cute));
-  k.add('go', 2, f({ dx: -22, rot: 0.06 }, FACE.happy));
-  k.add('hug', 8, f(hug, FACE.happy, { hug: true }));
-  k.add('freeze', 10, f({ ...hug, ky: 1.04 }, FACE.shock, { hug: true, bang: true }));
-  kit.steps(-16, -40, 3).forEach((x, i) => k.add('back' + i, 2, f({ dx: x, rot: -0.03 }, FACE.shock, { pr: true })));
-  k.add('ouch', 16, f({ dx: -40, ky: 0.97 }, OW, { pr: true }));
-  k.add('out0', 2, f({ dx: -26 }, OW, { pr: true, a: 0.6 }));
-  k.add('out1', 2, f({ dx: -13 }, OW, { pr: true, a: 0.3 }));
-  k.done();
+  const cactus = (c, seed, ox) => {
+    c.save(); c.translate(ox, 0); c.lineJoin = c.lineCap = 'round';
+    closedPath(c, boil([[20, 203], [19, 92], [28, 64], [46, 54], [64, 64], [72, 92], [73, 203]], seed + 3, 1.2));
+    c.fillStyle = kit.GREEN; c.fill(); c.strokeStyle = kit.CREAM; c.lineWidth = 2.6; c.stroke();
+    c.strokeStyle = '#2E9E60'; c.lineWidth = 3; c.beginPath(); c.moveTo(60, 70); c.lineTo(60, 198); c.moveTo(44, 62); c.lineTo(44, 198); c.stroke();
+    c.strokeStyle = kit.CREAM; c.lineWidth = 2.2; c.beginPath();
+    [[52, 72], [66, 90], [54, 108], [67, 126], [53, 144], [66, 162], [54, 180]].forEach(([x, y]) => { c.moveTo(x, y); c.lineTo(x + 7, y - 5); });
+    c.stroke(); c.restore();
+  };
+  const prick = (c, [x, y], a) => { c.beginPath(); c.moveTo(x, y); c.lineTo(x + Math.cos(a) * 13, y + Math.sin(a) * 13); c.stroke(); };
+  // the cactus behind him and n prickles in him; fly is one on its way over, burst the one that has just landed
+  const scene = (o, n, { ox = 0, fly, burst } = {}) => ({
+    back: (c, d, seed) => cactus(c, seed, ox),
+    front: c => {
+      c.save(); c.lineCap = 'round'; c.strokeStyle = kit.CREAM; c.lineWidth = 3;
+      SPOTS.slice(0, n).forEach(([x, y, a]) => prick(c, kit.pt(o, [x, y]), a));
+      if (fly !== undefined) {
+        const [x, y, a] = SPOTS[fly], q = kit.pt(o, [x, y]), from = [76, q[1] - 8], p = [(from[0] + q[0]) / 2, (from[1] + q[1]) / 2];
+        prick(c, p, a); c.lineWidth = 1.8; c.beginPath(); c.moveTo(from[0], from[1]); c.lineTo(p[0] - 6, p[1] - 1); c.stroke();
+      }
+      if (burst !== undefined) {
+        const [x, y, a] = SPOTS[burst], q = kit.pt(o, [x, y]); c.lineWidth = 2;
+        [1.3, -1.3, 2.5, -2.5].forEach(t => { c.beginPath(); c.moveTo(q[0] + Math.cos(a + t) * 6, q[1] + Math.sin(a + t) * 6); c.lineTo(q[0] + Math.cos(a + t) * 12, q[1] + Math.sin(a + t) * 12); c.stroke(); });
+      }
+      c.restore();
+    },
+  });
+
+  kit.steps(1, 1.7, 4).forEach((z, i) => k.add('in' + i, 2, xf(D.N, { face: kit.look(-5, 0, 'smile'), extra: { view: kit.zoom(z, [112, 115]), ...scene({}, 0, { ox: [-84, -52, -18, 0][i] }) } })));
+  kit.steps(-0.06, -0.18, 3).forEach((rot, i) => k.add('lean' + i, i === 2 ? 6 : 2, xf(D.N, { rot, face: kit.faces.closed, extra: { view: V, ...scene({ rot }, 0) } })));
+  const settled = [kit.faces.closed, kit.faces.wide, kit.faces.worried, kit.look(-5, 0, 'wobble'), kit.faces.sad, kit.faces.sad, GRIM];
+  SPOTS.forEach((s, i) => {
+    k.add('fly' + i, 2, xf(D.N, { ...LEAN, face: settled[i], extra: { view: V, ...scene(LEAN, i, { fly: i }) } }));
+    k.add('hit' + i, 2, xf(D.N, { ...JOLT, face: i < 5 ? WINCE : GRIM, extra: { view: V, ...scene(JOLT, i + 1, { burst: i }) } }));
+  });
+  k.add('resigned', 12, xf(D.N, { ...LEAN, face: GRIM, extra: { view: V, ...scene(LEAN, 7) } }));
+  // he slides down it to sleep, prickles and all, as the view lets go
+  [[D.T1, { ky: 0.92 }, 1.6, [112, 118], 0], [D.T1, { ky: 0.92 }, 1.45, [114, 124], -16], [D.T2, { ky: 0.62, kx: 1.12 }, 1.3, [118, 140], -42],
+   [D.T2, { ky: 0.62, kx: 1.12 }, 1.15, [120, 150], -72], [D.S1, { ky: 0.42, kx: 1.2 }, 1, [120, 150], -104]]
+    .forEach(([base, o, z, focus, ox], i) => k.add('down' + i, i === 4 ? 6 : 2, { ...base, view: kit.zoom(z, focus), ...scene(o, 7, { ox }), ...(i === 4 ? { fxm: 'idle' } : {}) }));
+  k.done({ doze: false });
 })();

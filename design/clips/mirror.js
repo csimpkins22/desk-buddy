@@ -1,34 +1,64 @@
-// Mirror: he waves into a standing mirror; his reflection waves late, then pulls a face he didn't make.
+// Four quick poses at a tall mirror, each copied a beat late; then the reflection shrugs, walks out of the frame and off, and he is left staring at empty glass.
+// Written with him on the left and the mirror on the right: the clip is mirrored, so on screen he is on the right.
 (() => {
-  const { D, xf, FACE, kit } = window.__lump, k = kit.clip('mirror'), { CREAM, BROWN, WHITE } = kit;
-  const tongue = [...FACE.chooEyes, ['mouth', [[118, 119], [128, 131], [138, 119]], [128, 129, 6, 5]]];
-  const o = { k: 0.9, dx: -56 }, S = kit.pt(o, [166, 140]), RS = kit.pt({ k: 0.6 }, [166, 140]);
-  const refl = (face, hand) => kit.flip(xf(D.N, { k: 0.6, face, extra: hand ? { arm2: [RS, hand] } : {} }));
-  const R = { still: refl(FACE.lookr), a: refl(FACE.happy, [163, 138]), b: refl(FACE.happy, [168, 150]), face: refl(tongue) };
-  const glass = c => { c.beginPath(); c.roundRect(148, 98, 78, 100, 10); };
-  const mirror = (r, a) => (c, d, seed) => kit.fade(c, a, () => {
-    c.lineJoin = c.lineCap = 'round';
-    c.fillStyle = '#22303C'; glass(c); c.fill();
-    c.save(); glass(c); c.clip(); kit.twin(c, r, seed, 60, -6); c.restore();
-    c.strokeStyle = CREAM; c.lineWidth = 7; glass(c); c.stroke();
-    c.strokeStyle = BROWN; c.lineWidth = 3; glass(c); c.stroke();
-    c.strokeStyle = WHITE; c.lineWidth = 3; c.globalAlpha *= 0.5; c.beginPath(); c.moveTo(158, 116); c.lineTo(168, 106); c.stroke();
-  });
-  const sc = (face, r, { hand, a = 1, ky = 1, dx = -56 } = {}) => xf(D.N, { k: 0.9, dx, ky, face, extra: { ...(hand ? { arm2: [S, hand] } : {}), back: mirror(r, a) } });
+  const { D, xf, FACE, kit } = window.__lump;
+  const k = kit.clip('mirror', { mirror: true }), K = 0.8, ME = -66, RF = -44, HOME = -16;
 
-  k.add('in0', 2, sc(FACE.lookr, R.still, { a: 0.4 }));
-  k.add('in1', 2, sc(FACE.lookr, R.still, { a: 0.8 }));
-  k.add('look', 6, sc(FACE.lookr, R.still));
-  k.add('wa', 4, sc(FACE.happy, R.still, { hand: [128, 110] }));
-  k.add('wb', 4, sc(FACE.happy, R.still, { hand: [136, 124] }));
-  k.add('wa', 4); k.add('wb', 4);
-  k.add('huh', 8, sc(FACE.lookr, R.still));
-  k.add('ra', 4, sc(FACE.lookr, R.a));
-  k.add('rb', 4, sc(FACE.lookr, R.b));
-  k.add('ra', 4);
-  k.add('face', 6, sc(FACE.lookr, R.face));
-  k.add('shock', 14, sc(FACE.shock, R.face, { ky: 1.04 }));
-  k.add('out0', 2, sc(FACE.shock, R.face, { a: 0.6, dx: -38 }));
-  k.add('out1', 2, sc(FACE.shock, R.face, { a: 0.3, dx: -18 }));
+  const mirror = (c, mx) => {
+    c.save(); c.translate(mx, 0); c.lineCap = c.lineJoin = 'round';
+    c.fillStyle = kit.BROWN; c.strokeStyle = kit.CREAM; c.lineWidth = 3; c.beginPath(); c.roundRect(114, 34, 114, 169, 10); c.fill(); c.stroke();
+    c.fillStyle = '#1C3148'; c.lineWidth = 2.4; c.beginPath(); c.roundRect(121, 41, 100, 155, 6); c.fill(); c.stroke();
+    c.strokeStyle = kit.BLUE; c.globalAlpha = 0.6; c.lineWidth = 3; c.beginPath(); c.moveTo(198, 50); c.lineTo(213, 74); c.moveTo(186, 50); c.lineTo(194, 62); c.stroke();
+    c.restore();
+  };
+
+  const arms = (l, r) => o => { const a = kit.pt(o, [90, 140]), b = kit.pt(o, [166, 140]); return { ...(l ? { arm: [a, [a[0] + l[0], a[1] + l[1]]] } : {}), ...(r ? { arm2: [b, [b[0] + r[0], b[1] + r[1]]] } : {}) }; };
+  const P = {
+    stand: { face: kit.look(4, 0, 'smile') },
+    wave1: { face: FACE.happy, arms: arms(null, [5, -34]) },
+    wave2: { face: FACE.happy, arms: arms(null, [17, -27]) },
+    lean: { o: { rot: -0.22 }, face: kit.faces.smug },
+    crouch: { o: { ky: 0.88, kx: 1.05 }, face: FACE.happy },
+    hop: { o: { dy: -28, ky: 1.08, kx: 0.95, shadowK: 0.7 }, face: FACE.happy },
+    squash: { o: { ky: 0.6, kx: 1.1 }, face: kit.faces.wide },
+    tada: { face: FACE.happy, arms: arms([-12, -32], [12, -32]) },
+    unmoved: { face: kit.look(4, 0, 'flat') },
+    puzzled: { face: kit.look(4, 0, 'o') },
+    shrug: { o: { ky: 0.95 }, face: kit.faces.smug, arms: arms([-20, -12], [20, -12]) },
+    gape: { face: FACE.shock },
+    stare: { face: kit.faces.wide },
+    peer: { o: { rot: 0.12 }, face: kit.look(5, 0, 'o') },
+  };
+  const pose = (p, dx, dy = 0) => { const o = { k: K, dx, ...p.o, dy: (p.o?.dy || 0) + dy }; return xf(D.N, { ...o, face: p.face, extra: p.arms ? p.arms(o) : {} }); };
+  // the reflection: his pose drawn the other way round, standing in the glass
+  const refl = p => kit.flip(pose(p, RF, -7));
+  const shot = (me, rf, mx = 0) => ({ ...me, back: (c, d, seed) => { mirror(c, mx); if (rf) kit.twin(c, rf, seed, mx, 0); } });
+  let n = 0;
+  const beat = (ticks, p, r) => k.add('p' + n++, ticks, shot(pose(P[p], ME), r && refl(P[r])));
+
+  // he steps aside as the mirror rolls in. The first and last drawings are flipped back, so they sit exactly on the standing pose either side of the clip.
+  const home = face => kit.flip(xf(D.N, { dx: -HOME, face }));
+  const SLIDE = kit.steps(130, 0, 5);
+  kit.walk(HOME, ME, 5, {}).forEach((w, i) => k.add('in' + i, 2, shot(i ? xf(D.N, { ...w, k: 1 - (1 - K) * i / 4, face: P.stand.face }) : home(kit.look(-4, 0, 'smile')), refl(P.stand), SLIDE[i])));
+
+  // four poses, the reflection a beat behind each time
+  beat(2, 'wave1', 'stand'); beat(2, 'wave2', 'stand'); beat(2, 'wave1', 'stand');
+  beat(2, 'wave2', 'wave1'); beat(2, 'wave1', 'wave2');
+  beat(2, 'lean', 'wave1'); beat(2, 'lean', 'wave2'); beat(2, 'lean', 'stand');
+  beat(4, 'lean', 'lean');
+  beat(2, 'crouch', 'lean'); beat(2, 'hop', 'lean'); beat(2, 'stand', 'lean');
+  beat(2, 'stand', 'crouch'); beat(2, 'stand', 'hop');
+  beat(6, 'squash', 'stand');
+  beat(4, 'squash', 'squash');
+
+  // a fifth, and the reflection has had enough
+  beat(2, 'tada', 'squash'); beat(8, 'tada', 'unmoved');
+  beat(6, 'puzzled', 'unmoved');
+  beat(8, 'puzzled', 'shrug');
+  kit.walk(RF, -204, 7, { k: K }).forEach((w, i) => k.add('out' + i, 2, shot(pose(P.gape, ME), kit.flip(xf(D.N, { ...w, dy: i < 2 ? -7 + i * 4 : 0, face: kit.faces.smug })))));
+
+  // nobody in the glass
+  beat(16, 'stare'); beat(6, 'peer');
+  kit.walk(ME, HOME, 5, {}).forEach((w, i) => k.add('away' + i, 2, shot(i < 4 ? xf(D.N, { ...w, k: K + (1 - K) * i / 4, face: kit.faces.sad }) : home(kit.faces.sad), null, SLIDE[4 - i])));
   k.done();
 })();

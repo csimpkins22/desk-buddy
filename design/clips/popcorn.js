@@ -1,42 +1,56 @@
-// Popcorn: he watches one kernel in a pan; it pops, then dozens do, burying him up to the eyes.
+// A pan slides in while he sleeps and one kernel pops, waking him. Then popcorn fills the screen from the bottom, lifting him to the top edge until only his eyes and cowlick show. He dozes off buried.
 (() => {
-  const { D, xf, FACE, boil, closedPath, kit } = window.__lump, k = kit.clip('popcorn');
-  const { CREAM, YELLOW, GREY, WHITE, TAU } = kit;
-  const tw = (a, b, n) => kit.steps(a, b, n + 1).slice(1);
-  const pose = t => ({ k: 1 - 0.1 * t, dx: -30 * t }), O = pose(1);
-  const DOWN = [['dot', 122, 114, 3.8], ['dot', 146, 112, 3.8], ['stroke', [[124, 125], [129, 126], [134, 125]], 2.6]];
-  const pan = (c, x) => {
-    c.save(); c.lineCap = c.lineJoin = 'round'; c.strokeStyle = CREAM; c.lineWidth = 2.6; c.fillStyle = GREY;
-    c.beginPath(); c.roundRect(x + 20, 187, 26, 6, 3); c.fill(); c.stroke();
-    c.beginPath(); c.roundRect(x - 24, 184, 48, 17, 5); c.fill(); c.stroke(); c.restore();
-  };
-  const kernel = (c, x, y) => { c.save(); c.fillStyle = YELLOW; c.strokeStyle = CREAM; c.lineWidth = 2; c.beginPath(); c.arc(x, y, 6, 0, TAU); c.fill(); c.stroke(); c.restore(); };
-  const BUMPS = [[60, 188], [96, 180], [136, 190], [172, 184], [78, 162], [118, 158], [156, 166], [100, 140], [140, 144]];
-  const mound = (c, top, seed, j) => {
-    for (let i = 0; i < 5; i++) kit.puff(c, 30 + (j * 53 + i * 71) % 180, top - 14 - (j * 37 + i * 29) % 50, seed + i, 8, WHITE);
-    c.save(); c.lineCap = c.lineJoin = 'round'; c.fillStyle = WHITE; c.strokeStyle = CREAM; c.lineWidth = 2.6;
-    const pts = [[22, 201], [34, top + 34], [66, top + 8], [104, top], [150, top + 5], [190, top + 12], [212, top + 38], [220, 201]].map(([x, y]) => [x, Math.min(201, y)]);
-    closedPath(c, boil(pts, seed, 1.5)); c.fill(); c.stroke();
-    c.strokeStyle = GREY; c.fillStyle = YELLOW;
-    BUMPS.filter(([, y]) => y > top + 22).forEach(([x, y]) => { c.beginPath(); c.arc(x, y, 9, Math.PI * 1.1, Math.PI * 1.9); c.stroke(); c.beginPath(); c.arc(x + 12, y + 3, 3, 0, TAU); c.fill(); });
+  const { xf, D, kit, hash } = window.__lump, { CREAM, YELLOW, GREY, TAU } = kit;
+  const k = kit.clip('popcorn', { asleep: true });
+  const FILL = '#FFF6DC', EDGE = '#C89B4A', BUTTER = '#E2B85C', PAN = '#5B6676';
+  const puff = (c, x, y, side) => { c.moveTo(x + 15, y); c.arc(x, y, 15, 0, TAU); c.moveTo(x + side * 10 + 10, y - 8); c.arc(x + side * 10, y - 8, 10, 0, TAU); };
+  // popcorn from `top` down to the bottom of the screen (or just `rows` of it)
+  const heap = (c, top, rows = 99) => {
+    if (top > 254) return;
+    c.save(); c.lineJoin = c.lineCap = 'round';
+    if (top + 14 < 240) { c.fillStyle = BUTTER; c.fillRect(0, top + 14, 240, 226 - top); }
+    c.fillStyle = FILL; c.strokeStyle = EDGE; c.lineWidth = 2.4;
+    for (let r = 0; r < rows && top + r * 24 - 4 < 240; r++) {
+      c.beginPath();
+      for (let i = 0; i < 8; i++) puff(c, -4 + i * 34 + (r % 2) * 17 + (hash(r * 7.3 + i * 3.1) - 0.5) * 10, top + 14 + r * 24 + (hash(r * 5.7 + i * 9.4) - 0.5) * 8, hash(r + i * 1.7) > 0.5 ? 1 : -1);
+      c.fill(); c.stroke();
+    }
     c.restore();
   };
-  const L = (face, o, s) => xf(D.N, { ...o, face, extra: { front: (c, d, seed) => {
-    pan(c, s.pan ?? 180);
-    if (s.k) kernel(c, s.k[0], s.k[1]);
-    if (s.p) kit.puff(c, s.p[0], s.p[1], seed, s.p[2], WHITE);
-    if (s.top !== undefined && s.top < 197) mound(c, s.top, seed, s.j || 0);
-  } } });
+  const pan = (c, x, kernel = true) => {
+    c.save(); c.lineJoin = c.lineCap = 'round'; c.strokeStyle = GREY; c.lineWidth = 5;
+    c.beginPath(); c.moveTo(x + 20, 186); c.lineTo(x + 40, 176); c.stroke();
+    if (kernel) { c.fillStyle = YELLOW; c.beginPath(); c.ellipse(x, 180, 7, 5.5, 0, 0, TAU); c.fill(); }
+    c.fillStyle = PAN; c.strokeStyle = CREAM; c.lineWidth = 2.6; c.beginPath(); c.roundRect(x - 22, 180, 44, 22, 6); c.fill(); c.stroke();
+    c.restore();
+  };
+  const one = (c, x, y) => { c.save(); c.fillStyle = FILL; c.strokeStyle = EDGE; c.lineWidth = 2.4; c.beginPath(); puff(c, x, y, 1); c.fill(); c.stroke(); c.restore(); };
+  const lines = (c, pts) => { c.save(); c.lineCap = 'round'; c.strokeStyle = CREAM; c.lineWidth = 3; c.beginPath(); pts.forEach(([a, b, x, y]) => { c.moveTo(a, b); c.lineTo(x, y); }); c.stroke(); c.restore(); };
+  const PX = 35;
 
-  tw(0, 1, 3).forEach((t, i) => k.add('go' + i, 2, L(FACE.lookr, pose(t), { pan: 260 - 80 * t, k: [260 - 80 * t, 178] })));
-  k.add('watch', 10, L(DOWN, O, { k: [180, 178] }));
-  D.popcorn_ja = L(DOWN, O, { k: [177, 177] }); D.popcorn_jb = L(DOWN, O, { k: [183, 176] });
-  for (let i = 0; i < 2; i++) { k.add('ja', 2); k.add('jb', 2); }
-  [[180, 152, 6], [178, 128, 9], [180, 172, 9]].forEach((p, i) => k.add('pop' + i, 2, L(i ? FACE.happy : FACE.shock, O, { p })));
-  k.add('one', 8, L(FACE.happy, O, { p: [180, 172, 9] }));
-  tw(201, 128, 5).forEach((top, j) => k.add('burst' + j, 2, L(FACE.shock, O, { p: [180, 172, 9], top, j: j + 1 })));
-  k.add('buried', 10, L(FACE.shock, O, { top: 128, j: 7 }));
-  k.add('peek', 6, L(FACE.lookr, O, { top: 128, j: 8 }));
-  tw(0, 1, 3).forEach((t, i) => k.add('sink' + i, 2, L(FACE.grump, pose(1 - t), { pan: 180 + 80 * t, top: 128 + 80 * t, j: 9 + i })));
+  [-36, -2, PX].forEach((x, i) => k.add('pan' + i, 2, xf(D.S1, { extra: { front: c => pan(c, x) } })));
+  [-2, 2].forEach((dx, i) => k.add('shake' + i, 4, xf(D.S1, { extra: { front: c => { pan(c, PX + dx); lines(c, i ? [[8, 176, 4, 170], [58, 172, 63, 166]] : [[10, 170, 6, 163], [56, 176, 62, 172]]); } } })));
+  k.add('shake0', 4);
+  k.add('pop0', 2, xf(D.S1, { extra: { front: c => { pan(c, PX, false); c.fillStyle = YELLOW; c.beginPath(); c.ellipse(PX, 154, 7, 5.5, 0, 0, TAU); c.fill(); } } }));
+  k.add('pop1', 4, xf(D.K1, { extra: { front: c => { pan(c, PX, false); one(c, 34, 126); lines(c, [[14, 112, 6, 104], [54, 112, 62, 104], [34, 100, 34, 90], [12, 132, 3, 134]]); } } }));
+  k.add('pop2', 2, xf(D.N, { face: kit.look(-6, -3, 'o'), extra: { front: c => { pan(c, PX, false); one(c, 44, 150); } } }));
+  k.add('pop3', 2, xf(D.N, { face: kit.look(-7, 2, 'o'), extra: { front: c => { pan(c, PX, false); one(c, 56, 178); } } }));
+  const still = c => { pan(c, PX, false); one(c, 62, 190); };
+  k.add('pop4', 8, xf(D.N, { face: kit.look(-8, 6, 'flat'), extra: { front: still } }));
+  // the heap comes up from the bottom edge and takes him with it
+  const N = 18;
+  for (let i = 0; i < N; i++) {
+    const top = 246 - (i + 1) * (103 / N), feet = Math.min(201, top + 10), up = feet < 201;
+    k.add('rise' + i, 2, xf(D.N, { dy: feet - 201, rot: up ? (i % 2 ? 0.04 : -0.04) : 0, shadowK: up ? 0 : 1, face: up ? kit.faces.worried : kit.look(0, 6, 'o'),
+      extra: { back: c => up && heap(c, top - 14, 2), front: c => { still(c); heap(c, top); } } }));
+  }
+  // pressed against the top edge: he squashes, and the popcorn climbs up his face
+  const buried = (t, face) => { const ky = 1 - 0.25 * t, feet = 4 + 149 * ky, top = 143 + (62 - 143) * t;
+    return xf(D.N, { ky, kx: 1 + 0.18 * t, dy: feet - 201, shadowK: 0, face, extra: { back: c => heap(c, top - 14, 2), front: c => heap(c, top) } }); };
+  const peep = g => [['dot', 116 + g, 109, 4.2], ['dot', 140 + g, 107, 4.2]];
+  kit.steps(0, 1, 6).slice(1).forEach((t, i) => k.add('press' + i, 2, buried(t, t < 0.7 ? kit.faces.wide : peep(0))));
+  k.add('peep_l', 8, buried(1, peep(-4))); k.add('peep_r', 8, buried(1, peep(4))); k.add('peep_c', 6, buried(1, peep(0)));
+  k.add('droop', 4, buried(1, [['stroke', [[110, 110], [122, 110]], 3], ['stroke', [[134, 108], [146, 108]], 3]]));
+  k.add('doze', 16, buried(1, kit.faces.closed.slice(0, 2)));
   k.done();
 })();

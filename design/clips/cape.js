@@ -1,32 +1,54 @@
-// Cape: he ties on a cape and strikes a hero pose; the wind catches the cape and wraps it over his face.
+// Rapid fire: he flies past in a cape three times (far, nearer, huge), crashes off the right edge, and walks back in with the cape over his head.
 (() => {
-  const { D, xf, FACE, boil, closedPath, kit } = window.__lump, k = kit.clip('cape'), { CREAM, RED, YELLOW } = kit;
-  const cape = (c, pts, seed, dx = 0, dy = 0) => {
-    c.save(); c.translate(dx, dy); c.lineCap = c.lineJoin = 'round'; c.strokeStyle = CREAM; c.lineWidth = 2.8; c.fillStyle = RED;
-    closedPath(c, boil(pts, seed, 1.5)); c.fill(); c.stroke(); c.restore();
+  const { D, xf, FACE, boil, closedPath, openPath, kit } = window.__lump;
+  const { CREAM, RED, YELLOW, pt, look } = kit;
+  const k = kit.clip('cape');
+  const lin = (a, b, n) => Array.from({ length: n }, (_, i) => a + (b - a) * i / (n - 1));
+  const cloth = (c, P) => { c.lineJoin = c.lineCap = 'round'; closedPath(c, P); c.fillStyle = RED; c.fill(); c.strokeStyle = CREAM; c.lineWidth = 2.8; c.stroke(); };
+
+  // hanging behind him as he stands: s widens it until it shows either side
+  const hang = (o, s) => (c, d, seed) => cloth(c, boil([[128 - 50 * s, 104], [128 + 50 * s, 104], [128 + 84 * s, 199], [128 - 84 * s, 199]].map(q => pt(o, q)), seed, 2));
+  // streaming out behind him in flight, from his neck to well past his feet
+  const cape = (o, flap) => (c, d, seed) => cloth(c, boil([[92, 96], [164, 96], [198, 150], [204, 236 + flap * 10], [166, 262 - flap * 8], [128, 246 + flap * 8], [90, 262 - flap * 8], [52, 236 - flap * 10], [58, 150]].map(q => pt(o, q)), seed, 2 * o.k));
+  // over his head, hiding his eyes
+  const hood = (o, seed) => c => {
+    cloth(c, boil([[58, 154], [66, 104], [88, 72], [128, 58], [168, 72], [190, 104], [198, 154], [182, 146], [164, 121], [128, 116], [92, 121], [74, 146]].map(q => pt(o, q)), seed, 2));
+    c.lineWidth = 2.2; openPath(c, [[104, 76], [99, 96], [103, 116]].map(q => pt(o, q))); c.stroke(); openPath(c, [[150, 74], [156, 94], [152, 114]].map(q => pt(o, q))); c.stroke();
   };
-  const knot = (c, dy = 0) => {
-    c.save(); c.strokeStyle = CREAM; c.lineWidth = 2.4; c.lineJoin = 'round'; c.fillStyle = YELLOW;
-    c.beginPath(); c.arc(128, 142 + dy, 6, 0, kit.TAU); c.fill(); c.stroke(); c.restore();
+
+  // xf options that put the middle of his body at (cx, cy), scaled by s and turned by rot
+  const fly = (cx, cy, s, rot) => ({ k: s, rot, dx: cx - 128 - 61 * Math.sin(rot) * s, dy: cy - 201 + 61 * Math.cos(rot) * s, shadowK: 0 });
+  const flyer = (cx, cy, s, rot, i, face) => {
+    const o = fly(cx, cy, s, rot), right = rot > 0, extra = { back: cape(o, i % 2 ? 1 : -1) };
+    if (s > 0.5) extra[right ? 'arm2' : 'arm'] = [pt(o, [right ? 166 : 90, 140]), pt(o, [right ? 178 : 78, 66])];
+    return xf(D.N, { ...o, face, extra });
   };
-  const HANG = [[84, 130], [172, 130], [204, 196], [128, 186], [52, 196]];
-  const FLY1 = [[84, 130], [172, 130], [150, 188], [70, 184], [26, 156], [50, 138]];
-  const FLY2 = [[84, 130], [172, 130], [146, 180], [72, 172], [24, 174], [46, 146]];
-  const LIFT = [[84, 130], [172, 130], [196, 92], [152, 50], [92, 44], [48, 84]];
-  const WRAP = [[72, 100], [90, 74], [128, 66], [166, 74], [186, 100], [182, 140], [150, 152], [128, 146], [100, 154], [60, 162], [34, 150], [52, 126]];
-  const worn = (o, pts, tied = true) => xf(D.N, { ...o, extra: { ...o.extra, back: (c, d, seed) => cape(c, pts, seed), front: c => tied && knot(c) } });
-  kit.steps(-150, 0, 3).forEach((dy, i) => k.add('on' + i, 2, xf(D.N, { face: FACE.lookup, extra: { back: (c, d, seed) => cape(c, HANG, seed, 0, dy), front: c => knot(c, dy) } })));
-  k.add('tied', 4, worn({ face: FACE.happy, ky: 0.96, kx: 1.03 }, HANG));
-  const HERO = { arm: [[90, 140], [70, 162]], arm2: [[166, 140], [196, 100]] };
-  k.add('hero1', 4, worn({ face: FACE.happy, ky: 1.05, extra: HERO }, FLY1));
-  k.add('hero2', 4, worn({ face: FACE.happy, ky: 1.05, extra: HERO }, FLY2));
-  k.add('hero1', 4); k.add('hero2', 4);
-  k.add('lift', 2, worn({ face: FACE.shock, extra: HERO }, LIFT));
-  const wrapped = (n, a, a2, o = {}) => k.add(n, 4, xf(D.N, { ...o, face: [], extra: { arm: [[90, 140], a], arm2: [[166, 140], a2], front: (c, d, seed) => cape(c, WRAP, seed) } }));
-  wrapped('wrap1', [62, 120], [196, 126], { ky: 0.97 });
-  wrapped('wrap2', [60, 150], [198, 110]);
-  k.add('wrap1', 4); k.add('wrap2', 4);
-  [-70, -150, -240].forEach((dx, i) => k.add('off' + i, 2, xf(D.N, { face: FACE.grump, extra: { front: (c, d, seed) => cape(c, WRAP, seed, dx, -i * 14) } })));
-  k.add('end', 6, xf(D.N, { face: FACE.grump }));
+
+  const c0 = { ky: 0.9, kx: 1.05 }, c1 = { ky: 0.78, kx: 1.1 }, u0 = { ky: 1.22, kx: 0.9, dy: -70, k: 1 }, u1 = { ky: 1.3, kx: 0.86, dy: -250, k: 1 };
+  k.add('crouch0', 2, xf(D.N, { ...c0, face: look(0, -3, 'smile'), extra: { back: hang(c0, 0.8) } }));
+  k.add('crouch1', 4, xf(D.N, { ...c1, face: look(0, -4, 'smile'), extra: { back: hang(c1, 1) } }));
+  k.add('up0', 2, xf(D.N, { ...u0, shadowK: 0.5, face: FACE.happy, extra: { back: cape(u0, 1), arm2: [pt(u0, [166, 140]), pt(u0, [178, 80])] } }));
+  k.add('up1', 2, xf(D.N, { ...u1, shadowK: 0, face: FACE.happy, extra: { back: cape(u1, -1) } }));
+
+  lin(-28, 268, 7).forEach((x, i) => k.add('far' + i, 2, flyer(x, 60 - Math.sin(i / 6 * Math.PI) * 10, 0.36, 1.25, i, FACE.happy)));
+  lin(312, -72, 6).forEach((x, i) => k.add('mid' + i, 2, flyer(x, 122 - Math.sin(i / 5 * Math.PI) * 16, 0.75, -1.25, i, FACE.happy)));
+  lin(-225, 465, 5).forEach((x, i) => k.add('huge' + i, 2, flyer(x, 124, 2, 1.3, i, kit.faces.wide)));
+
+  const burst = (s, puff) => (c, d, seed) => {
+    c.lineCap = 'round'; c.strokeStyle = YELLOW; c.lineWidth = 4.5;
+    for (let i = 0; i < 5; i++) {
+      const a = Math.PI + (i - 2) * 0.44, r0 = 16 * s, r1 = (38 + (i % 2) * 18) * s;
+      c.beginPath(); c.moveTo(240 + Math.cos(a) * r0, 128 + Math.sin(a) * r0); c.lineTo(240 + Math.cos(a) * r1, 128 + Math.sin(a) * r1); c.stroke();
+    }
+    if (puff) kit.puff(c, 222, 160, seed, puff);
+  };
+  [[1.3, -8, 0, 2], [1.6, 6, 12, 4], [1, -3, 15, 4]].forEach(([s, shift, puff, ticks], i) => k.add('crash' + i, ticks, kit.gone({ view: kit.view(1, [120, 120], [120 + shift, 120]), front: burst(s, puff) })));
+
+  const glum = [['stroke', [[121, 128], [128, 124], [135, 128]], 2.8]];
+  kit.walk(176, 0, 6).forEach((o, i) => k.add('back' + i, 2, xf(D.N, { ...o, face: glum, extra: { front: hood(o, i) } })));
+  k.add('stand', 10, xf(D.N, { face: glum, extra: { front: hood({}, 3) } }));
+  k.add('off0', 2, xf(D.N, { face: FACE.sheep, extra: { back: hang({ dy: 6 }, 1.05) } }));
+  k.add('off1', 2, xf(D.N, { face: FACE.sheep, extra: { back: (c, d, seed) => kit.fade(c, 0.6, () => hang({ ky: 0.6 }, 1.1)(c, d, seed)) } }));
+  k.add('off2', 2, xf(D.N, { face: FACE.sheep, extra: { back: (c, d, seed) => kit.fade(c, 0.3, () => hang({ ky: 0.35 }, 1.15)(c, d, seed)) } }));
   k.done();
 })();

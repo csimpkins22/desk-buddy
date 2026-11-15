@@ -1,25 +1,41 @@
-// Wind-up key: a key turns on his back as he marches; it slows, he droops mid-step, then one last twitch.
+// A wind-up key turns in his back as he marches in from the left; it runs down and he dozes off mid-step.
 (() => {
-  const { D, xf, FACE, kit } = window.__lump, k = kit.clip('windup_key'), { CREAM, YELLOW, TAU } = kit;
-  const sleepy = [['stroke', [[110, 110], [116, 114], [122, 110]], 3], ['stroke', [[134, 108], [140, 112], [146, 108]], 3], ['stroke', [[122, 126], [134, 126]], 3]];
-  const key = (o, ph, a) => c => kit.fade(c, a, () => {
-    const [x, y] = kit.pt(o, [76, 150]), w = 4 + 9 * Math.abs(Math.cos(ph));
-    c.lineCap = c.lineJoin = 'round';
-    c.strokeStyle = CREAM; c.lineWidth = 9; c.beginPath(); c.moveTo(x + 8, y); c.lineTo(x - 18, y); c.stroke();
-    c.strokeStyle = YELLOW; c.lineWidth = 4; c.stroke();
-    c.strokeStyle = CREAM; c.lineWidth = 2.6; c.fillStyle = YELLOW; c.beginPath(); c.ellipse(x - 28, y, w, 15, 0, 0, TAU); c.fill(); c.stroke();
-  });
-  const pose = (o, face, ph, a = 1) => xf(D.N, { ...o, face, extra: { back: key(o, ph, a) } });
-  const droop = { dx: 14, rot: 0.1, ky: 0.9, kx: 1.05 };
+  const { D, xf, kit } = window.__lump;
+  const { CREAM, DARK, YELLOW, GREY, TAU } = kit, k = kit.clip('windup_key');
+  // the key in his back at [x, y]: rot 0 points straight left, a is how far round its wings have turned
+  const key = ([x, y], rot, a) => c => {
+    const h = 6 + 24 * Math.abs(Math.cos(a));
+    c.save(); c.translate(x, y); c.rotate(rot); c.lineCap = c.lineJoin = 'round'; c.strokeStyle = CREAM; c.lineWidth = 2.6;
+    c.fillStyle = GREY; c.beginPath(); c.rect(-34, -4, 46, 8); c.fill(); c.stroke();
+    [-1, 1].forEach(s => {
+      c.fillStyle = YELLOW; c.beginPath(); c.ellipse(-42, s * (h / 2 + 2), 11, h / 2, 0, 0, TAU); c.fill(); c.stroke();
+      if (h > 13) { c.fillStyle = DARK; c.beginPath(); c.ellipse(-42, s * (h / 2 + 2), 4.5, h / 2 - 5, 0, 0, TAU); c.fill(); }
+    });
+    c.restore();
+  };
+  const stare = kit.look(3, 0, 'flat', 4.4);
+  const heavy = [['stroke', [[109, 105], [123, 106]], 2.8], ['dot', 116, 110, 3], ['stroke', [[133, 103], [147, 104]], 2.8], ['dot', 140, 108, 3], ['stroke', [[123, 125], [133, 125]], 2.6]];
+  const shut = [kit.faces.closed[0], kit.faces.closed[1], ['dot', 128, 126, 2.8]];
+  const toy = (o, a, face, handY, more = {}) => xf(D.N, { ...o, face, extra: { arm2: [kit.pt(o, [166, 140]), kit.pt(o, [190, handY])], back: key(kit.pt(o, [84, 138]), o.rot || 0, a), ...more } });
 
-  k.add('in0', 2, pose({ dx: 5 }, FACE.happy, 0, 0.4));
-  k.add('in1', 2, pose({ dx: 10 }, FACE.happy, 0.4, 0.8));
-  [2, 2, 2, 2, 2, 2, 4, 4, 6, 8].forEach((t, i) => k.add('m' + i, t, pose({ dx: 14, rot: i % 2 ? 0.07 : -0.07, dy: i % 2 ? -4 : 0 }, FACE.happy, 0.8 + i * 0.8)));
-  k.add('sag', 2, pose({ dx: 14, rot: 0.08, ky: 0.95 }, sleepy, 8.4));
-  k.add('droop', 12, pose(droop, sleepy, 8.4));
-  k.add('twitch', 2, pose({ dx: 14, rot: -0.05, ky: 1.03, dy: -3 }, FACE.shock, 9.2));
-  k.add('droop2', 12, pose(droop, sleepy, 9.2));
-  k.add('out0', 2, pose({ dx: 10, ky: 0.95 }, sleepy, 9.2, 0.6));
-  k.add('out1', 2, pose({ dx: 5 }, sleepy, 9.2, 0.3));
-  k.done();
+  kit.walk(0, -190, 8, { face: kit.look(-5) }).forEach((o, i) => k.add('off' + i, 2, xf(D.N, o)));
+  k.add('empty', 6, kit.gone());
+
+  let x = -196, a = 0, o;
+  for (let i = 0; i < 24; i++) {
+    const up = i % 2, v = 16 - 13.45 * i / 23;
+    o = { dx: x, rot: up ? 0.11 : -0.05, ky: up ? 1.03 : 0.96, kx: up ? 0.98 : 1.03 };
+    k.add('m' + i, i < 10 ? 2 : i < 16 ? 4 : i < 21 ? 6 : 8, toy(o, a, stare, up ? 120 : 152));
+    if (i < 23) { x += v; a += v * 0.055; }
+  }
+  const stop = { dx: x + 4, rot: 0.15, ky: 1.02, kx: 0.99 };
+  a += 0.45;
+  k.add('tick', 4, toy({ ...stop, rot: 0.2 }, a, stare, 118));
+  k.add('still', 10, toy(stop, a, stare, 126));
+  k.add('heavy', 6, toy(stop, a, heavy, 140));
+  k.add('shut', 20, toy(stop, a, shut, 152, { fxm: 'idle', fx: [186, 66] }));
+  k.add('sag', 4, xf(D.T1, { dx: 20, face: [['stroke', [[110, 117], [116, 120], [122, 117]], 3], ['stroke', [[134, 115], [140, 118], [146, 115]], 3], ['dot', 128, 132, 2.6]], extra: { back: key([104, 142], 0.1, a) } }));
+  k.add('tip', 4, xf(D.T2, { dx: 10, extra: { back: key([95, 140], 0.75, a) } }));
+  k.add('down', 6, xf(D.S1, { dx: 3, extra: { back: key([86, 154], 0.75, a), fxm: 'idle' } }));
+  k.done({ doze: false });
 })();
