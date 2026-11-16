@@ -2,7 +2,7 @@
 name: Gallery
 on:
   push:
-    branches: [main]
+    branches: [main, vector-instructions]     # the second only while the build is being proven
     paths: [design/**, firmware/data/lump.bin, firmware/src/vec.h, gallery/**, tools/**, .github/workflows/gallery.yml]
   workflow_dispatch:
 permissions:
@@ -22,6 +22,7 @@ jobs:
         with:
           path: gallery
   deploy:
+    if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     environment:
