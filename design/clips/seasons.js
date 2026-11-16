@@ -1,4 +1,5 @@
 // A year passes round him while he stands still: blossom and a shoot, a hot sun, falling leaves, then snow that leaves a cap on his head.
+// group: odd
 (() => {
   const { D, xf, boil, openPath, closedPath, mixHex, tint, kit } = window.__lump, { TAU, CREAM, WHITE, GREEN, YELLOW, RED, BLUE, GREY } = kit;
   const k = kit.clip('seasons'), PETAL = mixHex(tint(), '#FFFFFF', 0.45), LEAF = ['#F0A030', RED, YELLOW];

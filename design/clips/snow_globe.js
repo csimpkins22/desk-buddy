@@ -1,4 +1,5 @@
 // Snow globe: a glass dome drops over him, his whole world gets a good shake, and the snow settles on his head.
+// group: weather
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, closedPath } = window.__lump;
   const CREAM = '#FFF1DC', SNOW = '#F4F8FF', CX = 128, CY = 116, R = 108;

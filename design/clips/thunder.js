@@ -1,4 +1,5 @@
 // Thunder: a dark cloud, a bolt and a flash. He dives under a blanket, and peeks out once it has gone quiet.
+// group: weather
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, closedPath } = window.__lump;
   const CREAM = '#FFF1DC', DARK = '#17161A';

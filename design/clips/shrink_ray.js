@@ -1,4 +1,5 @@
 // Shrink ray: a ray gun zaps him tiny and he scurries about. The zap to undo it overshoots, and for a moment he is enormous.
+// group: nonsense
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', GREEN = '#58D68D', YELLOW = '#FFD23F', GUN = [200, 34], S = 0.4;

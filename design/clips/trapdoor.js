@@ -1,4 +1,5 @@
 // Trapdoor: the tap springs a door in the floor. He hangs there a moment, drops out of sight, and comes back in from the top.
+// group: tap
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', FY = 205, L = 54, R = 202, W = 74;

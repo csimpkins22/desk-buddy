@@ -1,4 +1,5 @@
 // Think about it: he taps the side of his head with a knowing grin and a sparkle, then struts off with his eyes shut, straight into a brick wall.
+// group: memes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath } = window.__lump;
   const CREAM = '#FFF1DC', DARK = '#17161A', BRICK = '#B55236', BURNT = '#8E3F2A', YELLOW = '#FFD23F', P = 'think_about_it_', WALL = 176, LEFT = -48;

@@ -1,4 +1,5 @@
 // Rain cloud: a small cloud finds him and rains on him. He steps aside; it follows. It rains itself out.
+// group: weather
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, closedPath, mixHex, tint } = window.__lump;
   const CREAM = '#FFF1DC';

@@ -1,4 +1,5 @@
 // Shadow puppets: in a patch of light he makes a bird, then a rabbit, then a monster that frightens its own maker.
+// group: pastimes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const LAMP = '#FFD23F', DARK = '#17161A', LX = 194, LY = 94, LR = 43;

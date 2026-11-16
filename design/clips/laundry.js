@@ -1,4 +1,5 @@
 // He is the washing: pegged to a line, dripping. A breeze pings one peg off, then the other; he drops out of view and climbs back up.
+// group: scenes
 (() => {
   const { D, xf, FACE, openPath, kit } = window.__lump;
   const { CREAM, BLUE, GREY, TAU } = kit, k = kit.clip('laundry');

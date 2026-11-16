@@ -1,4 +1,5 @@
 // Close on his face: he rests a cheek on a cactus at the left edge and its prickles ping into him one at a time, until he gives up.
+// group: scenes
 (() => {
   const { D, xf, boil, closedPath, kit } = window.__lump;
   const k = kit.clip('cactus_hug'), V = kit.view(1.7, [112, 115]);

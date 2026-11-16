@@ -1,4 +1,5 @@
 // Bubblegum: he chews, blows a bubble so big it lifts him off the floor, and it pops all over his face.
+// group: pastimes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, closedPath, mixHex, tint } = window.__lump;
   const CREAM = '#FFF1DC';

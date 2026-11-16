@@ -1,4 +1,5 @@
 // Water fills the screen from the bottom edge: a snorkel drops onto him, he floats up, drifts, rolls upside down as a fish swims behind him, and is left dripping in a puddle.
+// group: scenes
 (() => {
   const { D, xf, boil, openPath, closedPath, kit } = window.__lump, k = kit.clip('snorkel'), PI = Math.PI;
   // where a point on standing Lump lands once he has turned about his middle and drifted

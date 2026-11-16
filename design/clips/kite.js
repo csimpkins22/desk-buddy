@@ -1,4 +1,5 @@
 // A windy day seen wide: the gusts build on a big kite until it carries him off the right edge, and he walks back in from the left wearing it.
+// group: scenes
 (() => {
   const { D, xf, FACE, boil, openPath, kit } = window.__lump;
   // zooms are kept to 256ths, as the board stores them: otherwise things far from the focus land a fraction of a pixel off and the frame is kept as pixels

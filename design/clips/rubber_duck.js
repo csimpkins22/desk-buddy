@@ -1,4 +1,5 @@
 // Rubber duck: he explains something to a rubber duck at great length. The duck nods off and face-plants.
+// group: gadgets
 (() => {
   const { D, CLIPS, xf, WAKE, DOZE, boil, openPath } = window.__lump;
   const CREAM = '#FFF1DC', DX = -26;

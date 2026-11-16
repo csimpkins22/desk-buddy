@@ -1,4 +1,5 @@
 // Juggling: three balls, then a fourth, then it all comes down on his head.
+// group: pastimes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', COLOURS = ['#FFD23F', '#5AB8FF', '#FF5A4D', '#7BE38B'];

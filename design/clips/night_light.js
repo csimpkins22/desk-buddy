@@ -1,4 +1,5 @@
 // Night light: it is dark and he is not keen on it. He pulls the chain on a tiny lamp and settles down in its pool of light.
+// group: clock
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', GLOW = '#FFD23F';

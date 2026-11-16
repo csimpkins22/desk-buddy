@@ -1,4 +1,5 @@
 // Tumbleweed: nobody comes. A tumbleweed rolls past instead, and then a very small one hurrying after it.
+// group: waiting
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, closedPath } = window.__lump;
   const CREAM = '#FFF1DC', BIG = 49, SMALL = 99;

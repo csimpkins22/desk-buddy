@@ -1,4 +1,5 @@
 // A hot sun comes out top left and he melts like a scoop: drips run down him in close-up, he sags into a puddle, then a cloud covers the sun and he firms up lopsided.
+// group: scenes
 (() => {
   const { D, xf, FACE, mixHex, tint, kit } = window.__lump, { TAU } = kit;
   const k = kit.clip('ice_cream');

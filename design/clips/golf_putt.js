@@ -1,4 +1,5 @@
 // Wide and slow: tiny on the far left he taps a ball that rolls the whole width, stops on the lip, and he blows it in from over there.
+// group: scenes
 (() => {
   const { D, xf, boil, closedPath, kit } = window.__lump;
   const { CREAM, RED, WHITE, GREY, TAU, steps, pt, look } = kit;

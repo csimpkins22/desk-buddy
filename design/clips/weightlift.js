@@ -1,4 +1,5 @@
 // An extreme close-up of his straining face, teeth gritted, sweating and trembling; then the view pulls back to show he is lifting a tiny dumbbell with one nub.
+// group: scenes
 (() => {
   const { D, xf, FACE, kit } = window.__lump;
   const k = kit.clip('weightlift');

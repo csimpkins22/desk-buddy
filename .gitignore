@@ -37,3 +37,8 @@ design/device/*.png
 
 # the video soundtrack: local only
 design/device/music/
+
+# built by tools/build_gallery.py (the page itself, gallery/index.html, is kept)
+gallery/clips/
+gallery/lump.bin
+gallery/manifest.json

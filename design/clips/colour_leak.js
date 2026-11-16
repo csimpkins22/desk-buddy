@@ -1,4 +1,5 @@
 // His orange drains out through his feet into a puddle. He stands pale and appalled, produces a straw, and drinks it back up from the top down.
+// group: odd
 // Staging: he stands on the right; his colour runs out of him to the left along the floor; normal view; 8.5 seconds; a slow drain, a hold, a slow refill; walks back to rest.
 (() => {
   const { D, xf, FACE, boil, closedPath, tint, mixHex } = window.__lump, kit = window.__lump.kit, k = kit.clip('colour_leak');

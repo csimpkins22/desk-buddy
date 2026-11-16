@@ -1,4 +1,5 @@
 // Maze chase: he gobbles a line of dots down a corridor with a wind-up toy rattling after him, eats the big dot, and the toy turns and flees.
+// group: games
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath } = window.__lump;
   const CREAM = '#FFF1DC', YELLOW = '#FFD23F', STONE = '#9FB0C4', DARK = '#17161A', TAU = Math.PI * 2, P = 'maze_chase_', DOTS = [104, 128, 152, 176], BIG = 206;

@@ -1,4 +1,5 @@
 // A zip runs down his front and a smaller Lump steps out; a zip on that one opens and a smaller one still steps out. The three stand in a row by size, then climb back in, in order.
+// group: odd
 // Staging: he steps to the left; the others come out of him to the right; the view widens to fit the row; 8 seconds; out, out again, then the whole thing in reverse; back to rest.
 (() => {
   const { D, xf } = window.__lump, kit = window.__lump.kit, k = kit.clip('unzip');

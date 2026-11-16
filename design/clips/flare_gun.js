@@ -1,4 +1,5 @@
 // Flare gun: he braces for a mighty flare. It wobbles up a little way and goes off with one tiny sad pop.
+// group: waiting
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', MUZZLE = [214, 70], TOP = [219, 30], RISE = 47, FALL = 69;

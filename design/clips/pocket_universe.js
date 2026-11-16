@@ -1,4 +1,5 @@
 // Pocket universe: he plucks a sun from his cowlick, becomes its planet, then puts it back.
+// group: nonsense
 // Staging: centre -> a full-screen orbit -> centre; everything comes out of his hair.
 // View: normal, then his body shrinks into a celestial silhouette; the camera stays still.
 // Rhythm: curious tug, sudden weightlessness, one tumbling revolution, embarrassed recovery.

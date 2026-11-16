@@ -1,4 +1,5 @@
 // Golden hour: the low sun turns everything amber. He squints, puts on sunglasses and strikes a couple of poses.
+// group: clock
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC';

@@ -1,4 +1,5 @@
 // Health bars: his shadow stands up to face him under two bars. He bops it and both bars halve; it bops him back and both empty at once.
+// group: games
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, closedPath, tint } = window.__lump;
   const CREAM = '#FFF1DC', GREY = '#9FB0C4', DARK = '#33363B', TAU = Math.PI * 2, P = 'health_bars_', SIDE = { k: 0.7, dx: -50 };

@@ -1,4 +1,5 @@
 // Paddle rally: two paddles bat him back and forth as the ball, faster each time, until he sails past one and a point pip ticks up.
+// group: games
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', BLUE = '#5AB8FF', RED = '#FF5A4D', TAU = Math.PI * 2, P = 'paddle_rally_';

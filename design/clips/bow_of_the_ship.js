@@ -1,4 +1,5 @@
 // Bow of the ship: a prow glides in and scoops him up. He spreads his arms into the wind, blissful, until a gull lands on his cowlick and does the same.
+// group: movies
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, closedPath } = window.__lump;
   const CREAM = '#FFF1DC', DARK = '#17161A', SEA = '#0E2438', BLUE = '#5AB8FF', WOOD = '#6B4A1F', GRAIN = '#8A6230', RAIL = '#C89B5A', GREY = '#9FB0C4', WHITE = '#F4F8FF', YELLOW = '#FFD23F', RED = '#FF5A4D', TAU = Math.PI * 2;

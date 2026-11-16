@@ -1,4 +1,5 @@
 // Each bounce on a trampoline goes higher and the view follows him up, past clouds and stars, until he lands on the moon and dozes off there.
+// group: scenes
 (() => {
   const { D, CLIPS, xf, FACE, DOZE, boil, closedPath, kit } = window.__lump;
   const NAME = 'trampoline', k = kit.clip(NAME), TAU = kit.TAU, MAT = 21, ZW = 0.68, MX = 226, MR = 60, HM = 660, MY = 180 - HM + MR, OVER = MX - 128;

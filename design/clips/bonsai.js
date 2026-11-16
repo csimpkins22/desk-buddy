@@ -1,4 +1,5 @@
 // Quiet: close on a little tree at the left, he leans in from the right with shears, makes one careful snip, watches the leaf drift down, and nods.
+// group: scenes
 (() => {
   const { D, xf, boil, closedPath } = window.__lump, kit = window.__lump.kit, { CREAM, GREEN, GREY, RED, TAU } = kit;
   const k = kit.clip('bonsai');

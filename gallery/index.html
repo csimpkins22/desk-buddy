@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lump's Animations</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap">
+<style>
+  /* Layout: a contact sheet. One sticky bar to search and jump, then every animation as a small black
+     screen the size of his own, grouped by what it is. Data comes from tools/build_gallery.py. */
+  :root {
+    --bg: #EEF0F3; --surface: #FFFFFF; --fg: #171A20; --muted: #5B6370; --line: #D3D8E0; --accent: #C2480A; --screen: #000000;
+    --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+    --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #101216; --surface: #181B21; --fg: #ECEEF2; --muted: #9AA3B0; --line: #2B3039; --accent: #FF8A57; color-scheme: dark }
+  }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 400 15px/1.5 var(--body); }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 28px 16px 64px; }
+
+  header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px 32px; }
+  h1 { font: 700 clamp(28px, 5vw, 44px)/1.05 var(--display); letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+  .lede { margin: 8px 0 0; color: var(--muted); max-width: 60ch; }
+  .lede a { color: var(--accent); }
+  .tints { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+  .tints button { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--surface); outline: 1px solid var(--line); background: var(--c); cursor: pointer; padding: 0; }
+  .tints button[aria-pressed="true"] { outline: 2px solid var(--fg); }
+
+  .bar { position: sticky; top: 0; z-index: 5; background: var(--bg); padding-block: 12px; margin-top: 20px; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; }
+  #q { font: 400 14px var(--mono); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; width: min(100%, 240px); }
+  .jump { display: flex; gap: 6px; overflow-x: auto; min-width: 0; flex: 1 1 320px; scrollbar-width: thin; padding-bottom: 2px; }
+  .jump button { font: 500 13px var(--body); color: var(--muted); background: none; border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px; white-space: nowrap; cursor: pointer; }
+  .jump button:hover { color: var(--fg); border-color: var(--muted); }
+  .jump button span { font: 400 12px var(--mono); margin-left: 6px; font-variant-numeric: tabular-nums; }
+
+  section { margin-top: 36px; scroll-margin-top: 72px; }
+  h2 { font: 700 22px/1.2 var(--display); margin: 0; display: flex; align-items: baseline; gap: 10px; }
+  h2 span { font: 400 13px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+  section > p { margin: 4px 0 0; color: var(--muted); max-width: 65ch; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px 16px; margin-top: 16px; }
+  @media (min-width: 720px) { .grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); } }
+
+  .card { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .screen { display: block; width: 100%; aspect-ratio: 1; padding: 0; border: 0; border-radius: 12px; background: var(--screen); cursor: pointer; overflow: hidden; outline: 1px solid var(--line); }
+  .screen canvas { display: block; width: 100%; height: 100%; }
+  .screen[aria-pressed="true"] { outline: 2px solid var(--accent); }
+  .screen:focus-visible, .tints button:focus-visible, .jump button:focus-visible, .copy:focus-visible, #q:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .meta { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+  .name { font: 500 13px/1.3 var(--mono); overflow-wrap: anywhere; flex: 1; min-width: 0; }
+  .secs { font: 400 12px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .copy { font: 400 12px var(--mono); color: var(--muted); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+  .copy:hover { color: var(--accent); }
+  #none, #fail { margin-top: 36px; color: var(--muted); }
+  #cmd { font: 400 13px var(--mono); position: fixed; left: 50%; transform: translateX(-50%); bottom: 16px; max-width: calc(100% - 32px); background: var(--fg); color: var(--bg); padding: 10px 14px; border-radius: 8px; z-index: 20; user-select: all; overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Lump's animations</h1>
+      <p class="lede"><span id="total">Every animation</span>, redrawn here from the same drawing instructions the board gets. Hover a screen to play it. Click to keep it running. <a id="source" hidden>Source on GitHub</a></p>
+    </div>
+    <div class="tints" id="tints" role="group" aria-label="Body colour"><span>Body colour</span></div>
+  </header>
+  <div class="bar">
+    <input id="q" type="search" placeholder="Find by name" aria-label="Find an animation by name" autocomplete="off">
+    <nav class="jump" id="jump" aria-label="Jump to a group"></nav>
+  </div>
+  <main id="main"></main>
+  <p id="none" hidden>Nothing by that name.</p>
+  <p id="fail" hidden>The animation list didn't load. If you opened this file straight from disk, serve the folder instead: <code>python3 -m http.server 8771 --directory gallery</code></p>
+</div>
+<div id="cmd" hidden></div>
+
+<script>
+(() => {
+  const S = 2, TICK = 1000 / 24;
+  const TINTS = [['Orange', '#FF7A45'], ['Yellow', '#FFC53D'], ['Green', '#4CD08A'], ['Blue', '#5AB8FF'], ['Red', '#FF5A4D']];
+  let tint = [255, 122, 69];
+  const colours = new Map();
+  const $ = id => document.getElementById(id);
+
+  // ---- the art files: lump.bin and the clips share one layout (see tools/export_frames.py) ----
+  const sources = new Map();
+  function load(file) {
+    if (!sources.has(file)) sources.set(file, fetch(file, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); }).then(parse));
+    return sources.get(file);
+  }
+  function parse(buffer) {
+    const d = new Uint8Array(buffer), dv = new DataView(buffer), frames = dv.getUint16(6, true);
+    let p = 10;
+    for (let i = d[8]; i > 0; i--) p += 2 + d[p + 1];
+    const seqs = {}, wide = dv.getUint16(4, true) >= 5;      // version 5 on: a two-byte sequence count
+    let count = wide ? dv.getUint16(p, true) : d[p]; p += wide ? 2 : 1;
+    for (; count > 0; count--) {
+      const n = d[p + 3], name = String.fromCharCode(...d.subarray(p + 4, p + 4 + n)); p += 4 + n;
+      const len = dv.getUint16(p, true), ids = new Uint16Array(len); p += 2;
+      for (let k = 0; k < len; k++, p += 2) ids[k] = dv.getUint16(p, true);
+      seqs[name] = ids;
+    }
+    return { d, dv, seqs, offsets: p, base: p + 4 * frames };
+  }
+
+  // His body is stored as a marker colour, and swapped for the real one as it's drawn (as the board does).
+  function colour(r, g, b, a) {
+    const key = (r << 24 | g << 16 | b << 8 | a) >>> 0;
+    let s = colours.get(key);
+    if (!s) {
+      const beta = g / 241, alpha = r / 255 - beta;
+      if (!(r < 8 && g < 8 && b < 8) && alpha > 0.02 && b >= alpha * 255 + beta * 220 - 48) {
+        r = Math.min(255, alpha * tint[0] + beta * 255 | 0); g = Math.min(255, alpha * tint[1] + beta * 241 | 0); b = Math.min(255, alpha * tint[2] + beta * 220 | 0);
+      }
+      colours.set(key, s = `rgba(${r},${g},${b},${a / 255})`);
+    }
+    return s;
+  }
+
+  function draw(c, src, id) {
+    const { d, dv } = src;
+    let p = src.base + (dv.getUint32(src.offsets + 4 * id, true) & 0x7FFFFFFF);
+    const end = p + 2 + dv.getUint16(p, true); p += 2;
+    const s16 = () => { const v = dv.getInt16(p, true); p += 2; return v; };
+    const u16 = () => { const v = dv.getUint16(p, true); p += 2; return v; };
+    const px = () => s16() / 16, ang = () => s16() / 4096, sc = () => s16() / 256;
+    const col = () => { p += 4; return colour(d[p - 4], d[p - 3], d[p - 2], d[p - 1]); };
+    let holes = [];
+    c.setTransform(S, 0, 0, S, 0, 0); c.lineCap = c.lineJoin = 'round';
+    c.fillStyle = '#000'; c.fillRect(0, 0, 240, 240);
+    c.save();
+    while (p < end) {
+      switch (d[p++]) {
+        case 1: c.beginPath(); holes = []; break;
+        case 2: c.closePath(); break;
+        case 3: c.moveTo(px(), px()); break;
+        case 4: c.lineTo(px(), px()); break;
+        case 5: c.quadraticCurveTo(px(), px(), px(), px()); break;
+        case 6: c.bezierCurveTo(px(), px(), px(), px(), px(), px()); break;
+        case 7: { const a = [px(), px(), px(), ang(), ang()]; c.arc(...a, !!d[p++]); holes.push(a); break; }
+        case 8: c.ellipse(px(), px(), px(), px(), ang(), ang(), ang(), !!d[p++]); break;
+        case 9: c.rect(px(), px(), px(), px()); break;
+        case 10: c.fillRect(px(), px(), px(), px()); break;
+        case 11: c.fill(); break;
+        case 12: c.stroke(); break;
+        case 13: c.clip(); break;
+        case 14: c.save(); break;
+        case 15: c.restore(); break;
+        case 16: c.translate(px(), px()); break;
+        case 17: c.rotate(ang()); break;
+        case 18: c.scale(sc(), sc()); break;
+        case 19: c.setTransform(sc() * S, sc() * S, sc() * S, sc() * S, px() * S, px() * S); break;
+        case 20: c.fillStyle = col(); break;
+        case 21: c.strokeStyle = col(); break;
+        case 22: c.lineWidth = u16() / 16; break;
+        case 23: c.globalAlpha = d[p++] / 255; break;
+        case 24: { const dash = []; for (let n = d[p++]; n > 0; n--) dash.push(u16() / 16); c.setLineDash(dash); break; }
+        case 25: c.roundRect(px(), px(), px(), px(), px()); break;
+        case 26: c.lineDashOffset = px(); break;
+        case 27: for (const a of holes) { c.beginPath(); c.rect(0, 0, 240, 240); c.arc(...a, true); c.clip(); } break;   // keep what is outside each circle
+        default: p = end;
+      }
+    }
+    c.restore();
+  }
+
+  // ---- cards ----
+  const cards = [], playing = new Set();
+  function still(card) {
+    if (!card.src || !card.near) return;
+    if (!card.ctx) { card.cv.width = card.cv.height = 240 * S; card.ctx = card.cv.getContext('2d'); }
+    card.shown = card.item.g === 'moods' ? 0 : Math.floor(card.seq.length * 0.55);
+    draw(card.ctx, card.src, card.seq[card.shown]);
+  }
+  function come(card) {
+    card.near = true;
+    if (card.src) return still(card);
+    load(card.item.f).then(src => { card.src = src; card.seq = src.seqs[card.item.s]; if (card.near) still(card); if (card.hover || card.pinned) play(card); }).catch(() => {});
+  }
+  function go(card) {
+    card.near = false; playing.delete(card);
+    card.cv.width = card.cv.height = 0; card.ctx = null;      // a canvas this far off screen gives its memory back
+  }
+  function play(card) {
+    if (!card.src || !card.near || playing.has(card)) return;
+    card.start = performance.now(); card.shown = -1; playing.add(card);
+    if (playing.size === 1) requestAnimationFrame(frame);
+  }
+  function stop(card) { if (!card.hover && !card.pinned && playing.delete(card)) still(card); }
+  function frame(now) {
+    for (const card of playing) {
+      const t = Math.floor((now - card.start) / TICK) % card.seq.length;
+      if (t !== card.shown) { card.shown = t; draw(card.ctx, card.src, card.seq[t]); }
+    }
+    if (playing.size) requestAnimationFrame(frame);
+  }
+  const watch = new IntersectionObserver(es => es.forEach(e => (e.isIntersecting ? come : go)(e.target.card)), { rootMargin: '600px 0px' });
+
+  function toast(text) {
+    const el = $('cmd'); el.textContent = text; el.hidden = false;
+    clearTimeout(toast.t); toast.t = setTimeout(() => { el.hidden = true; }, 4000);
+  }
+  function makeCard(item) {
+    const el = document.createElement('div'); el.className = 'card';
+    el.innerHTML = `<button class="screen" type="button" aria-pressed="false"><canvas width="0" height="0"></canvas></button>
+      <div class="meta"><span class="name"></span><span class="secs">${item.secs.toFixed(1)} s</span>${item.cmd ? '<button class="copy" type="button" title="Copy the command that plays this on the board">copy</button>' : ''}</div>`;
+    el.querySelector('.name').textContent = item.n;
+    const btn = el.querySelector('.screen'), card = { item, el, btn, cv: el.querySelector('canvas'), near: false, hover: false, pinned: false };
+    btn.title = item.about || item.n; btn.setAttribute('aria-label', 'Play ' + item.n + (item.about ? ': ' + item.about : ''));
+    el.card = card;
+    btn.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') { card.hover = true; play(card); } });
+    btn.addEventListener('pointerleave', () => { card.hover = false; stop(card); });
+    btn.addEventListener('click', () => { card.pinned = !card.pinned; btn.setAttribute('aria-pressed', card.pinned); card.pinned ? play(card) : stop(card); });
+    if (item.cmd) el.querySelector('.copy').addEventListener('click', e => {
+      const b = e.currentTarget;
+      navigator.clipboard.writeText(item.cmd).then(() => { b.textContent = 'copied'; setTimeout(() => { b.textContent = 'copy'; }, 1500); }, () => toast(item.cmd));
+    });
+    cards.push(card); watch.observe(el);
+    return el;
+  }
+
+  function build(m) {
+    const main = $('main'), jump = $('jump');
+    for (const g of m.groups) {
+      const items = m.items.filter(it => it.g === g.id);
+      const sec = document.createElement('section'); sec.id = 'group-' + g.id;
+      sec.innerHTML = '<h2></h2><p></p><div class="grid"></div>';
+      sec.querySelector('h2').append(g.title, Object.assign(document.createElement('span'), { textContent: items.length }));
+      sec.querySelector('p').textContent = g.blurb;
+      const grid = sec.querySelector('.grid');
+      items.forEach(it => grid.append(makeCard(it)));
+      main.append(sec);
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = g.title;
+      b.append(Object.assign(document.createElement('span'), { textContent: items.length }));
+      b.addEventListener('click', () => sec.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }));
+      g.sec = sec; g.jump = b; jump.append(b);
+    }
+    $('total').textContent = `${m.items.length} animations`;
+    $('q').addEventListener('input', e => {
+      const q = e.target.value.trim().toLowerCase().replace(/[\s_]+/g, '');
+      let any = false;
+      for (const g of m.groups) {
+        let n = 0;
+        for (const el of g.sec.querySelectorAll('.card')) { const hit = el.card.item.n.replace(/[\s_]+/g, '').includes(q); el.hidden = !hit; n += hit; }
+        g.sec.hidden = g.jump.hidden = !n; any = any || n > 0;
+      }
+      $('none').hidden = any;
+    });
+  }
+
+  TINTS.forEach(([name, hex], i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.title = name; b.setAttribute('aria-label', name);
+    b.style.setProperty('--c', hex); b.setAttribute('aria-pressed', i === 0);
+    b.addEventListener('click', () => {
+      tint = [1, 3, 5].map(k => parseInt(hex.slice(k, k + 2), 16)); colours.clear();
+      for (const o of $('tints').querySelectorAll('button')) o.setAttribute('aria-pressed', o === b);
+      for (const card of cards) if (!playing.has(card)) still(card);
+    });
+    $('tints').append(b);
+  });
+
+  if (location.hostname.endsWith('.github.io')) {             // on GitHub Pages the repository's address follows from the page's
+    const a = $('source'); a.href = `https://github.com/${location.hostname.split('.')[0]}/${location.pathname.split('/')[1]}`; a.hidden = false;
+  }
+  fetch('manifest.json', { cache: 'no-cache' }).then(r => r.json()).then(build).catch(() => { $('fail').hidden = false; });
+})();
+</script>
+</body>
+</html>

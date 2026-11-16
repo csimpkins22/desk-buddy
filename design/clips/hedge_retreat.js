@@ -1,4 +1,5 @@
 // Hedge retreat: a hedge grows up behind him. Holding a wide-eyed stare at you, he backs slowly into it until only his cowlick shows; then his eyes peek back out.
+// group: memes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, inkStroke, tint } = window.__lump;
   const CREAM = '#FFF1DC', DEEP = '#1D5A3C', MID = '#2F8D59', GREEN = '#58D68D', GAP = '#123A27', TWIG = '#6B4A1F', TURF = '#143524', INK = '#0B0E14', TAU = Math.PI * 2, P = 'hedge_retreat_';

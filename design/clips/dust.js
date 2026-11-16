@@ -1,4 +1,5 @@
 // While he sleeps, specks of dust drift down and settle on him a few at a time until he wears a grey cap of it. His nose twitches, and one enormous sneeze clears the lot.
+// group: odd
 // Staging: asleep in his usual place and never wakes; dust from above; normal view; 11 seconds; a long quiet stretch then one hit; ends asleep and clean.
 (() => {
   const { D, xf, hash, closedPath } = window.__lump, kit = window.__lump.kit, k = kit.clip('dust', { asleep: true });

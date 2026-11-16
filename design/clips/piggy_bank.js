@@ -1,4 +1,5 @@
 // Wide: tiny beside an enormous piggy bank, he climbs its side, drops his coin in the slot, leans to look after it and falls in; a beat of just the pig, then he rattles out of the bottom.
+// group: scenes
 (() => {
   const { D, xf, boil, openPath } = window.__lump, kit = window.__lump.kit, { CREAM, BLUE, DARK, YELLOW, WHITE, TAU } = kit;
   const k = kit.clip('piggy_bank');

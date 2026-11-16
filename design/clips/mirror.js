@@ -1,4 +1,5 @@
 // Four quick poses at a tall mirror, each copied a beat late; then the reflection shrugs, walks out of the frame and off, and he is left staring at empty glass.
+// group: scenes
 // Written with him on the left and the mirror on the right: the clip is mirrored, so on screen he is on the right.
 (() => {
   const { D, xf, FACE, kit } = window.__lump;

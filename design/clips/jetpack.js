@@ -1,4 +1,5 @@
 // Jetpack: it lifts him off and he loves it. Then it sputters, coughs, goes quiet, and drops him.
+// group: nonsense
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', GREY = '#9FB0C4';

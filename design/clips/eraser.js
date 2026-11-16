@@ -1,4 +1,5 @@
 // A giant eraser rubs out his lower half. He finds a pencil, draws himself feet (one far too big) and goes to sleep on them.
+// group: odd
 (() => {
   const { D, xf, FACE, boil, openPath, closedPath, tint, kit } = window.__lump;
   const k = kit.clip('eraser'), PAPER = '#E9E2D2', LEAD = '#C3CCD6';

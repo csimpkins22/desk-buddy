@@ -1,4 +1,5 @@
 // Cub lift: a jutting rock slides in with a tiny Lump waiting at its tip. He climbs up and holds the little one high in a shaft of light as the sun rises. It sneezes on him.
+// group: movies
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, closedPath, inkStroke, tint } = window.__lump;
   const CREAM = '#FFF1DC', INK = '#0B0E14', ROCK = '#6B4A1F', YELLOW = '#FFD23F', BLUE = '#5AB8FF', TAU = Math.PI * 2;

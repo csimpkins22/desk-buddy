@@ -1,4 +1,5 @@
 // Cucumber: he is head down in a bowl of kibble when a cucumber slides quietly in behind him. He turns, sees it, and goes straight up out of sight, coming down in a heap as far from it as he can get.
+// group: memes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, closedPath } = window.__lump;
   const CREAM = '#FFF1DC', FLOOR = '#2B3440', SKIN = '#3F9E5A', RIND = '#2A7445', SHINE = '#8FE0A8', BLUE = '#5AB8FF', DEEP = '#2E7FB8', KIBBLE = '#B07A3A', BROWN = '#6B4A1F', TAU = Math.PI * 2;

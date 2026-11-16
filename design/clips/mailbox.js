@@ -1,4 +1,5 @@
 // Mailbox: he opens a mailbox, peers in, and a week of letters blasts out over him. The last one sticks to his face.
+// group: meetings
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', DARK = '#17161A';

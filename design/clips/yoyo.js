@@ -1,4 +1,5 @@
 // Yo-yo: down and up, down and up, then it sticks at the bottom. He tugs. It comes back harder than he meant.
+// group: pastimes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC';

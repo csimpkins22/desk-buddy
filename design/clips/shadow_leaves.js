@@ -1,4 +1,5 @@
 // His shadow peels up off the floor and walks out to the right; he hurries after it, and both come back in from the left, where it lies down under him again.
+// group: odd
 (() => {
   const { D, xf, FACE, boil, openPath, closedPath, kit } = window.__lump;
   const k = kit.clip('shadow_leaves'), SH = '#465061', EDGE = '#7A8698';

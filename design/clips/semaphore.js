@@ -1,4 +1,5 @@
 // Semaphore: he signals frantically with two flags, holds the last pose hopefully, and droops when nobody answers.
+// group: waiting
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', L = [90, 140], R = [166, 140];

@@ -1,4 +1,5 @@
 // A dark piece: the lights go out, a candle on a small cake at lower left lights a circle round itself and part of his face. He blows it out: just his eyes. It relights itself. He looks at us.
+// group: scenes
 (() => {
   const { D, xf, mixHex, kit } = window.__lump;
   const { CREAM, YELLOW, RED, BLUE, WHITE, TAU, pt, look } = kit;

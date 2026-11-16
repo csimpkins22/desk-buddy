@@ -1,4 +1,5 @@
 // We are the phone: he leans in until his face fills the screen, pulls four quick faces, the flash goes off, and he drifts back dazzled.
+// group: scenes
 (() => {
   const { D, xf, FACE } = window.__lump, kit = window.__lump.kit;
   const k = kit.clip('selfie'), cam = z => kit.zoom(z, [128, 116], [120, 120]), Z = 2.8;

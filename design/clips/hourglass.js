@@ -1,4 +1,5 @@
 // Hourglass: he flips it and watches the sand. It is very slow. He shakes it, and one more grain falls.
+// group: waiting
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', X = -30, GX = 194, GY = 162, START = 42;

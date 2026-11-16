@@ -1,4 +1,5 @@
 // He walks right up to the glass, knocks on it at you, cups a nub to listen, hears nothing, and knocks again, more politely.
+// group: odd
 // Staging: centre, coming toward us; view changes from normal to close; 6 seconds; knock, long wait, smaller knock; pulls back to rest.
 (() => {
   const { D, xf, tint, mixHex } = window.__lump, kit = window.__lump.kit, k = kit.clip('tap_back');

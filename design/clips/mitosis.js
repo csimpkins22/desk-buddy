@@ -1,4 +1,5 @@
 // He pinches in at the middle and splits into two half-size Lumps. Each points at himself: both think they are the original. They merge back with a squelch, slightly too tall.
+// group: odd
 // Staging: centre; the second one comes out of him; the view closes in on the pair; 5.5 seconds; rapid fire; ends a little too tall.
 (() => {
   const { D, xf, FACE, openPath, tint } = window.__lump, kit = window.__lump.kit, k = kit.clip('mitosis');

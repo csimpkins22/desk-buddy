@@ -1,4 +1,5 @@
 // He pogos in from the right, each bounce higher, until the last takes him off the top; the stick falls back alone, and then so does he.
+// group: scenes
 (() => {
   const { D, xf, FACE, kit } = window.__lump;
   const { CREAM, RED, GREY, YELLOW } = kit, k = kit.clip('pogo');

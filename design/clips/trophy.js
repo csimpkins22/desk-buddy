@@ -1,4 +1,5 @@
 // Trophy: one bigger than he is comes down into his hands. He holds it up, wobbles, and it takes him over with it.
+// group: celebrations
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', GOLD = '#FFD23F';

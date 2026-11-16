@@ -1,4 +1,5 @@
 // He pats a sandcastle; a wave takes the whole screen and him with it, then washes him back flat on the far left with a starfish on his head.
+// group: scenes
 (() => {
   const { D, xf, FACE, boil, openPath, closedPath, kit } = window.__lump;
   const { CREAM, RED, BLUE, WHITE, YELLOW, TAU } = kit, k = kit.clip('sandcastle');

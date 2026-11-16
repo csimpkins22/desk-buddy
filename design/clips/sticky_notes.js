@@ -1,4 +1,5 @@
 // Sticky notes: he sticks one yellow note on his belly, then more and faster until even his eyes are covered. One peels off and he peeks out.
+// group: work
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const DARK = '#17161A', YELLOW = '#FFD23F';

@@ -1,4 +1,5 @@
 // Lunch: a sandwich too big for his mouth bonks off his face, so he unhinges his jaw, posts it in sideways and ends up sandwich-shaped.
+// group: clock
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath } = window.__lump;
   const CREAM = '#FFF1DC';

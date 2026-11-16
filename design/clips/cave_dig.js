@@ -1,4 +1,5 @@
 // Cave dig: he tunnels down through the dirt in a winding trail, a boulder wobbles above him, and he scoots out just before it drops.
+// group: games
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, closedPath } = window.__lump;
   const CREAM = '#FFF1DC', TAU = Math.PI * 2, K = 0.36, TOP = 46, ROW = 190, BY = 141, P = 'cave_dig_';

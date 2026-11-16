@@ -1,4 +1,5 @@
 // Big brain: a thought lights a spark over his head, which grows into a halo, then beams, then a blazing aura that lifts him off the floor with dots in orbit; it all fizzles out and leaves one small question mark.
+// group: memes
 (() => {
   const { D, CLIPS, xf, WAKE, DOZE, boil, openPath, closedPath } = window.__lump;
   const CREAM = '#FFF1DC', YELLOW = '#FFD23F', PALE = '#FFE685', GLARE = '#FFF6CC', RED = '#FF5A4D', BLUE = '#5AB8FF', GREEN = '#58D68D', WHITE = '#F4F8FF', GREY = '#9FB0C4', AMBER = '#D9981A', DARK = '#17161A', TAU = Math.PI * 2, P = 'big_brain_';

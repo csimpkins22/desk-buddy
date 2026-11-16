@@ -1,4 +1,5 @@
 // Line goes up: a tie drops onto him and he presents a chart, nodding proudly with his eyes shut as its arrow climbs; he goes on nodding when it turns and dives out through the bottom of the board and the floor.
+// group: memes
 (() => {
   const { D, CLIPS, xf, WAKE, DOZE, boil } = window.__lump;
   const CREAM = '#FFF1DC', RED = '#FF5A4D', GREEN = '#58D68D', BLUE = '#5AB8FF', NAVY = '#3A86C8', BOARD = '#22304A', WOOD = '#8A5A2B', BROWN = '#6B4A1F', WHITE = '#F4F8FF', TAU = Math.PI * 2, P = 'line_goes_up_';

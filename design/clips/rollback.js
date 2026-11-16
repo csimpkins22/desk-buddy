@@ -1,4 +1,5 @@
 // Rollback: he shuffles across, hops and takes a bow, then a rewind mark appears and it all plays backwards to where he began.
+// group: work
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC';

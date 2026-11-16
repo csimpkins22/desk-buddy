@@ -1,4 +1,5 @@
 // Tests pass: he holds up a scorecard and three green ticks land on it, one by one.
+// group: work
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath } = window.__lump;
   const CREAM = '#FFF1DC';

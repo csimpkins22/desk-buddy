@@ -1,4 +1,5 @@
 // Champagne: he shakes the bottle and the cork goes off round the screen, wall to wall, while he watches. It ends between his eyes.
+// group: celebrations
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC';

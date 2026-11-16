@@ -1,4 +1,5 @@
 // Extra life: three tiny Lumps in the corner count his lives. He trips on a pebble and one pops; he looks up, alarmed, and stands very still.
+// group: games
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, closedPath, tint } = window.__lump;
   const CREAM = '#FFF1DC', TAU = Math.PI * 2, P = 'extra_life_';

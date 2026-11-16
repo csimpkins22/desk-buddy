@@ -1,4 +1,5 @@
 // Is this...? A butterfly flutters into his meadow. He holds a nub out towards it with a hopeful "?", and it comes over and settles on his cowlick.
+// group: memes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, closedPath } = window.__lump;
   const CREAM = '#FFF1DC', BLUE = '#5AB8FF', DEEP = '#2A6FB0', YELLOW = '#FFD23F', GOLD = '#D9A21B', BROWN = '#6B4A1F', GREEN = '#58D68D', RED = '#FF5A4D', TAU = Math.PI * 2, P = 'is_this_';

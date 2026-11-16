@@ -1,4 +1,5 @@
 // Portal: a hole opens under him and another overhead. He falls through the floor and drops in from the top, round and round, until the floor closes.
+// group: nonsense
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', BLUE = '#5AB8FF', YELLOW = '#FFD23F', FY = 203;

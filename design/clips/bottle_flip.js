@@ -1,4 +1,5 @@
 // Bottle flip: he flips a bottle of water. It slaps down on its side, then lands on its base and topples; the third one sticks. He throws both arms up, and the thump of his cheering knocks it over.
+// group: memes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', FLOOR = '#2B3440', WATER = '#5AB8FF', CAP = '#2E7FB8', LABEL = '#F4F8FF', TAU = Math.PI * 2, HALF = Math.PI / 2;

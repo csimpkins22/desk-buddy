@@ -1,4 +1,5 @@
 // Extreme close-up on his eyes: a bee loops round in front of them, lands between them, he goes cross-eyed and holds still; it leaves and one eye stays crossed.
+// group: scenes
 (() => {
   const { xf, D, kit } = window.__lump, { CREAM, DARK, YELLOW, WHITE, TAU } = kit;
   const k = kit.clip('bee');

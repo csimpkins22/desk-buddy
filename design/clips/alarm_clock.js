@@ -1,4 +1,5 @@
 // Asleep with an alarm clock by his tail: it rings, one nub comes up and over and flattens it without his eyes opening, and a spring and a cog roll away.
+// group: scenes
 (() => {
   const { D, CLIPS, xf, kit } = window.__lump;
   const NAME = 'alarm_clock', k = kit.clip(NAME, { asleep: true }), X = 48, TAU = kit.TAU;

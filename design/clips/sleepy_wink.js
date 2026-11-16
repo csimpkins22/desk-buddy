@@ -1,4 +1,5 @@
 // Sleepy wink: fast asleep, he opens one eye, finds you watching, winks, and goes back to sleep.
+// group: scenes
 (() => {
   const { D, kit } = window.__lump, k = kit.clip('sleepy_wink', { asleep: true });
   const lie = (face, extra = {}) => ({ ...D.S1, face, fxm: 'none', ...extra });

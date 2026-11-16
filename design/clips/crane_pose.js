@@ -1,4 +1,5 @@
 // Crane pose: a post lifts him up into the sunset. He raises his arms wide, wobbles, goes perfectly still, and one drifting leaf tips him off onto his head.
+// group: movies
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, closedPath } = window.__lump;
   const CREAM = '#FFF1DC', WOOD = '#8A5A2B', BARK = '#6B4A1F', TAU = Math.PI * 2, PX = 88, TOP = 44, HZ = 178, P = 'crane_pose_';

@@ -1,4 +1,5 @@
 // Rate limited: he sits behind a "back in 5" sign tapping his watch, stares at you, taps some more, then holds the watch up.
+// group: work
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, openPath } = window.__lump;
   const CREAM = '#FFF1DC', TAU = Math.PI * 2;

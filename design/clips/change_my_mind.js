@@ -1,4 +1,5 @@
 // Change my mind: he sets up behind a folding table with a blank sign and a mug, sure of himself. The sun crosses the whole sky, a tumbleweed rolls by, and nobody comes.
+// group: memes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, closedPath, inkStroke, mixHex, tint } = window.__lump;
   const CREAM = '#FFF1DC', DARK = '#17161A', WOOD = '#C89B5A', BROWN = '#6B4A1F', STEEL = '#9FB0C4', WHITE = '#F4F8FF', SHADE = '#C9D4E0', BLUE = '#5AB8FF', DEEP = '#2A6FB0', YELLOW = '#FFD23F', RED = '#FF5A4D', WALL = '#2B3440', STRAW = '#D8B878';

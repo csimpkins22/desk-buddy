@@ -1,4 +1,5 @@
 // Wrench: he tightens a bolt on the edge of the frame. Every heave tilts the whole picture, until he slides off down the slope.
+// group: gadgets
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', GREY = '#9FB0C4', BOLT = [224, 112], MID = [120, 120], UP = Math.PI + 0.5, DOWN = Math.PI - 0.5;

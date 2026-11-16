@@ -1,4 +1,5 @@
 // Extreme close-up: he fills the right of the screen, one small pea sits on a plate rim at lower left. Chopsticks hover, tremble, grip, and the pea pings off three edges while his eyes follow.
+// group: scenes
 (() => {
   const { D, xf, kit } = window.__lump;
   const { CREAM, BROWN, GREEN, GREY, WHITE, YELLOW, TAU, steps, look } = kit;

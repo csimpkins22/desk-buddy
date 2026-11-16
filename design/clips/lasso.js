@@ -1,4 +1,5 @@
 // He plays with the screen: whirls a lasso, throws it at us so the loop runs round the border, and each of three tugs pulls the view in on him. Then it goes slack and falls over him in coils.
+// group: scenes
 (() => {
   const { D, xf, FACE, kit } = window.__lump;
   const { YELLOW, TAU, steps, pt, look } = kit;

@@ -1,4 +1,5 @@
 // Jack-in-the-box: startled by the tap, he hides in his box. The crank turns on its own and out he springs, boinging.
+// group: tap
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', RED = '#FF5A4D', TOP = 146;

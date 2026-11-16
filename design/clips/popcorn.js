@@ -1,4 +1,5 @@
 // A pan slides in while he sleeps and one kernel pops, waking him. Then popcorn fills the screen from the bottom, lifting him to the top edge until only his eyes and cowlick show. He dozes off buried.
+// group: scenes
 (() => {
   const { xf, D, kit, hash } = window.__lump, { CREAM, YELLOW, GREY, TAU } = kit;
   const k = kit.clip('popcorn', { asleep: true });

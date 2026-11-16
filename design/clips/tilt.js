@@ -1,4 +1,5 @@
 // Someone picks his cube up off the desk and tips it. He slides into the low corner and braces; it tips the other way and he slides across; it is set down and he staggers upright.
+// group: odd
 (() => {
   const { D, xf, FACE, kit } = window.__lump;
   const k = kit.clip('tilt'), Z = 0.74, GLASS = '#7C8A9C', DESK = '#3D3514';

@@ -1,4 +1,5 @@
 // Moon bike: a full moon comes up and he hops off to fetch a bicycle. Back he comes, small and in silhouette, pedalling up and across it, until the front wheel dips and he has to pedal like mad.
+// group: movies
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, closedPath } = window.__lump;
   const CREAM = '#FFF1DC', BLACK = '#000000', MOON = '#FFE08A', CRATER = '#E9C766', TAU = Math.PI * 2, MX = 120, MY = 104, MR = 90;

@@ -1,4 +1,5 @@
 // He never wakes: a saucer slides in from the top, its beam lifts him off the floor, tumbles him over and sets him down facing the other way, then leaves him snoring.
+// group: scenes
 (() => {
   const { D, xf, kit } = window.__lump, { TAU } = kit;
   const k = kit.clip('ufo', { asleep: true });

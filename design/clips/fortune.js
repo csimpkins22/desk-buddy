@@ -1,4 +1,5 @@
 // Fortune: the tap shakes loose a fortune cookie. He cracks it open, reads the slip, turns it over, and is none the wiser.
+// group: tap
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, closedPath } = window.__lump;
   const CREAM = '#FFF1DC', TAN = '#E0A84E', DARK = '#17161A';

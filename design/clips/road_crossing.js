@@ -1,4 +1,5 @@
 // Road crossing: he leaps to the far side and hops home lane by lane between passing boxes, rides a floating log for a moment, and makes it across with a relieved flop.
+// group: games
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', YELLOW = '#FFD23F', RED = '#FF5A4D', BLUE = '#5AB8FF', BROWN = '#6B4A1F', TAU = Math.PI * 2, P = 'road_crossing_';

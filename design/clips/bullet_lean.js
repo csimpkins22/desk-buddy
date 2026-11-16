@@ -1,4 +1,5 @@
 // Bullet lean: three slow dots drift at him, trailing ripples. He bends over backwards, impossibly far, and they sail past above him. Then he can't get back up, until a straggler pings him upright.
+// group: movies
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', YELLOW = '#FFD23F', BLUE = '#5AB8FF', TAU = Math.PI * 2, R = 40;

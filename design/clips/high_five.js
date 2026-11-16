@@ -1,4 +1,5 @@
 // High five: a smaller Lump walks in and offers one, pulls away at the last moment, he swings through and spins, and the small one giggles.
+// group: scenes
 (() => {
   const { D, xf, FACE, kit } = window.__lump, k = kit.clip('high_five');
   const HOME = -44, TX = 56;

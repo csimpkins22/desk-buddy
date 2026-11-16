@@ -1,4 +1,5 @@
 // Deal with it: the sun comes out and he squints. A pair of sunglasses comes down from the top a step at a time, settles on his face with a glint, and he allows himself the faintest smirk.
+// group: memes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, closedPath } = window.__lump;
   const CREAM = '#FFF1DC', DARK = '#17161A', SLATE = '#3A4656', YELLOW = '#FFD23F', TAU = Math.PI * 2, P = 'deal_with_it_', SUN = [45, 46], ON = 108;

@@ -1,4 +1,5 @@
 // Block bonk: he jumps and headbutts a floating block, and a coin pops out. He does it again. The third time the block is empty and he just hurts his head.
+// group: games
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', YELLOW = '#FFD23F', BLUE = '#5AB8FF', STONE = '#9FB0C4', TAU = Math.PI * 2, P = 'block_bonk_', REST = [[204, 190], [228, 190]];

@@ -1,4 +1,5 @@
 // Close on his face while one drop of water takes six seconds to fall on his head: curious, braced, squinting, flinching, plip, shrug.
+// group: odd
 (() => {
   const { D, xf, FACE, kit } = window.__lump, { TAU, CREAM, WHITE, BLUE } = kit;
   const k = kit.clip('slow_motion'), V = kit.view(1.5, [128, 112], [120, 170]), N = 72;

@@ -1,4 +1,5 @@
 // Pinball: the tap turns the screen into a pinball table with him as the ball. Each bumper he hits lights a pip, then he drains for the jackpot.
+// group: tap
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', TAU = Math.PI * 2, BUMPERS = [[42, 66, '#FF5A4D'], [200, 62, '#5AB8FF'], [120, 150, '#FFD23F']];

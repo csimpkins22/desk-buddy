@@ -1,4 +1,5 @@
 // Polite cough: he waits, gives a small "ahem" behind his hand, then whistles as if it wasn't him.
+// group: waiting
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath } = window.__lump;
   const CREAM = '#FFF1DC';

@@ -1,4 +1,5 @@
 // Dream bubble: asleep, he dreams of a smaller himself, who is dreaming of a smaller one still. The smallest wakes, and the bubbles pop all the way back up to him.
+// group: pastimes
 (() => {
   const { D, CLIPS, xf, WAKE, DOZE, boil, openPath, closedPath, tint } = window.__lump;
   const CREAM = '#FFF1DC', DARK = '#17161A';

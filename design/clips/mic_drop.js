@@ -1,4 +1,5 @@
 // Mic drop: he says his piece, holds the mic out and lets go, eyes shut and smug. It bounces off the floor and bonks him.
+// group: celebrations
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, tint } = window.__lump;
   const CREAM = '#FFF1DC';

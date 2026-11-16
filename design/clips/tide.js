@@ -1,4 +1,5 @@
 // He is a rock on a shore, at the left with his eyes open: the tide comes in over his head, holds, and goes out, leaving him a strand of seaweed.
+// group: odd
 (() => {
   const { D, xf, openPath, closedPath, kit } = window.__lump, { TAU, DARK, GREEN } = kit;
   const k = kit.clip('tide'), V = kit.view(1, [128, 120], [74, 120]), FLAT = kit.look(0, 0, 'flat');

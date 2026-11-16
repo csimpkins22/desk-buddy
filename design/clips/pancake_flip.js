@@ -1,4 +1,5 @@
 // One hit, close up: a big pan comes up from below, scoops him and flips him like a pancake. He lands flat, blinks, and gets a drizzle of syrup.
+// group: scenes
 (() => {
   const { D, xf, FACE, boil, openPath, closedPath, kit } = window.__lump;
   const { CREAM, BROWN, WHITE, TAU } = kit, k = kit.clip('pancake_flip');

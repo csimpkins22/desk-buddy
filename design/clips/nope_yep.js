@@ -1,4 +1,5 @@
 // Nope, yep: a plate of broccoli slides up and he turns away from it behind a raised nub; it is sent back, a slice of cake slides up instead, and he points at that with a nod.
+// group: memes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', RED = '#FF5A4D', YELLOW = '#FFD23F', BLUE = '#5AB8FF', NAVY = '#3A86C8', BROWN = '#6B4A1F', COCOA = '#8A5A2B', SPONGE = '#F4C76B', WHITE = '#F4F8FF', SHADE = '#C9D4E0',

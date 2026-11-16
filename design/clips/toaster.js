@@ -1,4 +1,5 @@
 // He sleeps through it: a toaster off to the left pops, and the toast arcs over and lands flat on his back.
+// group: scenes
 (() => {
   const { D, xf } = window.__lump, kit = window.__lump.kit, { CREAM, GREY, DARK, YELLOW, RED, TAU } = kit;
   const k = kit.clip('toaster', { asleep: true });

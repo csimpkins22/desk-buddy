@@ -1,4 +1,5 @@
 // He twists himself, squeaking, into a balloon dog made of his own body, admires it for a beat, and pops back to himself with a bang.
+// group: odd
 // Staging: centre, his own body is the prop; the view pushes in a little on the dog; 4.5 seconds; one big hit; the bang drops him back, startled.
 (() => {
   const { D, xf, FACE, boil, openPath, tint, mixHex } = window.__lump, kit = window.__lump.kit, k = kit.clip('balloon_animal');

@@ -1,4 +1,5 @@
 // Sip tea: a fuss kicks off just out of sight. He gives it a long side-eye, brings out a cup and saucer, and takes a slow sip without once looking away.
+// group: memes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, tint } = window.__lump;
   const CREAM = '#FFF1DC', INK = '#0B0E14', WHITE = '#F4F8FF', SHADE = '#C9D4E0', BLUE = '#5AB8FF', TEA = '#C47A2C', GLINT = '#E9B872', GREY = '#9FB0C4', TAU = Math.PI * 2, P = 'sip_tea_', DX = -12, S = 1.35;

@@ -1,4 +1,5 @@
 // A vending machine drops over him and he is the snack: he taps on the glass, eyes the slot, wriggles down into the tray and pushes out through the flap.
+// group: scenes
 (() => {
   const { D, xf, kit } = window.__lump, k = kit.clip('vending');
   const { CREAM, GREY, YELLOW, RED, BLUE, GREEN, BROWN, WHITE, TAU } = kit, CASE = '#2B3A55';

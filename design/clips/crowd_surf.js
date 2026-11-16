@@ -1,4 +1,5 @@
 // Crowd surf: tiny hands come up from below, he hops on and they pass him along and back. Then they throw him up and leave.
+// group: celebrations
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC';

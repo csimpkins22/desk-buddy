@@ -1,4 +1,5 @@
 // In the dark he turns once on the spot and a beam of light from his face sweeps round the screen, lighting the sea, a boat, a cloud and a rock as it crosses them.
+// group: odd
 (() => {
   const { D, xf, boil, openPath, closedPath, kit } = window.__lump, { TAU, CREAM, RED, WHITE, BLUE } = kit;
   const k = kit.clip('lighthouse'), Z = 0.75, V = kit.view(Z, [128, 140], [120, 125]), N = 60;

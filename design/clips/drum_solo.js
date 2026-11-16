@@ -1,4 +1,5 @@
 // Close in and fast: sticks, cymbals and a determined face, his nubs a blur. One stick leaves. He ends the roll with his forehead on the snare and stays there.
+// group: scenes
 (() => {
   const { D, xf, FACE, kit } = window.__lump;
   const { CREAM, YELLOW, BLUE, WHITE, GREY, TAU, steps, pt, look } = kit;

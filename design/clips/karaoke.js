@@ -1,4 +1,5 @@
 // Two Lumps share one microphone, swaying; they go for the high note together, the little one's note cracks, and he gives it a look.
+// group: scenes
 (() => {
   const { D, xf, FACE, kit } = window.__lump, k = kit.clip('karaoke', { mirror: true });
   // drawn with the pair on the left: the mirror puts them on the right

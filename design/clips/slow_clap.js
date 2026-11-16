@@ -1,4 +1,5 @@
 // Slow clap: one deadpan clap, then another, a little sooner each time, until his arms are a blur and his hands are smoking.
+// group: celebrations
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, tint } = window.__lump;
   const CREAM = '#FFF1DC';

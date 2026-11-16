@@ -1,4 +1,5 @@
 // Rain dance: night, rain, a street lamp coming on. He grabs the post and swings round it, tossing a furled umbrella from hand to hand, then lets go and lands in a puddle.
+// group: movies
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, closedPath, mixHex } = window.__lump;
   const CREAM = '#FFF1DC', IRON = '#3A4656', GREY = '#9FB0C4', YELLOW = '#FFD23F', RAIN = '#7FB6E6', BLUE = '#5AB8FF', RED = '#FF5A4D', FOLD = '#C23A30', BROWN = '#6B4A1F', TAU = Math.PI * 2;

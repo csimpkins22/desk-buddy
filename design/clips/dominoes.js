@@ -1,4 +1,5 @@
 // Six thin little Lumps stand in a row from the right edge like dominoes; the far one tips, they fall in turn toward him on the left, he braces, and ends asleep under the heap.
+// group: scenes
 (() => {
   const { D, xf, FACE, kit } = window.__lump;
   const k = kit.clip('dominoes');

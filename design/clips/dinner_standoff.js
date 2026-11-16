@@ -1,4 +1,5 @@
 // Dinner standoff: a small Lump pops up behind his salad at the far end of the table; he leans right across it, shouting and pointing, and the small one just blinks and goes back to his dinner.
+// group: memes
 (() => {
   const { D, CLIPS, xf, WAKE, DOZE, boil, openPath, closedPath, inkStroke, tint } = window.__lump;
   const CREAM = '#FFF1DC', INK = '#0B0E14', RED = '#FF5A4D', YELLOW = '#FFD23F', BLUE = '#5AB8FF', NIGHT = '#22304A', WOOD = '#8A5A2B', BROWN = '#6B4A1F', WHITE = '#F4F8FF', SHADE = '#C9D4E0', GREEN = '#58D68D', LEAF = '#2FA866', MOSS = '#1F7F4C', TAU = Math.PI * 2, P = 'dinner_standoff_';

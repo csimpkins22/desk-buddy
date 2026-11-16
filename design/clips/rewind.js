@@ -1,4 +1,5 @@
 // He strolls into a vase and it smashes; rewind marks come up and it all runs backwards. The second time he tiptoes round the vase, and backs into another.
+// group: odd
 (() => {
   const L = window.__lump, { D, xf, FACE, closedPath } = L, kit = L.kit, k = kit.clip('rewind');
   const AX = 300, BX = 480, W = x => kit.view(0.7, [x, 150], [120, 150]);

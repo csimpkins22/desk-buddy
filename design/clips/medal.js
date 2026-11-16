@@ -1,4 +1,5 @@
 // Medal: he wears it proudly, but the ribbon reaches the floor. He steps on it, goes over, and the medal lands on him.
+// group: celebrations
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, openPath } = window.__lump;
   const CREAM = '#FFF1DC';

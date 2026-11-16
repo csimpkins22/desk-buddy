@@ -1,4 +1,5 @@
 // Bowling pin: the tap sends a ball down the lane and he goes over like a pin. A little arm sets him upright. Then the next ball shows up.
+// group: tap
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', GREY = '#9FB0C4';

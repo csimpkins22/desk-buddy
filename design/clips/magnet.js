@@ -1,4 +1,5 @@
 // Magnet: a magnet lands where the glass was tapped. He digs in, loses, and is yanked flat against the glass, then slides off.
+// group: tap
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', MX = 198, MY = 42;

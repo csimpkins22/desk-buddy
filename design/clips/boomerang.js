@@ -1,4 +1,5 @@
 // He throws a boomerang off the right edge and waits, and waits; it comes all the way round from the left and shaves his cowlick flat.
+// group: scenes
 (() => {
   const { D, xf, kit } = window.__lump, k = kit.clip('boomerang'), H = 32;
   const boom = (c, x, y, a) => {

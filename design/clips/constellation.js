@@ -1,4 +1,5 @@
 // He sits small at the bottom looking up while stars come out and thin lines join some of them into his own outline, cowlick and all.
+// group: odd
 (() => {
   const { D, xf, kit } = window.__lump, { WHITE, GREY, YELLOW } = kit;
   const k = kit.clip('constellation'), V = kit.view(0.5, [128, 201], [120, 228]);

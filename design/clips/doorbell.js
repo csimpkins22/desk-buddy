@@ -1,4 +1,5 @@
 // Doorbell: he presses a button that isn't there. It rings a little, then more, then far too much.
+// group: waiting
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', X = -20, S = [146, 140];

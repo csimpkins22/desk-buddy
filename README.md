@@ -180,6 +180,8 @@ python3 tools/export_frames.py --clip coffee --gif coffee.gif     # the whole cl
 python3 tools/export_frames.py --clip all                         # bake every clip into ~/.desk-buddy/clips
 curl -X POST --data coffee 127.0.0.1:47823/play
 python3 tools/showreel.py                                         # everything he can do, back to back
+python3 tools/build_gallery.py                                    # ...or as a web page: then serve gallery/,
+python3 -m http.server 8771 --directory gallery                   # and open http://localhost:8771
 ```
 
 The bridge also plays clips by itself when the moment fits:
@@ -253,6 +255,7 @@ calendar / Slack ──┘   one mood for all sessions                   plays b
 | `tools/export_frames.py` | The bake: draws every frame in Chrome, records it as instructions, checks it against the board's renderer |
 | `design/device/` | The Blender model of the display and the scripts that make the video |
 | `tools/showreel.py` | Plays everything he can do, one after another |
+| `tools/build_gallery.py`, `gallery/` | A web page of everything he can do, replayed from the same drawing instructions the board gets |
 | `enclosure/` | OpenSCAD source for the adjustable monitor mount, with [ready-to-print STLs](enclosure/print/) |
 | `tests/` | Bridge tests (no board needed): `~/.desk-buddy/venv/bin/python -m unittest discover -s tests` |
 

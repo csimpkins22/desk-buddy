@@ -1,4 +1,5 @@
 // Clock out: he drops his card into a little time clock (ka-chunk, green light), then moonwalks off one side of the screen and back in the other.
+// group: clock
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC';

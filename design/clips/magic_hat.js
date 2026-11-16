@@ -1,4 +1,5 @@
 // He hops into a top hat on the right and vanishes; a second hat drops in top left, upside down, and he falls out of it, then looks from one hat to the other.
+// group: scenes
 (() => {
   const { D, xf, FACE, kit } = window.__lump, { TAU } = kit;
   const k = kit.clip('magic_hat');

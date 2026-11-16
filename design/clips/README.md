@@ -9,6 +9,7 @@ props that move every frame, `raincloud.js` shows him moving about, and `tests_p
 
 ```js
 // One line saying what happens.
+// group: pastimes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, closedPath, mixHex, tint } = window.__lump;
   D.wave_1 = xf(D.N, { face: FACE.happy, extra: { arm2: [[166, 140], [200, 110]] } });
@@ -17,6 +18,9 @@ props that move every frame, `raincloud.js` shows him moving about, and `tests_p
 })();
 ```
 
+- The second line says which group the gallery shows it in (`tools/build_gallery.py` lists them:
+  `work waiting celebrations meetings clock tap pastimes weather gadgets nonsense games movies memes
+  scenes odd`).
 - The file name, the `CLIPS` key and the name you play it by are the same: lower case, digits and
   `_` only (`wave.js`, `CLIPS.wave`).
 - Name every drawing `<clip name>_<something>`, so no two clips collide.

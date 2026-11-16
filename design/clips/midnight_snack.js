@@ -1,4 +1,5 @@
 // Midnight snack: he checks the coast is clear, raids the fridge for cheese, and freezes mid-chew in the glow of the open door. Caught.
+// group: clock
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', DARK = '#17161A', COLD = '#CFE9FF';

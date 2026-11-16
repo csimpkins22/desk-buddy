@@ -1,4 +1,5 @@
 // Build bike: he pedals a tiny exercise bike wired to a lightbulb. It slowly lights; he stops to admire it and it goes out.
+// group: work
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, mixHex, tint } = window.__lump;
   const CREAM = '#FFF1DC', TAU = Math.PI * 2;

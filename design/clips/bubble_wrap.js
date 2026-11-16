@@ -1,4 +1,5 @@
 // Bubble wrap: a sheet slides in. He pokes one bubble, loves it, and rolls the length of the sheet popping the rest. The last one gets him when he sits down.
+// group: nonsense
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', BLUE = '#5AB8FF', K = 0.7, X = i => 106 + i * 24;

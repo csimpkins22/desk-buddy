@@ -1,4 +1,5 @@
 // Rock field: he drifts and spins among floating rocks and bumps the big one in two. The halves drift off one edge and back in at the other, and one comes round to get him.
+// group: games
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, closedPath } = window.__lump;
   const CREAM = '#FFF1DC', TAU = Math.PI * 2, K = 0.4, P = 'rock_field_';

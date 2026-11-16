@@ -1,4 +1,5 @@
 // Barrel ladders: barrels roll down two sloped planks. He hops two on the floor, climbs the ladder, and the third rolls him all the way back down.
+// group: games
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', TAU = Math.PI * 2, K = 0.4, R = 12, P = 'barrel_ladders_';

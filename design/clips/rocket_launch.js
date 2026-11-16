@@ -1,4 +1,5 @@
 // Rocket launch: fins on, three lights count down, and he lifts off, leaning further and further over, out of the top corner. He comes back down sooty.
+// group: nonsense
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', RED = '#FF5A4D', YELLOW = '#FFD23F', TAU = Math.PI * 2;

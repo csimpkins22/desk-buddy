@@ -1,4 +1,5 @@
 // He goes down: digs at an X and the view follows him below the floor past a boot, a bone and a bed of stones to a chest holding one sock. He sleeps down there.
+// group: scenes
 (() => {
   const { D, xf, FACE, kit } = window.__lump;
   const { CREAM, BROWN, YELLOW, RED, GREY, WHITE, TAU, steps, pt, look } = kit;

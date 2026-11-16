@@ -1,4 +1,5 @@
 // Wire drop: a hatch opens, a wire clips on and lowers him flat over a floor of light beams. A sweat drop falls from his brow; he catches it just in time.
+// group: movies
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, closedPath } = window.__lump;
   const CREAM = '#FFF1DC', DARK = '#17161A', STEEL = '#9FB0C4', RED = '#FF5A4D', WEB = '#3F4855', YELLOW = '#FFD23F', BLUE = '#5AB8FF', TAU = Math.PI * 2;

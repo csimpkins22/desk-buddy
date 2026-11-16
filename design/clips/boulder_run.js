@@ -1,4 +1,5 @@
 // Boulder run: he swaps a golden idol for a sandbag, ever so carefully. The pedestal sinks anyway, the floor rumbles, and a huge boulder rolls him off the screen. He walks back in flat.
+// group: movies
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, closedPath } = window.__lump;
   const CREAM = '#FFF1DC', STONE = '#8C8577', SHADE = '#5E594F', GOLD = '#FFD23F', DEEP = '#D9A520', TAN = '#C8A46A', BROWN = '#6B4A1F', GREEN = '#58D68D', TAU = Math.PI * 2;

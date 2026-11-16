@@ -1,4 +1,5 @@
 // This is fine: he settles at a little table with a mug while flames come up round the room, takes a calm sip, and goes on smiling when the mug catches fire too.
+// group: memes
 (() => {
   const { D, CLIPS, xf, WAKE, DOZE, boil, openPath } = window.__lump;
   const CREAM = '#FFF1DC', RED = '#FF5A4D', YELLOW = '#FFD23F', WOOD = '#8A5A2B', BROWN = '#6B4A1F', WHITE = '#F4F8FF', SHADE = '#C9D4E0', BLUE = '#5AB8FF', GREEN = '#58D68D', TAU = Math.PI * 2, P = 'this_is_fine_';

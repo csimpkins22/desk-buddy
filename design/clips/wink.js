@@ -1,4 +1,5 @@
 // Wink: he looks straight at you, leans in a touch, and winks, with a small sparkle off the closed eye.
+// group: scenes
 (() => {
   const { D, xf, kit } = window.__lump, k = kit.clip('wink');
   const at = (z, face, extra = {}) => xf(D.N, { face, extra: { view: kit.zoom(z, [128, 112]), ...extra } });

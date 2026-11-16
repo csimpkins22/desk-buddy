@@ -1,4 +1,5 @@
 // Big diff: sheets of paper land on him faster and faster until only his cowlick shows. It waves, droops, and he bursts out.
+// group: work
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', SHIFT = [0, 6, -5, 3, -7, 5, -2, 7, -6, 2, -4, 6, -3, 4];

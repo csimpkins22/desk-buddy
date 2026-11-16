@@ -1,4 +1,5 @@
 // Keyboard solo: a little electric keyboard rolls in and he plays it with a completely straight face, nubs going up and down in turn, even as a long stage hook comes over his head, takes him round the middle and hauls him off. Then it comes back for the keyboard.
+// group: memes
 (() => {
   const { D, CLIPS, xf, WAKE, DOZE, boil, openPath, closedPath, inkStroke, tint } = window.__lump;
   const CREAM = '#FFF1DC', DARK = '#17161A', SLATE = '#3A4656', DEEP = '#2B3440', WHITE = '#E9EEF5', GREY = '#9FB0C4', RED = '#FF5A4D', WINE = '#C8402F', YELLOW = '#FFD23F', BROWN = '#6B4A1F', TAU = Math.PI * 2;

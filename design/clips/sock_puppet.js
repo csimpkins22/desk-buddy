@@ -1,4 +1,5 @@
 // Sock puppet: he says yes, the sock on his nub says no, and when he insists it bites him on the cowlick.
+// group: pastimes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', DARK = '#17161A', SOCK = '#58D68D', RED = '#FF5A4D';

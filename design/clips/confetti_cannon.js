@@ -1,4 +1,5 @@
 // Confetti cannon: he pulls the string and nothing happens. He peers down the barrel, it goes off, and he ends up wearing the lot.
+// group: celebrations
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', COLOURS = ['#FFD23F', '#5AB8FF', '#58D68D', CREAM, '#FF5A4D'];

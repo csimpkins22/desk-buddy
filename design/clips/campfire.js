@@ -1,4 +1,5 @@
 // A quiet night, seen from far off: he sits small by a little fire under a few stars, warms his nubs, yawns, leans, and falls asleep beside it as it burns low.
+// group: scenes
 (() => {
   const { D, xf, boil, closedPath, kit } = window.__lump, { TAU } = kit;
   const k = kit.clip('campfire');

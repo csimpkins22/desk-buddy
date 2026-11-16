@@ -1,4 +1,5 @@
 // Brick breaker: a paddle bats him up into a wall of bricks. He knocks them out one by one, and the last one comes down on his head.
+// group: games
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', STONE = '#9FB0C4', BLUE = '#5AB8FF', P = 'brick_breaker_', W = 56, H = 24;

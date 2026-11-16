@@ -1,4 +1,5 @@
 // Kart drift: he skids off in a tiny cart of his own, hits a banana peel, and spins out past the chequered flag. The peel lands on his head.
+// group: games
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', YELLOW = '#FFD23F', TAU = Math.PI * 2, K = 0.45, P = 'kart_drift_';

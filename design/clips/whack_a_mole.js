@@ -1,4 +1,5 @@
 // Whack-a-mole: he dives into the floor and pops up from hole after hole, a step ahead of the taps. The third one gets him.
+// group: tap
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', HX = [42, 128, 214], HY = 190;

@@ -1,4 +1,5 @@
 // A progress bar above him fills fast and stalls near the end; he waits, taps a foot, then stretches up behind the end of the fill and pushes it home.
+// group: odd
 (() => {
   const { D, xf, FACE, tint, kit } = window.__lump, { TAU, CREAM, DARK, GREEN, BLUE } = kit;
   const k = kit.clip('loading'), X0 = 33, W = 186, BY = 30, STALL = 0.78, HOME = -36;

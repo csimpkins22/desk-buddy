@@ -1,4 +1,5 @@
 // The screen sways: a metronome ticks on the left and the whole view swings further each tick; it stops, he does not, and he dozes off still swaying.
+// group: scenes
 (() => {
   const { D, xf, FACE, kit } = window.__lump;
   const { CREAM, BROWN, YELLOW, steps, pt, look } = kit;

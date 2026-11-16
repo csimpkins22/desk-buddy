@@ -1,4 +1,5 @@
 // Boombox: he hoists a portable stereo over his head and plays it at a lit window, steadfast, while his arms slowly give way and it settles on his head.
+// group: movies
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', DARK = '#17161A', GREY = '#9FB0C4', SLATE = '#6F7C8C', YELLOW = '#FFD23F', RED = '#FF5A4D', TAU = Math.PI * 2, CX = 110, P = 'boombox_';

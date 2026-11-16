@@ -1,4 +1,5 @@
 // Windy: a breeze turns into a gale. He leans into it, grabs a post, flaps from it like a flag, and drops when it stops.
+// group: weather
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', LEAVES = ['#FFD23F', '#FF5A4D', '#58D68D', '#C89B5A'];

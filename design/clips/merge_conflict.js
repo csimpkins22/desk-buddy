@@ -1,4 +1,5 @@
 // Merge conflict: two arrows grab a hand each and tug him wider and wider, until he snaps back and is left dizzy.
+// group: work
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', K = 0.8, CX = 120;

@@ -1,4 +1,5 @@
 // Stand-up: called to the stand-up, he strains and rises on a pair of brand-new legs, looks down, and is alarmed to find them there.
+// group: meetings
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, tint } = window.__lump;
   const CREAM = '#FFF1DC';

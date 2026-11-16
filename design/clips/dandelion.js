@@ -1,4 +1,5 @@
 // Dandelion: he blows a dandelion clock, the seeds drift off, and the last one goes the long way round and lands on his cowlick.
+// group: pastimes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil } = window.__lump;
   const CREAM = '#FFF1DC', HX = 178, HY = 96;

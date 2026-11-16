@@ -1,4 +1,5 @@
 // Asleep, he freezes into a block; it melts and he melts with it into a puddle with eyes; the puddle pulls itself back up into him, wobbling, and he dozes off still dripping.
+// group: scenes
 (() => {
   const { xf, D, kit } = window.__lump, { CREAM, WHITE, BLUE, TAU } = kit;
   const k = kit.clip('ice_cube', { asleep: true });

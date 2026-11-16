@@ -1,4 +1,5 @@
 // Magnifying glass: he peers through one and that eye goes huge. He puts it down, and the eye stays huge for a beat.
+// group: gadgets
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, mixHex, tint } = window.__lump;
   const CREAM = '#FFF1DC';

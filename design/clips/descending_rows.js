@@ -1,4 +1,5 @@
 // Descending rows: rows of plain shapes step down the screen at him while he fires puffs up from his cowlick, and he clears the last one just above his head.
+// group: games
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', YELLOW = '#FFD23F', RED = '#FF5A4D', GREEN = '#58D68D', BLUE = '#5AB8FF', TAU = Math.PI * 2, P = 'descending_rows_';

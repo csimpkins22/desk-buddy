@@ -1,4 +1,5 @@
 // In the dark there are only his eyes, close up. A bulb clicks on above him and the view pulls back on the whole lit room; he is delighted; it goes out, and it is eyes in the dark again.
+// group: scenes
 (() => {
   const { D, xf, FACE } = window.__lump, kit = window.__lump.kit, { CREAM, YELLOW, GREY, TAU } = kit;
   const k = kit.clip('lightbulb_idea');

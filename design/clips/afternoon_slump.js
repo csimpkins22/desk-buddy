@@ -1,4 +1,5 @@
 // Afternoon slump: his eyelids droop and he slides slowly down the screen into a flat heap. One try at getting up. No.
+// group: clock
 (() => {
   const { D, CLIPS, xf, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC';

@@ -1,4 +1,5 @@
 // A quiet one: he lies back, small in the corner of a wide night sky. Stars come out, a shooting star crosses slowly, and he shuts his eyes.
+// group: scenes
 (() => {
   const { D, xf, mixHex, openPath, closedPath, kit } = window.__lump;
   const { CREAM, YELLOW, TAU } = kit, k = kit.clip('stargaze');

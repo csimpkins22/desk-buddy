@@ -1,4 +1,5 @@
 // House of cards: he builds three storeys, holds his breath, and then sneezes the lot across the floor.
+// group: pastimes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', RED = '#FF5A4D';

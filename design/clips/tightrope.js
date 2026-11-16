@@ -1,4 +1,5 @@
 // Wide and slow: he crosses a high rope from the far left to the far right with a balancing pole, wobbling worst in the middle, then drops back in from above.
+// group: scenes
 (() => {
   const { D, xf, FACE, kit } = window.__lump;
   const k = kit.clip('tightrope');

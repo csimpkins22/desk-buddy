@@ -1,4 +1,5 @@
 // Tests fail: he waits for the result, one red cross drops on his head, bounces off and lands beside him.
+// group: work
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC';

@@ -1,4 +1,5 @@
 // Telescope: he scans the horizon, then turns it on you the wrong way round (a tiny eye). He flips it: a giant eye, and he jumps.
+// group: gadgets
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, mixHex, tint } = window.__lump;
   const CREAM = '#FFF1DC', BRASS = '#FFD23F', EDGE = '#6B4A1F', DX = -16;

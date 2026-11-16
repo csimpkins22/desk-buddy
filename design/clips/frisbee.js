@@ -1,4 +1,5 @@
 // A frisbee whips over him there and back and he chases it both ways; on the third pass he leaps back at it, catches it in his mouth and skids to a stop.
+// group: scenes
 (() => {
   const { D, xf, kit } = window.__lump, k = kit.clip('frisbee');
   // dir 1 or -1 draws speed lines trailing behind it

@@ -1,4 +1,5 @@
 // Deploy: he hauls a giant lever over, braces for the worst, peeks, and all that happens is a little green light.
+// group: work
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', TAU = Math.PI * 2, PIVOT = [196, 184], LEN = 96;

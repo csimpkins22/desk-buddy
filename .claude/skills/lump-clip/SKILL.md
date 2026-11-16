@@ -195,6 +195,10 @@ Then fix it all in one edit, bake, and play.
 
 ## After it plays
 
+The script's first line says what happens and its second which group the gallery files it under
+(`// group: scenes`; the list is in `design/clips/README.md`). `python3 tools/build_gallery.py`
+rebuilds the gallery in `gallery/` with the new clip in it.
+
 Tell the user what you made in a sentence, its length, and anything you know is rough. To make
 him play it by himself, add its name to a list in `CLIP_SETS` in `tools/buddy_bridge.py` (`idle`
 for most), copy that file to `~/.desk-buddy/bridge.py` and restart the bridge; ask before doing

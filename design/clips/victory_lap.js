@@ -1,4 +1,5 @@
 // Victory lap: a cheer, then he tears off out of the right of the screen. A pause. He comes back in from the left, a lot slower.
+// group: celebrations
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC';

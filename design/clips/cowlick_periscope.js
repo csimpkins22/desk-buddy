@@ -1,4 +1,5 @@
 // Dozing on his feet, his cowlick uncurls into a periscope, looks left, right and at us, and snaps back just before he opens his eyes. Once he is asleep it goes up again.
+// group: odd
 (() => {
   const L = window.__lump, { D, xf } = L, kit = L.kit, k = kit.clip('cowlick_periscope'), TAU = Math.PI * 2;
   const V = kit.view(1.35, [128, 78], [96, 118]);

@@ -1,4 +1,5 @@
 // Jelly wobble: a tap on the glass runs up through him like jelly. It settles, then one last aftershock.
+// group: tap
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC';

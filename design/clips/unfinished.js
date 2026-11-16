@@ -1,4 +1,5 @@
 // He wakes as a rough pencil sketch. A pen inks his line and a brush colours him in, missing a spot; he points at it until the brush comes back.
+// group: odd
 (() => {
   const L = window.__lump, { D, xf, FACE, boil, openPath, closedPath, tint, kit } = L;
   const k = kit.clip('unfinished', { bare: true }), PENCIL = kit.GREY, V = kit.view(1.25, [126, 136], [120, 122]);

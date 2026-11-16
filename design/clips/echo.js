@@ -1,4 +1,5 @@
 // Close on his face: he shouts, the rings leave to the right, he waits a long time, and the echo comes back from behind and bowls him over.
+// group: scenes
 (() => {
   const { D, CLIPS, xf, FACE, DOZE, kit } = window.__lump;
   const k = kit.clip('echo'), F = [128, 112], cam = (z, x, y) => kit.view(Math.round(z * 256) / 256, F, [x, y]), CLOSE = cam(1.8, 62, 120), TAU = kit.TAU;

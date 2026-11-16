@@ -1,4 +1,5 @@
 // Foam rises from the bottom of the screen and floats him up; he pops bubbles, ducks under, and it drains away leaving a tall foam hat he dozes off in.
+// group: scenes
 (() => {
   const { D, xf, FACE, kit } = window.__lump, { TAU } = kit;
   const k = kit.clip('bubble_bath');

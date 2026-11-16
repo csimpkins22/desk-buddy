@@ -1,4 +1,5 @@
 // Vacuum: he hoovers the floor, takes a look at the business end, and is pulled in. The bag swells with him inside until it pops.
+// group: gadgets
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath } = window.__lump;
   const CREAM = '#FFF1DC', GREY = '#9FB0C4', DARK = '#17161A', DX = -30;

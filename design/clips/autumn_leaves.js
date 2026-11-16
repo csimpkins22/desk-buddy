@@ -1,4 +1,5 @@
 // Autumn leaves: he rakes the leaves into a pile, drops the rake, and jumps in.
+// group: weather
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, closedPath } = window.__lump;
   const CREAM = '#FFF1DC', LEAVES = ['#FFD23F', '#FF5A4D', '#C89B5A', '#58D68D'], PX = 170;

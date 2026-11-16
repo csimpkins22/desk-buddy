@@ -1,4 +1,5 @@
 // Paint roller: he rolls a blue stripe across his belly, likes it, and rolls a second one straight over his eyes.
+// group: gadgets
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, closedPath, inkStroke, tint } = window.__lump;
   const CREAM = '#FFF1DC', BLUE = '#5AB8FF', SHOULDER = [166, 142], HELD = [204, 96, Math.PI / 2];

@@ -1,4 +1,5 @@
 // Tower climb: a little city comes up behind him. He leaps onto its tallest tower, climbs to the top, and swats at the paper aeroplanes circling him until he gets one.
+// group: movies
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', SHADE = '#B9AE98', NAVY = '#2B3A4A', DUSK = '#1E2936', SLATE = '#6F7C8C', YELLOW = '#FFD23F', TAU = Math.PI * 2, P = 'tower_climb_';

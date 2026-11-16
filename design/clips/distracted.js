@@ -1,4 +1,5 @@
 // Distracted: out strolling with his balloon, he turns to watch a bigger, shinier one drift by, and the balloon on his string glares at him and deflates in protest.
+// group: memes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, closedPath } = window.__lump;
   const CREAM = '#FFF1DC', INK = '#0B0E14', RED = '#FF5A4D', DEEP = '#C8402F', GOLD = '#FFD23F', AMBER = '#D9981A', GREEN = '#58D68D', BLUE = '#5AB8FF', TAU = Math.PI * 2, P = 'distracted_';

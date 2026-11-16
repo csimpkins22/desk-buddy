@@ -1,4 +1,5 @@
 // Seen from the floor he towers over us; he notices, leans over until his face fills the screen and blots it out, and when the light comes back he is his usual size.
+// group: odd
 (() => {
   const L = window.__lump, { D, xf } = L, kit = L.kit, k = kit.clip('ants_eye');
   const mix = (A, B, t) => A.map((p, i) => [p[0] + (B[i][0] - p[0]) * t, p[1] + (B[i][1] - p[1]) * t]);

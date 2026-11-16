@@ -1,4 +1,5 @@
 // Snake tail: he eats a dot and grows a segment behind him, eats another and grows again, then turns round and bumps into his own tail.
+// group: games
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, tint } = window.__lump;
   const CREAM = '#FFF1DC', YELLOW = '#FFD23F', TAU = Math.PI * 2, P = 'snake_tail_', DOTS = [112, 184];

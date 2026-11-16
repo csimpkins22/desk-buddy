@@ -1,4 +1,5 @@
 // Snowman: he pats a snowball up into a small snow Lump and gives it a face. It winks whenever he isn't looking.
+// group: weather
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, closedPath } = window.__lump;
   const CREAM = '#FFF1DC', SNOW = '#F4F8FF', SX = 199, K = 0.58;

@@ -1,4 +1,5 @@
 // Shelf push: a shelf with a mug on it comes down the wall. He hops up beside the mug and, holding your eye, nudges it to the edge in small pushes, pauses, and pushes it off. A crash; he does not look away.
+// group: memes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil } = window.__lump;
   const CREAM = '#FFF1DC', WALL = '#171D27', SKIRT = '#2B3440', BOARDS = '#222A35', WOOD = '#8A6230', GRAIN = '#C89B5A', KNOT = '#6B4A1F', STEEL = '#9FB0C4', MUG = '#F4F8FF', SHADE = '#C4CFDD', RED = '#FF5A4D', COFFEE = '#7A4F22', TAU = Math.PI * 2;

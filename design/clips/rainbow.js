@@ -1,4 +1,5 @@
 // Rainbow: one arcs in behind him. He leaps up out of sight, comes sliding down it, and skids back in beaming.
+// group: weather
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const BANDS = ['#FF5A4D', '#FF9F1C', '#FFD23F', '#58D68D', '#5AB8FF'], CX = 70, CY = 270, R = 205;

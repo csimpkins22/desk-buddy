@@ -1,4 +1,5 @@
 // Coffee: he wakes up groggy, sips from a mug twice, and the caffeine hits.
+// group: clock
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, closedPath, mixHex, tint } = window.__lump;
   const CREAM = '#FFF1DC';

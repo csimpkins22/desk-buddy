@@ -1,4 +1,5 @@
 // Rapid fire: he flies past in a cape three times (far, nearer, huge), crashes off the right edge, and walks back in with the cape over his head.
+// group: scenes
 (() => {
   const { D, xf, FACE, boil, closedPath, openPath, kit } = window.__lump;
   const { CREAM, RED, YELLOW, pt, look } = kit;

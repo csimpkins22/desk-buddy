@@ -39,7 +39,8 @@ DESIGN = os.path.join(ROOT, "design")
 OUT = os.path.join(ROOT, "firmware", "data", "lump.bin")
 KIT = os.path.join(DESIGN, "clip_kit.js")          # props and helpers every clip script may use
 CLIPS = os.path.expanduser("~/.desk-buddy/clips")
-CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+CHROME = os.environ.get("CHROME") or next((p for p in ("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", shutil.which("google-chrome"),
+                                                        shutil.which("chromium")) if p and os.path.exists(p)), "google-chrome")
 PIXELS = 240 * 240 * 4
 MAX_SEQS = 750                    # sequences the board has room for in lump.bin (MAX_SEQ in firmware/src/main.cpp)
 MAX_MEAN, MAX_FAR = 2.0, 300      # an instruction frame may differ from the browser's by this much: mean % of full
@@ -381,7 +382,7 @@ def headless(config, scripts=()):
     srv = http.server.ThreadingHTTPServer(("127.0.0.1", port), H)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     profile = tempfile.mkdtemp(prefix="lump-export-")
-    chrome = subprocess.Popen([CHROME, "--headless=new", "--disable-gpu", "--no-first-run", "--no-default-browser-check",
+    chrome = subprocess.Popen([CHROME, "--headless=new", "--disable-gpu", *(["--no-sandbox"] if sys.platform == "linux" else []), "--no-first-run", "--no-default-browser-check",
                                f"--user-data-dir={profile}", f"http://127.0.0.1:{port}/"],
                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:

@@ -1,4 +1,5 @@
 // Umbrella: a gust turns it inside out and carries him off the top of the screen. He comes back down without it.
+// group: gadgets
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, openPath } = window.__lump;
   const CREAM = '#FFF1DC', RED = '#FF5A4D', SHOULDER = [156, 140];

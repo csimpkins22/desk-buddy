@@ -1,4 +1,5 @@
 // Sign spinner: he twirls an arrow sign faster and faster, then stops it dead, pointing straight out at you.
+// group: waiting
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', DARK = '#17161A', HUB = [188, 100], START = 42;

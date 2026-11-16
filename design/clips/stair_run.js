@@ -1,4 +1,5 @@
 // Stair run: a wide flight of steps slides in and he bounds up it, slower with every step. At the top he throws his arms up, and flops.
+// group: movies
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, closedPath, inkStroke, tint } = window.__lump;
   const CREAM = '#FFF1DC', TREAD = '#5E6B7D', RISER = '#3F4855', WALL = '#2B3440', BLUE = '#5AB8FF', TAU = Math.PI * 2;

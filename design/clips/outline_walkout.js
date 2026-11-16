@@ -1,4 +1,5 @@
 // His outline steps sideways out of his body. The line and the blob look at each other; the blob starts to sag, and the line hurries back in, crooked.
+// group: odd
 (() => {
   const L = window.__lump, { D, xf, FACE, boil, openPath, closedPath, kit } = L;
   const k = kit.clip('outline_walkout'), WIDE = kit.view(0.8, [195, 132], [120, 124]), OUT = 135;

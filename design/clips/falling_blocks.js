@@ -1,4 +1,5 @@
 // Falling blocks: plain blocks drop and stack beside him until one gap is left. He squeezes into it, the full row flashes and vanishes with him in it, and he pops back.
+// group: games
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, closedPath } = window.__lump;
   const CREAM = '#FFF1DC', COLOURS = ['#FFD23F', '#5AB8FF', '#58D68D', '#FF5A4D'], P = 'falling_blocks_', S = 40, ROW = 161;

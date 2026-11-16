@@ -1,4 +1,5 @@
 // A sneeze launches his face onto the glass. He peels it off and puts it back upside down.
+// group: odd
 // Staging: recoils left, searches by touch, reaches up-right, returns to centre.
 // Source: his own face; fixed normal view; about ten seconds including waking and dozing.
 // Rhythm: two false starts, one sneeze, a held blank stare, a repair with a second punchline.

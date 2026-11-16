@@ -1,4 +1,5 @@
 // Two buttons: a console comes up with a tick button and a cross button. His hand hovers from one to the other, faster and sweatier, until he slams both.
+// group: memes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, closedPath, inkStroke, tint } = window.__lump;
   const CREAM = '#FFF1DC', DARK = '#17161A', STEEL = '#9FB0C4', SLATE = '#6F7C8C', IRON = '#3F4855', GREEN = '#58D68D', MOSS = '#2F9E63', RED = '#FF5A4D', WINE = '#B8372D', YELLOW = '#FFD23F', BLUE = '#5AB8FF';

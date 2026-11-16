@@ -1,4 +1,5 @@
 // Pinata: he winds up and whacks it with a stick. It bursts, and instead of sweets it rains tiny Lumps.
+// group: celebrations
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, tint } = window.__lump;
   const CREAM = '#FFF1DC';

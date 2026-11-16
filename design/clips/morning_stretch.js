@@ -1,4 +1,5 @@
 // Morning stretch: arms up and a yawn that keeps growing until he is nearly all mouth, then he snaps back.
+// group: clock
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const shut = [['stroke',[[106,95],[113,99],[120,95]],3], ['stroke',[[138,93],[145,97],[152,93]],3]];

@@ -1,4 +1,5 @@
 // Counting sheep: he lies awake keeping a tally while sheep hop over him. The third one lands on him and falls asleep instead.
+// group: pastimes
 (() => {
   const { D, CLIPS, xf, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', DARK = '#17161A';

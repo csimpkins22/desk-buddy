@@ -1,4 +1,5 @@
 // A quiet one, seen from far off: he sails a paper boat across wide water past a low sun and out of view, then walks back in, wet.
+// group: scenes
 (() => {
   const { D, xf, boil, kit } = window.__lump, k = kit.clip('paper_boat');
   const screen = (c, fn) => { c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.lineCap = c.lineJoin = 'round'; fn(); c.restore(); };

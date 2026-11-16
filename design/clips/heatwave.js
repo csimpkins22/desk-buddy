@@ -1,4 +1,5 @@
 // Heatwave: under a blazing sun he sags and melts into a puddle, then pulls himself together when it moves on.
+// group: weather
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath } = window.__lump;
   const CREAM = '#FFF1DC';

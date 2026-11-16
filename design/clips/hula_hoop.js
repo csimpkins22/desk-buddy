@@ -1,4 +1,5 @@
 // Hula hoop: it spins round his middle, sinks however hard he wiggles, and settles round his feet.
+// group: pastimes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', HOOP = '#FFD23F';

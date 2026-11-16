@@ -1,4 +1,5 @@
 // Obvious outcome: he holds a pin up beside a balloon, gives you a look, pokes it, and when it pops he stands there with a perfectly round mouth, astonished.
+// group: memes
 (() => {
   const { D, CLIPS, xf, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', RED = '#FF5A4D', YELLOW = '#FFD23F', BLUE = '#5AB8FF', NAVY = '#3A86C8', GREEN = '#58D68D', GREY = '#9FB0C4', SLATE = '#6F7C8C', TAU = Math.PI * 2, P = 'obvious_outcome_';

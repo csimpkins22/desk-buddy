@@ -1,4 +1,5 @@
 // A text cursor blinks beside him and types him a hat, stroke by stroke. He puts it on, it is a bit small, and the cursor deletes it again.
+// group: odd
 (() => {
   const { D, xf, FACE, kit } = window.__lump, { CREAM, RED } = kit;
   const k = kit.clip('cursor'), AT = 40, GROUND = [58, 170], HEAD = [166, 75];

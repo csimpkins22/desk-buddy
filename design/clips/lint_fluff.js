@@ -1,4 +1,5 @@
 // Lint: he tweezes two bits of fluff off himself, then mistakes his cowlick for a third and gets a nasty surprise.
+// group: work
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', TAU = Math.PI * 2;

@@ -1,4 +1,5 @@
 // Knitting: his needles click and a striped scarf runs off one side of the screen and back in the other. Nobody to give it to, so he wears it.
+// group: pastimes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', BLUE = '#5AB8FF', STRIPE = 12;

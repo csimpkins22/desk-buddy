@@ -1,4 +1,5 @@
 // Hiccups: the tap leaves him with hiccups that holding his breath won't shift. A second, bigger tap frightens them out of him.
+// group: tap
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC';

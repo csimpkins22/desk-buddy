@@ -1,4 +1,5 @@
 // Gravity off: he and a ball drift up off the floor and he bumps the ceiling. Gravity comes back, and so does the ball, onto his head.
+// group: nonsense
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC';

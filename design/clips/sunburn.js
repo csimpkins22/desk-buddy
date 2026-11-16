@@ -1,4 +1,5 @@
 // Sunburn: he basks under a hot sun, slowly goes red, and ends up fanning himself.
+// group: weather
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, closedPath } = window.__lump;
   const CREAM = '#FFF1DC';

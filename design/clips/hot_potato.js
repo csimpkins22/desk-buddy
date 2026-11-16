@@ -1,4 +1,5 @@
 // Three Lumps pass a steaming potato along, faster and faster, until the other two back out of opposite edges and he is left holding it.
+// group: scenes
 (() => {
   const { D, xf, boil, openPath, closedPath } = window.__lump, kit = window.__lump.kit, { CREAM, BROWN, TAU } = kit;
   const k = kit.clip('hot_potato');

@@ -1,4 +1,5 @@
 // Fishing rod: he casts, hooks his own cowlick, thinks it's a bite, and reels himself up off the floor.
+// group: gadgets
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', DX = -14, SHOULDER = [152, 140];

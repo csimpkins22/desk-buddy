@@ -1,4 +1,5 @@
 // Calendar avalanche: one calendar page drops beside him, then two more, then the whole week buries him to the eyes. The last lands on his head.
+// group: work
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', DARK = '#17161A', RED = '#FF5A4D';

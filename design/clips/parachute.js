@@ -1,4 +1,5 @@
 // He jumps off the top of the screen, then drifts down, tiny, under a round parachute from the top left to the bottom right over hills and a low sun. He lands, the canopy settles beside him, and he sits looking at the view.
+// group: scenes
 (() => {
   const { xf, D, FACE, kit } = window.__lump, { CREAM, WHITE, RED, GREEN, BROWN, YELLOW, GREY, TAU } = kit;
   const k = kit.clip('parachute');

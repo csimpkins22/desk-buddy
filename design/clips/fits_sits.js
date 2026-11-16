@@ -1,4 +1,5 @@
 // Fits, sits: a cardboard box far too small for him slides in. He weighs it up, hops on, and squeezes down until he bulges over every side, entirely content.
+// group: memes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, inkStroke, tint } = window.__lump;
   const CREAM = '#FFF1DC', KRAFT = '#C89B5A', SIDE = '#9C7438', INSIDE = '#5A3D18', FLAP = '#DDB67A', TAPE = '#F0DFB8', MARK = '#6B4A1F', FLOOR = '#2B3440', TAU = Math.PI * 2;

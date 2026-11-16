@@ -1,4 +1,5 @@
 // Battle menu: he squares up to a pebble and a menu pops up with three choices. The cursor dithers between the bop and the bottle; he picks the arrow and runs for it.
+// group: games
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, closedPath } = window.__lump;
   const CREAM = '#FFF1DC', YELLOW = '#FFD23F', TAU = Math.PI * 2, P = 'battle_menu_', ROWS = [-38, 0, 38];

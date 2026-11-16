@@ -1,4 +1,5 @@
 // A seesaw scoops him up; a twin drops on the far end and the view follows him up into the sky, over, and down onto the other end, which sends the twin up instead.
+// group: scenes
 (() => {
   const { D, xf, kit } = window.__lump, k = kit.clip('seesaw');
   // the seats at each end of the plank; s 0.2 has the left end down, -0.2 the right

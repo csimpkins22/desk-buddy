@@ -1,4 +1,5 @@
 // A wind-up key turns in his back as he marches in from the left; it runs down and he dozes off mid-step.
+// group: scenes
 (() => {
   const { D, xf, kit } = window.__lump;
   const { CREAM, DARK, YELLOW, GREY, TAU } = kit, k = kit.clip('windup_key');

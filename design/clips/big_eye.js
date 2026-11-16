@@ -1,4 +1,5 @@
 // A faint, enormous eye slowly fills the screen behind him, as if someone is peering into the cube. He turns, sees it, gives a small uncertain wave, and it blinks.
+// group: odd
 // Staging: small in the bottom left of a wide shot; the eye grows in behind him; 8 seconds; slow burn to one blink; he drops straight into pretend sleep.
 (() => {
   const { D, xf } = window.__lump, kit = window.__lump.kit, k = kit.clip('big_eye');

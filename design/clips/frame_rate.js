@@ -1,4 +1,5 @@
 // He moves in stiff held poses, two a second, like a bad connection. He thumps the side of the screen and glides off smoothly; then it drops again as he dozes.
+// group: odd
 (() => {
   const { D, xf, FACE, kit } = window.__lump;
   const k = kit.clip('frame_rate');

@@ -1,4 +1,5 @@
 // A sprout comes up under him and lifts him on a leaf, past the clouds; he dozes off at the top with the stem swaying.
+// group: scenes
 (() => {
   const { D, xf, FACE, boil, openPath, closedPath, kit } = window.__lump;
   const { CREAM, GREEN, GREY, WHITE } = kit, k = kit.clip('sprout');

@@ -1,4 +1,5 @@
 // Tin can phone: he listens hopefully. The string twangs! Then it goes slack and the other can clatters in with nobody on it.
+// group: waiting
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, openPath } = window.__lump;
   const CREAM = '#FFF1DC', X = -24, EAR = [166, 106], TWANG = 57;

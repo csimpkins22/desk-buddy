@@ -1,4 +1,5 @@
 // Taffy stretch: two gloved hands take him by the sides and pull him long and thin. They let go, he twangs back, and his cowlick stays stretched.
+// group: nonsense
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC';

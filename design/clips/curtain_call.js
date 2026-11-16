@@ -1,4 +1,5 @@
 // Curtain call: he takes his bows, a rose sails in and he catches it, and then the curtain comes down, right on top of him.
+// group: nonsense
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, closedPath, tint } = window.__lump;
   const CREAM = '#FFF1DC', RED = '#FF5A4D', DRAPE = '#D8362F', DARK = '#8F1F1B', GREEN = '#58D68D', TAU = Math.PI * 2;

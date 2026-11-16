@@ -1,4 +1,5 @@
 // Panic, calm, panic: a small spider comes down on its thread and he panics. It stops and hangs there, and he calms down. Then it gives a little wave, and he panics harder.
+// group: memes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', FLOOR = '#2B3440', BLUE = '#5AB8FF', SLATE = '#3A4656', TAU = Math.PI * 2, SX = 196, HANG = 100, P = 'panic_calm_';

@@ -1,4 +1,5 @@
 // Tuning fork: the tap sets him ringing. The hum dies away, except in his cowlick, which he has to hold still. It gets the last ting.
+// group: tap
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, closedPath, tint } = window.__lump;
   const CREAM = '#FFF1DC';

@@ -1,4 +1,5 @@
 // A rolling pin flattens him into a sheet, a cutter stamps out three tiny Lumps who walk off three ways, and the holey sheet gathers back into him.
+// group: odd
 (() => {
   const L = window.__lump, { D, xf, FACE } = L, kit = L.kit, k = kit.clip('dough'), TAU = Math.PI * 2;
   const mix = (A, B, t) => A.map((p, i) => [p[0] + (B[i][0] - p[0]) * t, p[1] + (B[i][1] - p[1]) * t]);

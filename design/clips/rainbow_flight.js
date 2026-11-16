@@ -1,4 +1,5 @@
 // Rainbow flight: under the stars he springs up out of sight, comes flying level across the sky with a banded rainbow streaming out behind him, banks round at the far side for a second pass lower down, and drops back in.
+// group: memes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', YELLOW = '#FFD23F', BANDS = ['#FF5A4D', '#FF9F1C', '#FFD23F', '#58D68D', '#5AB8FF'], TAU = Math.PI * 2, P = 'rainbow_flight_';

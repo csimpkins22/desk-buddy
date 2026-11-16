@@ -1,4 +1,5 @@
 // He rides a lift: floors scroll down past a window on the left, it stops with a bounce, and the doors part on starlight.
+// group: scenes
 (() => {
   const { D, xf, FACE, kit } = window.__lump;
   const { CREAM, DARK, YELLOW, GREEN, BROWN, GREY, TAU } = kit, k = kit.clip('elevator');

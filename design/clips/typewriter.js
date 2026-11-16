@@ -1,4 +1,5 @@
 // Typewriter: he types a line, the bell dings, and the carriage return takes him with it, flat against the side of the frame.
+// group: gadgets
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', DARK = '#17161A', HOME = 156, STEP = 7;

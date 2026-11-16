@@ -15,6 +15,20 @@
       "name": "lump-preview",
       "url": "http://localhost:8767",
       "port": 8767
+    },
+    {
+      "name": "lump-gallery",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8771",
+        "--bind",
+        "127.0.0.1",
+        "--directory",
+        "gallery"
+      ],
+      "port": 8771
     }
   ]
 }

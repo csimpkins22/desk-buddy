@@ -1,4 +1,5 @@
 // Puddle: he hops in for a splash, stomps again harder, and goes straight down. It was deep.
+// group: weather
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', BLUE = '#5AB8FF', PX = 172;

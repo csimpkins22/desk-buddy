@@ -1,4 +1,5 @@
 // Origami: he folds himself up, square, triangle, kite, into a paper crane, and flaps off the floor. Then he springs open, still creased.
+// group: nonsense
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, tint } = window.__lump;
   const CREAM = '#FFF1DC';

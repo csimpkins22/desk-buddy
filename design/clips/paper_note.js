@@ -1,4 +1,5 @@
 // Paper note: he folds his note into an aeroplane and throws it. It loops round and comes back into the back of his head.
+// group: waiting
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', SHADE = '#B9AE98';

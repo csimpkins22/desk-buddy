@@ -1,4 +1,5 @@
 // Balloon house: a bunch of balloons ties itself to his cowlick, and lifts him and the little house roped to it up past the clouds. He comes back down under the last balloon.
+// group: movies
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil } = window.__lump;
   const CREAM = '#FFF1DC', RED = '#FF5A4D', YELLOW = '#FFD23F', BLUE = '#5AB8FF', GREEN = '#58D68D', GREY = '#9FB0C4', TAU = Math.PI * 2, P = 'balloon_house_';

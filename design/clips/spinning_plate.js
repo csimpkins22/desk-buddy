@@ -1,4 +1,5 @@
 // Spinning plate: it spins on his cowlick, the wobble gets away from him, and he dives and catches it on one nub.
+// group: pastimes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC';

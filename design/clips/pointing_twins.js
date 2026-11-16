@@ -1,4 +1,5 @@
 // Pointing twins: he hops out of sight, and two Lumps exactly like him stroll in from either side, see each other and point in alarm. Then he drops in between them, pointing at both.
+// group: memes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath, closedPath, inkStroke, tint } = window.__lump;
   const CREAM = '#FFF1DC', TAU = Math.PI * 2, K = 0.72, P = 'pointing_twins_', MID = -8;

@@ -1,4 +1,5 @@
 // Fireworks: he touches a match to his cowlick, it fizzes like a fuse, a rocket shoots off his head and the sky bursts above him.
+// group: celebrations
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, openPath } = window.__lump;
   const CREAM = '#FFF1DC', COLOURS = ['#FFD23F', '#FF5A4D', '#5AB8FF', '#58D68D'];

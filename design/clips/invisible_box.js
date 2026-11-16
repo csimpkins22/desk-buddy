@@ -1,4 +1,5 @@
 // Invisible box: a mime act, palms flat on walls that aren't there. He takes his bow, strolls off, and walks straight into the glass. It's real, all round.
+// group: nonsense
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, tint } = window.__lump;
   const CREAM = '#FFF1DC', L = 40, R = 216, TOP = 42;

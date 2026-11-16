@@ -1,4 +1,5 @@
 // Table flip: a table laid for dinner comes up in front of him. He simmers, then hurls it over in a rage, plates and vase and all; a beat later, rather sheepish, he stands it back up, lays it again and straightens the vase.
+// group: memes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, closedPath, inkStroke, tint } = window.__lump;
   const CREAM = '#FFF1DC', WHITE = '#F4F8FF', CHINA = '#C9D4E0', BLUE = '#5AB8FF', NAVY = '#3D8FD1', BROWN = '#6B4A1F', WOOD = '#8A5A2B', YELLOW = '#FFD23F', AMBER = '#E0962A', GREEN = '#58D68D', RED = '#FF5A4D', HOT = '#FF2A1F', TAU = Math.PI * 2;

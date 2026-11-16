@@ -1,4 +1,5 @@
 // He runs off, then skates across three times: far off and small, mid-size, then huge and close. An empty beat, and he strolls back in with the board under his arm.
+// group: scenes
 (() => {
   const { xf, D, FACE, kit } = window.__lump, { CREAM, RED, GREY, TAU } = kit;
   const k = kit.clip('skateboard');

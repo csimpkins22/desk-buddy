@@ -1,4 +1,5 @@
 // Git push: he hops into a cannon, the fuse burns down, and it fires him off the top of the screen. He drops back in, dizzy.
+// group: work
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE } = window.__lump;
   const CREAM = '#FFF1DC', TAU = Math.PI * 2, TILT = -0.45, PIVOT = [196, 164];

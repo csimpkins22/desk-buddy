@@ -1,4 +1,5 @@
 // He breathes on the screen until a pale patch of mist covers it, draws a smiley in it with one nub, admires it, and it fades from the edges in.
+// group: odd
 // Staging: he stands on the left; the mist comes out of him onto the right of the glass; normal view; 7 seconds; slow build, long admire; walks back to rest.
 (() => {
   const { D, xf, openPath } = window.__lump, kit = window.__lump.kit, k = kit.clip('fogged_glass');

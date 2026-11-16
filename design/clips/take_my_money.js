@@ -1,4 +1,5 @@
 // Take my money: a gem on a pedestal slides in and his eyes go wide. He thrusts a fan of banknotes at it, then a bigger one, then his whole wallet.
+// group: memes
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, boil, closedPath, inkStroke, mixHex, tint } = window.__lump;
   const CREAM = '#FFF1DC', STEEL = '#9FB0C4', SLATE = '#6F7C8C', BLUE = '#5AB8FF', DEEP = '#2A6FB0', YELLOW = '#FFD23F', RED = '#FF5A4D', GREEN = '#58D68D', MOSS = '#2F9E63', BROWN = '#6B4A1F', TAN = '#8A5A2B';

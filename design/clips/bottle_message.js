@@ -1,4 +1,5 @@
 // Message in a bottle: he corks his note in a bottle and floats it off across the floor. It gets a little way and sinks.
+// group: waiting
 (() => {
   const { D, CLIPS, xf, FACE, WAKE, DOZE, openPath } = window.__lump;
   const CREAM = '#FFF1DC', X = -44, BX = 164, S = [122, 140], FLOAT = 60;

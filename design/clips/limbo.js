@@ -1,4 +1,5 @@
 // A bar the width of the screen comes down in steps; he waddles under it lower and flatter each pass, until it pins him flat and lifts away without him.
+// group: scenes
 (() => {
   const { D, xf } = window.__lump, kit = window.__lump.kit, { CREAM, YELLOW, RED } = kit;
   const k = kit.clip('limbo');
