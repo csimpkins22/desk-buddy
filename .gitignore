@@ -26,3 +26,14 @@ HANDOFF.md
 
 # Reddit/launch drafts and media: local only
 promo/
+
+# regenerable from design/device/build_device.py and make_animatic.py: the Blender scene, renders and video drafts
+design/device/animatic/
+*.blend
+*.blend1
+design/device/*.mp4
+design/device/*.png
+!design/device/screen_test.png
+
+# the video soundtrack: local only
+design/device/music/

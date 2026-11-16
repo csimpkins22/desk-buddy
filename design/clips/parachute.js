@@ -22,7 +22,7 @@
       c.beginPath(); c.moveTo(x - w, 204); c.quadraticCurveTo(x, 204 - h * 2, x + w, 204); c.closePath();
       c.fillStyle = near ? '#1C4A30' : '#12301F'; c.fill(); c.strokeStyle = near ? GREEN : '#2F7D55'; c.lineWidth = 6; c.stroke();
     });
-    TREES.filter(([x]) => seen(x, 204, 30)).forEach(([x, y]) => {
+    TREES.filter(([x, y]) => seen(x, y - 40, 70)).forEach(([x, y]) => {
       c.strokeStyle = BROWN; c.lineWidth = 8; c.beginPath(); c.moveTo(x, y); c.lineTo(x, y - 30); c.stroke();
       c.fillStyle = '#2F7D55'; c.strokeStyle = CREAM; c.lineWidth = 5; c.beginPath(); c.arc(x, y - 50, 24, 0, TAU); c.fill(); c.stroke();
     });
