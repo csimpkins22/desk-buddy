@@ -2,7 +2,7 @@
 name: Gallery
 on:
   push:
-    branches: [main, vector-instructions]     # the second only while the build is being proven
+    branches: [main]
     paths: [design/**, firmware/data/lump.bin, firmware/src/vec.h, gallery/**, tools/**, .github/workflows/gallery.yml]
   workflow_dispatch:
 permissions:
