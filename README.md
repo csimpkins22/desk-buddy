@@ -1,6 +1,6 @@
 # Lump, a desk buddy for Claude
 
-<img src="design/media/lump-dance.gif" alt="Lump, an orange blob with a curly cowlick, dancing in sunglasses under a disco ball inside the glass cube display" width="240" align="right">
+<img src="design/media/lump-header.jpg" alt="Lump, an orange blob with a curly cowlick, in sunglasses under a disco ball, floating inside a small glass cube on a black stand on a wooden desk" width="100%">
 
 Lump is a little blob who lives in a tiny glass prism display on your desk and shows
 you what your Claude sessions are up to, so you can look away from the screen while Claude works.
@@ -17,6 +17,22 @@ you what your Claude sessions are up to, so you can look away from the screen wh
 Lump was built with Claude Code, drawings included: Claude draws every frame in code, in a scratchy
 hand-drawn style, in one web page (`design/lump.html`), and a script bakes it into a file the ESP32
 plays back at 24 fps.
+
+<!-- The video: drag lumps_day_small.mp4 onto this line in GitHub's editor, and it becomes a player. -->
+
+<img src="design/media/scenes-morning.jpg" alt="Four scenes: asleep beside a ringing alarm clock, wide awake after coffee, a hard stare, and a wink" width="100%">
+<img src="design/media/scenes-daydream.jpg" alt="Four scenes: bouncing up to the moon, flying on a rainbow, drifting down under a parachute, and cycling across the moon" width="100%">
+<img src="design/media/scenes-evening.jpg" alt="Four scenes: sipping calmly among flames, flipping a table, sooty after a cartoon bomb, and lying under the stars" width="100%">
+
+This is a fork of [Lump by Joe Bentham](https://github.com/joebentham/desk-buddy). It adds:
+
+- **Drawings as instructions.** Each frame is stored as the canvas calls that drew it and redrawn by
+  the board, about a kilobyte a frame where pixels took eight times that.
+- **Clips.** Over 230 extra animations that reach him over Wi-Fi, with no flashing, and that he
+  plays by himself when the moment fits.
+- **A skill for making more.** Ask Claude Code for a new animation and it is written, checked and
+  playing on his screen in about a minute.
+- **A video of him**, made from a Blender model of the device with his real animations on its screen.
 
 ## What you need
 
@@ -35,7 +51,7 @@ plays back at 24 fps.
 ## Setup
 
 ```bash
-git clone https://github.com/joebentham/desk-buddy.git
+git clone https://github.com/csimpkins22/desk-buddy.git
 cd desk-buddy
 ```
 
@@ -45,7 +61,7 @@ cd desk-buddy
 tools/flash.sh
 ```
 
-This builds the firmware and writes it plus Lump's drawings (about 1.6 MB). It uses a paced
+This builds the firmware and writes it plus Lump's drawings (about 1.3 MB). It uses a paced
 esptool upload because macOS drops bytes from big bursts to
 this board's USB-serial chip, so plain `pio run -t upload` fails.
 
@@ -148,10 +164,19 @@ simple: dot eyes, small mouths, and let props sell the gag.
 A clip is one animation in its own small file. The bridge sends it to him over Wi-Fi the first time
 you play it, and he keeps it in memory until he restarts (up to 32 at once; the one played longest
 ago makes way for a new one). Each clip is a script in `design/clips/` that adds its own drawings
-and its sequence, using the page's helpers; `coffee.js` is a short one to copy.
+and its sequence, using the page's helpers; `coffee.js` is a short one to copy. There are over 230:
+reactions to what Claude is doing, weather, games, film scenes, memes, and a good many odd ones.
+
+The quickest way to add one is to ask. In Claude Code, in this repo, say what he should do ("make
+him juggle", "do one where he gets stuck in a jumper") and the **`lump-clip`** skill writes the
+script, bakes it and plays it. It has a fast mode (idea to screen in about a minute) and a careful
+one (it looks at every drawing once and fixes what it sees). `design/clips/README.md` is the guide
+for writing one by hand, and `design/clip_kit.js` has the props, faces and camera moves clips share
+(a second Lump, a mug, a table, close-ups, wide shots, mirroring).
 
 ```bash
 python3 tools/export_frames.py --clip coffee --sheet coffee.png   # its drawings side by side, to look at
+python3 tools/export_frames.py --clip coffee --gif coffee.gif     # the whole clip, moving (needs ffmpeg)
 python3 tools/export_frames.py --clip all                         # bake every clip into ~/.desk-buddy/clips
 curl -X POST --data coffee 127.0.0.1:47823/play
 python3 tools/showreel.py                                         # everything he can do, back to back
@@ -168,19 +193,40 @@ The bridge also plays clips by itself when the moment fits:
 | A meeting is 10 minutes away | a meeting clip |
 | A Slack DM or mention | sometimes a pigeon or a mailbox instead of the paper plane |
 | Your usage limit is nearly spent | `rate_limited` |
-| Nothing is happening | one of the idle clips, in place of a fidget sound |
+| Nothing is happening | one of a hundred idle clips, about once a minute |
 | You tap the glass | one of ten extra tap reactions, in the mix with his own gags |
 
-He plays at most one every two minutes, none at night or at a meeting alarm, and while something
-needs you only the waiting ones. The tables are at the top of `tools/buddy_bridge.py`
+Apart from the idle ones he plays at most one every two minutes, none at night or at a meeting
+alarm, and while something needs you only the waiting ones. The tables are at the top of `tools/buddy_bridge.py`
 (`CLIP_COMMANDS`, `CLIP_SETS`, `CLIP_HOURS`); `"auto_clips": false` in `~/.desk-buddy/config.json`
 turns all of it off.
 
 Keep props to cream, greys, yellows, reds, browns, greens and blues: the board takes pinks and
 purples for his body colour and recolours them. `--define file.json` makes a clip from his existing
 drawings with no script: `{"encore": {"home": "idle", "seq": [["S1", 4], ["HL1", 5], ...]}}`.
-Clips need him on Wi-Fi. If one won't send and `~/.desk-buddy/bridge.log` says "No route to host",
+A bake takes a second or two and reports what it found: `kept_as` (every frame should be instructions),
+`lint` (drawings stored twice, colours he will repaint, props cut off by an edge) and `staging`
+(where he stood, how big, how long), which shows at a glance whether a batch all looks alike.
+Clips need him on Wi-Fi and the Mac awake: only his original animations live on the board. If one won't send and `~/.desk-buddy/bridge.log` says "No route to host",
 allow the bridge's Python under System Settings > Privacy & Security > Local Network.
+
+### The video
+
+`design/device/` builds the video at the top of this page. `build_device.py` models the display
+in Blender from its real dimensions (the cube, the frosted sides, the half-silvered diagonal that
+makes him float, the tilted case) on a desk with a time of day, and plays any clip on its screen.
+`make_animatic.py` is the shot list: which clips, where the camera goes, the light, the titles
+and the sounds. It needs [Blender](https://www.blender.org/), ffmpeg and Google Chrome.
+
+```bash
+python3 design/device/make_animatic.py                 # every shot as a quick draft
+python3 design/device/make_animatic.py 5 6             # just those shots
+python3 design/device/video_sounds.py                  # sounds for the clips it shows
+QUALITY=720 python3 design/device/make_animatic.py     # the real thing (hours; it resumes if stopped)
+```
+
+Renders land in `design/device/animatic/`, which git ignores. Put your own soundtrack at
+`design/device/music/music.wav` (also ignored); without one the video has his sounds only.
 
 ## How it fits together
 
@@ -202,6 +248,10 @@ calendar / Slack ──┘   one mood for all sessions                   plays b
 | `tools/lumpbar/` | Lump on your Mac: frame baker (`bake.py`) and the notch/menu bar app (`main.swift`) |
 | `tools/flash.sh`, `tools/ota.py`, `tools/wifi_setup.py` | Getting firmware and drawings onto the board |
 | `design/clips/` | Extra animations, each a small script, baked into clips he gets over Wi-Fi |
+| `design/clip_kit.js` | Props, faces and camera moves that clips share |
+| `.claude/skills/lump-clip/` | The skill Claude Code uses to write a new clip |
+| `tools/export_frames.py` | The bake: draws every frame in Chrome, records it as instructions, checks it against the board's renderer |
+| `design/device/` | The Blender model of the display and the scripts that make the video |
 | `tools/showreel.py` | Plays everything he can do, one after another |
 | `enclosure/` | OpenSCAD source for the adjustable monitor mount, with [ready-to-print STLs](enclosure/print/) |
 | `tests/` | Bridge tests (no board needed): `~/.desk-buddy/venv/bin/python -m unittest discover -s tests` |
@@ -215,3 +265,4 @@ demand (from a hotkey, a menu bar app or Shortcuts), `curl -X POST --data disco 
 
 Code and 3D models: [MIT](LICENSE). Lump himself (the character, his drawings, animations and
 sounds): [CC BY-NC 4.0](LICENSE-ART.md). Build one, remix him, share it; just don't sell him.
+Lump is by [Joe Bentham](https://github.com/joebentham/desk-buddy); credit him if you share yours.
