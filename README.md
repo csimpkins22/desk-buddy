@@ -5,6 +5,8 @@
 Lump is a little blob who lives in a tiny glass prism display on your desk and shows
 you what your Claude sessions are up to, so you can look away from the screen while Claude works.
 
+**[See everything he can do in the gallery](https://csimpkins22.github.io/desk-buddy/)**: every animation, playing in your browser.
+
 - **Working** while Claude Code is busy, **waving for attention** when a session needs you
   (a permission prompt, a question, a plan to approve), and **celebrating** when it's done.
 - Corner counters show how many sessions are working, waiting on you, or finished and unread.
